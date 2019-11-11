@@ -6,15 +6,25 @@ Contains this project's main function, which is mostly just used to load the dat
 Also contains a signal handler for safely terminating the search on keyboard command.
 */
 
+/*
+Early stop conditions (or decisions) to implement:
+-Quit if one of the input files or a log file is missing. Missing certain log files is fine, and we can simply create new ones (as long as the folder is present).
+-Quit if the initial operator cost is set to the default value of -1.
+-If the initial flow vector is missing, default to the zero flow vector.
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
+
 using namespace std;
 
 int main()
 {
 	string line;
+	
 	ifstream vehicle_data("data/vehicle_data.txt");
+	
 	if (vehicle_data.is_open())
 	{
 		while (getline(vehicle_data, line))
@@ -24,7 +34,7 @@ int main()
 	else
 		cout << "Unable to open file." << endl;
 
-	cin.get();
+	cin.get(); ///////////////// remove later
 
 	return 0;
 }
