@@ -19,8 +19,20 @@ Early stop conditions (or decisions) to implement:
 
 using namespace std;
 
-int main()
+int main(int argc, char *argv[])
 {
+	// Command line argument test
+	if (argc > 1)
+	{
+		// First argument is always the program's own path, so only pay attention to the additional arguments.
+		cout << "Command line arguments:" << endl;
+		for (int i = 1; i < argc; i++)
+			cout << argv[i] << endl;
+		cout << endl;
+	}
+	else
+		cout << "No command line arguments read." << endl << endl;
+
 	string line;
 	
 	ifstream vehicle_data("data/vehicle_data.txt");
