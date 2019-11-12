@@ -12,20 +12,7 @@ Includes a Network, Arc, Node, and Line class. Objects from these classes are bu
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-// Define node and arc type IDs
-#define STOP_NODE 0
-#define BOARDING_NODE 1
-#define POPULATION_NODE 2
-#define FACILITY_NODE 3
-#define LINE_ARC 0
-#define BOARDING_ARC 1
-#define ALIGHTING_ARC 2
-#define WALKING_ARC 3
-#define ACCESS_ARC 4
-
-// Other technical definitions
-#define EPSILON 0.00000001 // very small positive value
+#include "definitions.hpp"
 
 using namespace std;
 

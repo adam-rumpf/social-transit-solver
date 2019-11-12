@@ -57,7 +57,7 @@ Constraint::Constraint(string us_file_name, string op_file_name, string assignme
 	else
 	{
 		cout << "Constraint file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 }
 

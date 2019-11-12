@@ -50,7 +50,7 @@ Objective::Objective(string obj_file_name, Network * net_in)
 	else
 	{
 		cout << "Objective file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 }
 

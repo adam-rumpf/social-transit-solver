@@ -272,7 +272,7 @@ NonlinearAssignment::NonlinearAssignment(string input_file, Network * net_in)
 	else
 	{
 		cout << "Assignment file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 }
 

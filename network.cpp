@@ -36,7 +36,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "Problem file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 
 	// Read node file and create node lists
@@ -93,7 +93,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "Node file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 
 	// Read vehicle file and record the information required to define the lines
@@ -132,7 +132,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "Vehicle file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 
 	// Read transit file and create line list
@@ -178,7 +178,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "Transit file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 
 	// Read arc file and create arc lists
@@ -250,7 +250,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "Arc file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 
 	// Initialize empty stop file travel demand lists
@@ -290,7 +290,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	else
 	{
 		cout << "OD file failed to open." << endl;
-		exit(1);
+		exit(FILE_NOT_FOUND);
 	}
 }
 
