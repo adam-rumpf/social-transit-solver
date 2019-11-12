@@ -3,13 +3,43 @@
 /**
 Constraint object constructor that loads constraint file input and sets a network object pointer.
 
-Requires the names of the user cost file, operator cost file, assignment model file, and a network object pointer.
+Requires the names of the user cost file, operator cost file, assignment model file, initial flow file, and a network object pointer.
 */
-Constraint::Constraint(string us_file_name, string op_file_name, string assignment_file_name, Network * net_in)
+Constraint::Constraint(string us_file_name, string op_file_name, string assignment_file_name, string flow_file_name, Network * net_in)
 {
 	Net = net_in;
 	stop_size = Net->stop_nodes.size();
 	sol_pair.first.resize(Net->core_arcs.size(), 0.0);
+
+	// Attempt to read initial flow file (if file is not present, it will simply remain initialized as the zero vector)
+	ifstream fl_file;
+	fl_file.open(flow_file_name);
+	if (fl_file.is_open())
+	{
+		string line, piece; // whole line and line element being read
+		getline(fl_file, line); // skip comment line
+		int count = 0;
+
+		while (fl_file.eof() == false)
+		{
+			count++;
+
+			// Get whole line as a string stream
+			getline(fl_file, line);
+			if (line.size() == 0)
+				// Break for blank line at file end
+				break;
+			stringstream stream(line);
+
+			// Go through each piece of the line
+			getline(stream, piece, '\t'); // Arc ID
+			int id = stoi(piece);
+			getline(stream, piece, '\t'); // Flow
+			sol_pair.first[id] = stod(piece);
+		}
+
+		fl_file.close();
+	}
 
 	// Initialize assignment model object
 	Assignment = new NonlinearAssignment(assignment_file_name, net_in);

@@ -40,7 +40,9 @@ struct Constraint
 	int stop_size; // number of stop nodes (also number of O/D nodes)
 
 	// Public methods
-	Constraint(string, string, string, Network *); // constructor that reads the operator cost, user cost, and assignment model data and sets the network object pointer
+	Constraint(string, string, string, string, Network *); // constructor that reads the operator cost, user cost, initial flow, and assignment model data and sets the network object pointer
 	pair<int, vector<double>> calculate(vector<int> &); // evaluates constraint functions for a given solution
 	vector<double> user_cost_components(); // uses flow vector and waiting time scalar to calculate user cost components
+
+	/////////////////// Add a subroutine to calculate a reasonable waiting time bound.
 };
