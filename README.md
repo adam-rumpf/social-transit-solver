@@ -209,3 +209,4 @@ A few errors can cause the program to terminate. The following codes may be retu
 
 * `0`: Successful exit at the end of the `main()` function.
 * `1`: Early termination due to a missing input file.
+* `2`: Intentional early termination from keyboard stop request ([Ctrl]+[C]).
