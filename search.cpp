@@ -7,20 +7,26 @@ Early stop conditions (or decisions) to implement:
 -If the initial flow vector is missing, default to the zero flow vector.
 */
 
-/**
-Signal handler for safe stop request.
+///////////////// Include optional arguments for the main solver.
 
-Executes whenever the user presses [Ctrl]+[C] on the keyboard (or with the "raise(SIGINT)" command).
-
-Sets the global stop request variable to True, which causes the main search loop to end after it completes its current iteration.
-*/
-void stop_request(int signum)
+/// Search constructor initializes Network, Objective, and Constraint objects, and sets the static stopping variable.
+Search::Search()
 {
-	cout << "\n****************************************" << endl;
-	cout << "************ STOP REQUESTED ************" << endl;
-	cout << "****************************************\n" << endl;
-	cout << "Program will safely exit at end of current loop (which may take a while)." << endl;
-	cout << "Do not close or data may be corrupted!\n" << endl;
+	Net = new Network(NODE_FILE, ARC_FILE, OD_FILE, TRANSIT_FILE, VEHICLE_FILE, PROBLEM_FILE); // network object
+	Obj = new Objective(OBJECTIVE_FILE, Net); // objective function object
+	Con = new Constraint(USER_COST_FILE, OPERATOR_COST_FILE, ASSIGNMENT_FILE, Net); // constraint function object
+}
 
-	stopping = true;
+/// Main driver of the solution algorithm.
+void Search::solve()
+{
+	cout << "Solution algorithm initialized." << endl;
+
+	if (keyboard_halt == true)
+	{
+		cout << "keyboard_halt is true" << endl;
+		exit(KEYBOARD_HALT);
+	}
+	else
+		cout << "keyboard_halt is false" << endl;
 }
