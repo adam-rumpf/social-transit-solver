@@ -4,6 +4,8 @@ The main tabu search/simulated annealing hybrid solution algorithm for use in a 
 
 This program shares a large amount of code with a [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single), including its objective function, constraint function, and assignment model. This program largely consists of a search process that uses these modules as subroutines.
 
+Note that this program may take an extremely long time to run for large problem instances. A search parameter file allows the user to specify the number of search iterations. The program can also be terminated early by pressing `[Ctrl]+[C]` during its execution, which causes the it to safely quit at the end of the current iteration (which may still take a fair amount of time).
+
 I would not expect this program to be of much use to anyone outside of our research group, but it is provided here for anyone interested.
 
 ## Output Logs
@@ -146,7 +148,8 @@ Parameters for the tabu search/simulated annealing hybrid algorithm.
 
 Contains the following rows:
 
-* `Elements`: Number of parameters listed on the following rows. Currently set to `13`.
+* `Elements`: Number of parameters listed on the following rows. Currently set to `14`.
+* `Iterations`: Number of iterations to perform during the overall local search algorithm (can be safely terminated before this point by pressing `[Ctrl]+[C]`).
 * `Temp_Init`: Initial simulated annealing temperature.
 * `Temp_Factor`: Factor by which to multiply the temperature when cooling. Should be between `0.0` and `1.0`.
 * `Attractive_Max`: Maximum size of attractive solution set.
