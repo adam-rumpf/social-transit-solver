@@ -12,7 +12,6 @@ Objective::Objective(string obj_file_name, Network * net_in)
 	fac_size = Net->facility_nodes.size();
 
 	// Read objective data
-	cout << "Reading objective data..." << endl;
 	ifstream obj_file;
 	obj_file.open(obj_file_name);
 	if (obj_file.is_open())
@@ -49,9 +48,10 @@ Objective::Objective(string obj_file_name, Network * net_in)
 		obj_file.close();
 	}
 	else
+	{
 		cout << "Objective file failed to open." << endl;
-
-	cout << "Objective data read!" << endl << endl;
+		exit(1);
+	}
 }
 
 /**
@@ -91,36 +91,20 @@ vector<double> Objective::all_metrics(const vector<int> &fleet)
 		distance[i].resize(fac_size);
 
 	// Calculate distances row-by-row using single-source Dijkstra in parallel over all sources
-	cout << "Calculating distances in parallel:\n|";
-	for (int i = 0; i < pop_size; i++)
-		cout << '-'; // "length" of "progress bar"
-	cout << "|\n|";
 	parallel_for(0, pop_size, [&](int i)
 	{
-		cout << '*'; // shows progress
 		population_to_all_facilities(i, distance[i]);
 	});
-	cout << '|' << endl;
 
 	// Calculate facility metrics
-	cout << "Calculating facility metrics." << endl;
 	vector<double> fac_met(fac_size);
 	for (int i = 0; i < fac_size; i++)
-	{
 		fac_met[i] = facility_metric(i, distance);
-		cout << fac_met[i] << ' ';
-	}
-	cout << endl;
 
 	// Do same for all population centers to get the gravity metrics
-	cout << "Calculating population metrics." << endl;
 	vector<double> pop_met(pop_size);
 	for (int i = 0; i < pop_size; i++)
-	{
 		pop_met[i] = population_metric(i, distance, fac_met);
-		cout << pop_met[i] << ' ';
-	}
-	cout << endl;
 
 	return pop_met;
 }

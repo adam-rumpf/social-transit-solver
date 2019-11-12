@@ -202,3 +202,10 @@ Contains the following columns:
 * `UB`: Maximum number of this type of vehicle allowed in the network.
 * `Capacity`: Seating capacity of this vehicle type. It is assumed that loading factor has already been taken into account. For trains, it is assumed that this includes all cars on a given train.
 * `Cost`: Operating cost per unit time.
+
+## Exit Status
+
+A few errors can cause the program to terminate. The following codes may be returned:
+
+* `0`: Successful exit at the end of the `main()` function.
+* `1`: Early termination due to a missing input file.

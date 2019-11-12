@@ -17,7 +17,6 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 {
 	// Read problem file to get time horizon
 	double horizon = 1440.0; // default to whole 24 hours
-	cout << "Reading problem data..." << endl;
 	ifstream problem_file;
 	problem_file.open(problem_file_name);
 	if (problem_file.is_open())
@@ -32,15 +31,15 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		getline(stream, piece, '\t'); // Horizon
 		horizon = stod(piece); // get time horizon value
 
-		cout << "Reading time horizon as " << horizon << " minutes." << endl;
-
 		problem_file.close();
 	}
 	else
+	{
 		cout << "Problem file failed to open." << endl;
+		exit(1);
+	}
 
 	// Read node file and create node lists
-	cout << "Reading node data..." << endl;
 	ifstream node_file;
 	node_file.open(node_file_name);
 	if (node_file.is_open())
@@ -92,10 +91,12 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		node_file.close();
 	}
 	else
+	{
 		cout << "Node file failed to open." << endl;
+		exit(1);
+	}
 
 	// Read vehicle file and record the information required to define the lines
-	cout << "Reading vehicle data..." << endl;
 	unordered_map<int, double> vehicle_seating; // maps vehicle type to seating capacity
 	ifstream vehicle_file;
 	vehicle_file.open(vehicle_file_name);
@@ -129,10 +130,12 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		vehicle_file.close();
 	}
 	else
+	{
 		cout << "Vehicle file failed to open." << endl;
+		exit(1);
+	}
 
 	// Read transit file and create line list
-	cout << "Reading transit data..." << endl;
 	ifstream transit_file;
 	transit_file.open(transit_file_name);
 	if (transit_file.is_open())
@@ -173,10 +176,12 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		transit_file.close();
 	}
 	else
+	{
 		cout << "Transit file failed to open." << endl;
+		exit(1);
+	}
 
 	// Read arc file and create arc lists
-	cout << "Reading arc data..." << endl;
 	ifstream arc_file;
 	arc_file.open(arc_file_name);
 	if (arc_file.is_open())
@@ -243,15 +248,16 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		arc_file.close();
 	}
 	else
+	{
 		cout << "Arc file failed to open." << endl;
+		exit(1);
+	}
 
 	// Initialize empty stop file travel demand lists
-	cout << "Initializing travel demand arrays..." << endl;
 	for (int i = 0; i < stop_nodes.size(); i++)
 		stop_nodes[i]->incoming_demand.resize(stop_nodes.size(), 0.0);
 
 	// Read OD file and create travel demand lists for nodes
-	cout << "Reading OD data..." << endl;
 	ifstream od_file;
 	od_file.open(od_file_name);
 	if (od_file.is_open())
@@ -282,9 +288,10 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 		}
 	}
 	else
+	{
 		cout << "OD file failed to open." << endl;
-
-	cout << "Network object complete!" << endl << endl;
+		exit(1);
+	}
 }
 
 /// Node constructor that sets default value to -1.

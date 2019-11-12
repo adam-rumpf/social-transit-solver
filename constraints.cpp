@@ -15,7 +15,6 @@ Constraint::Constraint(string us_file_name, string op_file_name, string assignme
 	Assignment = new NonlinearAssignment(assignment_file_name, net_in);
 
 	// Read constraint data
-	cout << "Reading user cost data..." << endl;
 	ifstream us_file;
 	us_file.open(us_file_name);
 	if (us_file.is_open())
@@ -56,9 +55,10 @@ Constraint::Constraint(string us_file_name, string op_file_name, string assignme
 		us_file.close();
 	}
 	else
-		cout << "User cost file failed to open." << endl;
-
-	cout << "User cost data read!" << endl << endl;
+	{
+		cout << "Constraint file failed to open." << endl;
+		exit(1);
+	}
 }
 
 /**

@@ -36,16 +36,10 @@ pair<vector<double>, double> ConstantAssignment::calculate(const vector<int> &fl
 	// Solve single-destination model in parallel for all sinks and add all results
 	vector<double> flows(Net->core_arcs.size(), 0.0); // total flow vector over all destinations
 	double waiting = 0.0; // total waiting time over all destinations
-	cout << "Solving single-sink models in parallel:\n|";
-	for (int i = 0; i < stop_size; i++)
-		cout << '-'; // length of "progress bar"
-	cout << "|\n|";
 	parallel_for_each(Net->stop_nodes.begin(), Net->stop_nodes.end(), [&](Node * s)
 	{
-		cout << '*'; // shows progress
 		flows_to_destination(s->id, flows, waiting, freq, arc_costs, &flow_lock, &wait_lock);
 	});
-	cout << '|' << endl;
 
 	return make_pair(flows, waiting);
 }
@@ -236,7 +230,6 @@ NonlinearAssignment::NonlinearAssignment(string input_file, Network * net_in)
 	Submodel = new ConstantAssignment(net_in);
 
 	// Read assignment model data
-	cout << "Reading assignment model data..." << endl;
 	ifstream a_file;
 	a_file.open(input_file);
 	if (a_file.is_open())
@@ -277,9 +270,10 @@ NonlinearAssignment::NonlinearAssignment(string input_file, Network * net_in)
 		a_file.close();
 	}
 	else
-		cout << "Assignment file file failed to open." << endl;
-
-	cout << "Assignment data read." << endl;
+	{
+		cout << "Assignment file failed to open." << endl;
+		exit(1);
+	}
 }
 
 /**
@@ -312,14 +306,10 @@ pair<vector<double>, double> NonlinearAssignment::calculate(vector<int> &fleet, 
 
 	// Main Frank-Wolfe loop
 
-	cout << "\n========================================\n\n";
 	while ((iteration < max_iterations) && (error > error_tol) && (change > change_tol))
 	{
 		// Loop continues until achieving sufficiently low error or reaching an iteration cutoff
 		iteration++;
-
-		cout << "----------------------------------------" << endl;
-		cout << "Frank-Wolfe algorithm iteration " << iteration << endl << endl;
 
 		// Update all arc costs based on the current flow
 		for_each(Net->core_arcs.begin(), Net->core_arcs.end(), [&](Arc * a)
@@ -332,23 +322,10 @@ pair<vector<double>, double> NonlinearAssignment::calculate(vector<int> &fleet, 
 
 		// Calculate new error bound
 		error = obj_error(capacities, sol_previous.first, sol_previous.second, sol_next.first, sol_next.second);
-		cout << "Current error bound = " << error << endl;
-
-		cout << "lambda = " << 1 - (1.0 / iteration) << endl;
 
 		// Update solution as successive average of consecutive solutions and get maximum elementwise difference
 		change = solution_update(1 - (1.0 / iteration), sol_previous.first, sol_previous.second, sol_next.first, sol_next.second);
-		cout << "Maximum change = " << change << endl;
 	}
-
-	cout << "\n========================================\n";
-	cout << "Frank-Wolfe ended." << endl;
-	if (error <= error_tol)
-		cout << "Error bound achieved at " << error << endl;
-	if (change <= change_tol)
-		cout << "Change bound achieved at " << change << endl;
-	if ((error > error_tol) && (change > change_tol))
-		cout << "Iteration cutoff reached at " << iteration << " with error " << error << endl;
 
 	return sol_previous;
 }
