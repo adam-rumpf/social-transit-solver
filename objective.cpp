@@ -85,6 +85,15 @@ vector<double> Objective::all_metrics(const vector<int> &fleet)
 	for (int i = 0; i < headways.size(); i++)
 		headways[i] = Net->lines[i]->headway(fleet[i]);
 
+	// Generate a vector of core arc total costs (base cost plus headway)
+	vector<double> arc_costs(Net->core_arcs.size());
+	for (int i = 0; i < Net->core_arcs.size(); i++)
+	{
+		arc_costs[i] = Net->core_arcs[i]->cost; // base cost
+		if (Net->core_arcs[i]->line >= 0)
+			arc_costs[i] += headways[Net->core_arcs[i]->line]; // headway
+	}
+
 	// Initialize a population center-to-facility distance matrix
 	vector<vector<double>> distance(pop_size);
 	for (int i = 0; i < pop_size; i++)
@@ -93,7 +102,7 @@ vector<double> Objective::all_metrics(const vector<int> &fleet)
 	// Calculate distances row-by-row using single-source Dijkstra in parallel over all sources
 	parallel_for(0, pop_size, [&](int i)
 	{
-		population_to_all_facilities(i, distance[i]);
+		population_to_all_facilities(i, arc_costs, distance[i]);
 	});
 
 	// Calculate facility metrics
@@ -112,13 +121,13 @@ vector<double> Objective::all_metrics(const vector<int> &fleet)
 /**
 Calculates the distance from a given population center to all primary care facilities.
 
-Requires the index of a population center (as a position in the population center list) and a reference to a distance matrix row.
+Requires the index of a population center (as a position in the population center list) and reference to the total arc cost vector and a distance matrix row.
 
 Returns nothing, but updates the referenced row with all distances.
 
 Distance calculations are accomplished with a priority queue implementation of single-sink Dijkstra. Note that this method will be run in parallel for all population centers, and so must rely on mostly local variables, treating all other data as read-only.
 */
-void Objective::population_to_all_facilities(int source, vector<double> &row)
+void Objective::population_to_all_facilities(int source, const vector<double> &core_cost, vector<double> &row)
 {
 	/*
 	To explain some of the technical details, the standard C++ priority queue container does not easily allow changing the priorities of its entries. This makes the tentative distance reduction step of Dijkstra's algorithm more difficult since we cannot simply reduce priorities (distances) in the queue.
@@ -156,7 +165,7 @@ void Objective::population_to_all_facilities(int source, vector<double> &row)
 		for (int i = 0; i < Net->nodes[chosen_node]->core_out.size(); i++)
 		{
 			int head = Net->nodes[chosen_node]->core_out[i]->head->id; // current out-neighbor
-			double new_dist = dist[chosen_node] + Net->nodes[chosen_node]->core_out[i]->cost; // own distance plus outgoing arc's cost
+			double new_dist = dist[chosen_node] + core_cost[Net->nodes[chosen_node]->core_out[i]->id]; // own distance plus outgoing arc's cost
 			if (new_dist < dist[head])
 			{
 				// If the new distance is an improvement, update the out-neighbor's distance and add a new copy to the queue

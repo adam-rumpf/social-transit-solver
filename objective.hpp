@@ -44,7 +44,7 @@ struct Objective
 	Objective(Network *); // constructor that reads objective function data and sets network object pointer
 	double calculate(const vector<int> &); // calculates objective value
 	vector<double> all_metrics(const vector<int> &); // calculates gravity metrics for all population centers
-	void population_to_all_facilities(int, vector<double> &); // calculates distance from a given source population center to all facilities and updates distance vector row
+	void population_to_all_facilities(int, const vector<double> &, vector<double> &); // calculates distance from a given source population center to all facilities and updates distance vector row
 	double facility_metric(int, vector<vector<double>> &); // calculates the gravity metric for a given facility and vector of distances to that facility
 	double population_metric(int, vector<vector<double>> &, vector<double> &); // calculates the gravity metric for a given population center, distance matrix, and facility metric vector
 };
