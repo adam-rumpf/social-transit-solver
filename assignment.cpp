@@ -287,12 +287,11 @@ The solution vector is used to determine the frequency and capacity of each line
 
 The overall process being used here is the Frank-Wolfe algorithm, which iteratively solves the linear approximation of the nonlinear cost quadratic program. That linear approximation happens to be an instance of the constant-cost LP whose costs are based on the current solution.
 */
-pair<vector<double>, double> NonlinearAssignment::calculate(vector<int> &fleet, pair<vector<double>, double> initial_sol)
+pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &fleet, const pair<vector<double>, double> &initial_sol)
 {
 	// Initialize variables
-	pair<vector<double>, double> sol_next = initial_sol; // flow/waiting pair calculated as the linearized submodel solution
-	pair<vector<double>, double> sol_previous = initial_sol; // flow/waiting pair for the previous solution
-	vector<double> arc_costs(Net->core_arcs.size()); // arc costs based on current flow
+	pair<vector<double>, double> sol_next; // flow/waiting pair calculated as the linearized submodel solution
+	pair<vector<double>, double> sol_previous; // flow/waiting pair for the previous solution
 	int iteration = 0; // current iteration number
 	double error = INFINITY; // current solution error bound
 	double change = INFINITY; // maximum elementwise difference between consecutive solutions
@@ -303,6 +302,16 @@ pair<vector<double>, double> NonlinearAssignment::calculate(vector<int> &fleet, 
 	{
 		capacities[a->id] = Net->lines[a->line]->capacity(fleet[a->line]);
 	});
+
+	// Calculate arc costs based on initial flow
+	vector<double> arc_costs(Net->core_arcs.size());
+	for_each(Net->core_arcs.begin(), Net->core_arcs.end(), [&](Arc * a)
+	{
+		arc_costs[a->id] = arc_cost(a->id, initial_sol.first[a->id], capacities[a->id]);
+	});
+
+	// Solve constant-cost model once to obtain an initial solution
+	sol_previous = Submodel->calculate(fleet, arc_costs);
 
 	// Main Frank-Wolfe loop
 

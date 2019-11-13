@@ -76,6 +76,13 @@ Constraint::Constraint(Network * net_in)
 				walking_weight = stod(value);
 			if (count == 6)
 				waiting_weight = stod(value);
+
+			// Handle the event of an unspecified initial user cost
+			if (initial_user_cost < 0)
+			{
+				cout << "User cost data file is missing an initial user cost value." << endl;
+				exit(INCORRECT_FILE);
+			}
 		}
 
 		us_file.close();
@@ -96,7 +103,7 @@ Returns a pair whose first element is the feasibility result (1 for feasible, 0 
 
 All of the constraint functions are evaluated using either the solution vector directly, or using the flow vector produced by the assignment model.
 */
-pair<int, vector<double>> Constraint::calculate(vector<int> &sol)
+pair<int, vector<double>> Constraint::calculate(const vector<int> &sol)
 {
 	// Feed solution to assignment model to calculate flow vector
 	sol_pair = Assignment->calculate(sol, sol_pair);
@@ -120,7 +127,7 @@ Returns a vector of the user cost components, in the order of the solution log c
 */
 vector<double> Constraint::user_cost_components()
 {
-	vector<double> uc(3, 0);
+	vector<double> uc(3, 0.0);
 	uc[2] = sol_pair.second;
 
 	// In-vehicle riding time
