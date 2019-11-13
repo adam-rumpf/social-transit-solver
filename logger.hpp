@@ -4,7 +4,10 @@ Logger objects for reading and writing various files required by the main soluti
 
 #pragma once
 
+#include <iostream>
+#include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 #include "definitions.hpp"
 
@@ -12,6 +15,7 @@ using namespace std;
 
 // Function prototypes
 string solution_string(const vector<int> &); // returns string version of integer vector
+vector<int> solution_string_vector(string); // returns an integer vector for a given solution string
 
 /**
 Event logger.

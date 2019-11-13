@@ -49,6 +49,7 @@ Global definitions used throughout various submodules.
 
 // Fixed parameters
 #define UC_COMPONENTS 3 // number of components of the user cost vector
+#define DELIMITER '_' // delimiter to use for defining solution log names
 
 // Other technical definitions
 #define EPSILON 0.00000001 // very small positive value
