@@ -13,7 +13,6 @@ Global definitions used throughout various submodules.
 #define OBJECTIVE_FILE "data/objective_data.txt"
 #define PROBLEM_FILE "data/problem_data.txt"
 #define USER_COST_FILE "data/user_cost_data.txt"
-#define OPERATOR_COST_FILE "data/operator_cost_data.txt"
 #define ASSIGNMENT_FILE "data/assignment_data.txt"
 #define FLOW_FILE "data/initial_flows.txt"
 #define SEARCH_FILE "data/search_parameters.txt"

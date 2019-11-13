@@ -29,7 +29,6 @@ This program reads input files from a local `data/` folder. The following data f
 * [`node_data.txt`](#node_datatxt)
 * [`objective_data.txt`](#objective_datatxt)
 * [`od_data.txt`](#od_datatxt)
-* [`operator_cost_data.txt`](#operator_cost_datatxt)
 * [`problem_data.txt`](#problem_datatxt)
 * [`search_parameters.txt`](#search_parameterstxt)
 * [`transit_data.txt`](#transit_datatxt)
@@ -121,17 +120,6 @@ Contains the following columns:
 * `Origin`: Node ID of origin.
 * `Destination`: Node ID of destination.
 * `Volume`: Number of people wishing to travel from the origin to the destination.
-
-### `operator_cost_data.txt`
-
-Information related to defining the operator cost function.
-
-Contains the following rows:
-
-* `Initial`: Operator cost of the initial solution. Used for defining the allowable relative increase bounds. Use [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single) to find this initial value.
-* `Elements`: Number of parameters listed on the following rows. Currently set to `2`.
-* `Operating_Cost`: Weight of the vehicle operating costs.
-* `Fares`: Fare collected from each boarding.
 
 ### `problem_data.txt`
 
