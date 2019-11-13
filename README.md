@@ -68,7 +68,8 @@ Information related to the Spiess and Florian assignment model.
 Contains the following rows:
 
 * `FW_Error_Epsilon`: Optimality gap threshold to use for ending the Frank-Wolfe algorithm.
-* `FW_Change_Epsilon`: Solution change threshold (inf-norm) to use for ending the Frank-Wolfe algorithm.
+* `FW_Flow_Epsilon`: Solution change threshold (inf-norm) to use for ending the Frank-Wolfe algorithm. This bound is for the flow vector.
+* `FW_Waiting_Epsilon`: Solution change threshold to use for ending the Frank-Wolfe algorithm. This bound is for the waiting time scalar, which in general is so large compared to the fleet sizes that a larger threshold is appropriate.
 * `FW_Cutoff`: Iteration cutoff for the Frank-Wolfe algorithm.
 * `Elements`: Number of parameters listed on the following rows. Currently set to `2`.
 * `alpha`: Alpha parameter of the conical congestion function.

@@ -258,12 +258,14 @@ NonlinearAssignment::NonlinearAssignment(Network * net_in)
 			if (count == 1)
 				error_tol = stod(value);
 			if (count == 2)
-				change_tol = stod(value);
+				flow_tol = stod(value);
 			if (count == 3)
+				waiting_tol = stod(value);
+			if (count == 4)
 				max_iterations = stoi(value);
-			if (count == 5)
-				conical_alpha = stod(value);
 			if (count == 6)
+				conical_alpha = stod(value);
+			if (count == 7)
 				conical_beta = stod(value);
 		}
 
@@ -294,7 +296,7 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 	pair<vector<double>, double> sol_previous; // flow/waiting pair for the previous solution
 	int iteration = 0; // current iteration number
 	double error = INFINITY; // current solution error bound
-	double change = INFINITY; // maximum elementwise difference between consecutive solutions
+	pair<double, double> change = make_pair(INFINITY, INFINITY); // flow/waiting time differences between consecutive solutions
 
 	// Calculate line arc capacities
 	vector<double> capacities(Net->core_arcs.size(), INFINITY);
@@ -315,7 +317,7 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 
 	// Main Frank-Wolfe loop
 
-	while ((iteration < max_iterations) && (error > error_tol) && (change > change_tol))
+	while ((iteration < max_iterations) && (error > error_tol) && ((change.first > flow_tol) || (change.second > waiting_tol)))
 	{
 		// Loop continues until achieving sufficiently low error or reaching an iteration cutoff
 		iteration++;
@@ -389,25 +391,28 @@ Updates the solution according to the convex combination found from the line sea
 
 Requires a value for the convex parameter, followed by references to the current flow vector, the current waiting time, the next flow vector, and the next waiting time, respectively.
 
-Returns the maximum elementwise difference between the current and updated solutions, and also updates the current solution in place as a convex combination of the two vectors.
+Updates the current solution in place as a convex combination of the two vectors.
+
+Also returns a pair containing the maximum elementwise flow vector change and the waiting time change, respectively.
 */
-double NonlinearAssignment::solution_update(double lambda, vector<double> &flows_current, double &waiting_current, const vector<double> &flows_next, double waiting_next)
+pair<double, double> NonlinearAssignment::solution_update(double lambda, vector<double> &flows_current, double &waiting_current, const vector<double> &flows_next, double waiting_next)
 {
-	double max_diff; // maximum elementwise difference
+	double max_flow_diff = 0.0; // maximum elementwise flow difference
+	double waiting_diff; // waiting time difference
 	double element; // temporary variable for the updated element
 
 	// Update waiting time
 	element = lambda*waiting_current + (1 - lambda)*waiting_next;
-	max_diff = abs(waiting_current - element);
+	waiting_diff = abs(waiting_current - element);
 	waiting_current = element;
 
 	// Update each flow variable
 	for (int i = 0; i < flows_current.size(); i++)
 	{
 		element = lambda*flows_current[i] + (1 - lambda)*flows_next[i];
-		max_diff = max(abs(flows_current[i] - element), max_diff);
+		max_flow_diff = max(abs(flows_current[i] - element), max_flow_diff);
 		flows_current[i] = element;
 	}
 
-	return max_diff;
+	return make_pair(max_flow_diff, waiting_diff);
 }

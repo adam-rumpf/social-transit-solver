@@ -58,7 +58,8 @@ struct NonlinearAssignment
 	Network * Net; // pointer to network object
 	ConstantAssignment * Submodel; // pointer to constant-cost submodel
 	double error_tol; // error bound cutoff for Frank-Wolfe
-	double change_tol; // solution vector change cutoff for Frank-Wolfe
+	double flow_tol; // flow vector change cutoff for Frank-Wolfe
+	double waiting_tol; // waiting time change cutoff for Frank-Wolfe
 	int max_iterations; // iteration cutoff for Frank-Wolfe
 	double conical_alpha; // alpha parameter for conical congestion function
 	double conical_beta; // beta parameter for conical congestion function
@@ -68,5 +69,5 @@ struct NonlinearAssignment
 	pair<vector<double>, double> calculate(const vector<int> &, const pair<vector<double>, double> &); // calculates flow vector for a given fleet vector and initial assignment model solution
 	double arc_cost(int, double, double); // calculates the nonlinear cost function for a given arc
 	double obj_error(const vector<double> &, const vector<double> &, double, const vector<double> &, double); // calculates an error bound for the current objective value
-	double solution_update(double, vector<double> &, double &, const vector<double> &, double); // updates current solution as a convex combination of the previous and next solutions, and outputs the maximum elementwise difference
+	pair<double, double> solution_update(double, vector<double> &, double &, const vector<double> &, double); // updates current solution as a convex combination of the previous and next solutions, and outputs the maximum elementwise difference
 };
