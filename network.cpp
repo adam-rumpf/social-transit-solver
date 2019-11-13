@@ -13,12 +13,12 @@ Requires the names of the following input data files, in order:
 
 Reads the contents of these files and uses them to fill its own line, node, and arc lists, while also initializing those objects.
 */
-Network::Network(string node_file_name, string arc_file_name, string od_file_name, string transit_file_name, string vehicle_file_name, string problem_file_name)
+Network::Network()
 {
 	// Read problem file to get time horizon
 	double horizon = 1440.0; // default to whole 24 hours
 	ifstream problem_file;
-	problem_file.open(problem_file_name);
+	problem_file.open(PROBLEM_FILE);
 	if (problem_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -41,7 +41,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 
 	// Read node file and create node lists
 	ifstream node_file;
-	node_file.open(node_file_name);
+	node_file.open(NODE_FILE);
 	if (node_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -99,7 +99,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 	// Read vehicle file and record the information required to define the lines
 	unordered_map<int, double> vehicle_seating; // maps vehicle type to seating capacity
 	ifstream vehicle_file;
-	vehicle_file.open(vehicle_file_name);
+	vehicle_file.open(VEHICLE_FILE);
 	if (vehicle_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -137,7 +137,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 
 	// Read transit file and create line list
 	ifstream transit_file;
-	transit_file.open(transit_file_name);
+	transit_file.open(TRANSIT_FILE);
 	if (transit_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -183,7 +183,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 
 	// Read arc file and create arc lists
 	ifstream arc_file;
-	arc_file.open(arc_file_name);
+	arc_file.open(ARC_FILE);
 	if (arc_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -259,7 +259,7 @@ Network::Network(string node_file_name, string arc_file_name, string od_file_nam
 
 	// Read OD file and create travel demand lists for nodes
 	ifstream od_file;
-	od_file.open(od_file_name);
+	od_file.open(OD_FILE);
 	if (od_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

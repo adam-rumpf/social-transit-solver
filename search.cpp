@@ -12,9 +12,9 @@ Early stop conditions (or decisions) to implement:
 /// Search constructor initializes Network, Objective, and Constraint objects, and sets the static stopping variable.
 Search::Search()
 {
-	Net = new Network(NODE_FILE, ARC_FILE, OD_FILE, TRANSIT_FILE, VEHICLE_FILE, PROBLEM_FILE); // network object
-	Obj = new Objective(OBJECTIVE_FILE, Net); // objective function object
-	Con = new Constraint(USER_COST_FILE, OPERATOR_COST_FILE, ASSIGNMENT_FILE, FLOW_FILE, Net); // constraint function object
+	Net = new Network(); // network object
+	Obj = new Objective(Net); // objective function object
+	Con = new Constraint(Net); // constraint function object
 }
 
 /// Main driver of the solution algorithm.

@@ -1,11 +1,7 @@
 #include "constraints.hpp"
 
-/**
-Constraint object constructor that loads constraint file input and sets a network object pointer.
-
-Requires the names of the user cost file, operator cost file, assignment model file, initial flow file, and a network object pointer.
-*/
-Constraint::Constraint(string us_file_name, string op_file_name, string assignment_file_name, string flow_file_name, Network * net_in)
+/// Constraint object constructor that loads constraint file input and sets a network object pointer.
+Constraint::Constraint(Network * net_in)
 {
 	Net = net_in;
 	stop_size = Net->stop_nodes.size();
@@ -13,7 +9,7 @@ Constraint::Constraint(string us_file_name, string op_file_name, string assignme
 
 	// Attempt to read initial flow file (if file is not present, it will simply remain initialized as the zero vector)
 	ifstream fl_file;
-	fl_file.open(flow_file_name);
+	fl_file.open(FLOW_FILE);
 	if (fl_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -42,11 +38,11 @@ Constraint::Constraint(string us_file_name, string op_file_name, string assignme
 	}
 
 	// Initialize assignment model object
-	Assignment = new NonlinearAssignment(assignment_file_name, net_in);
+	Assignment = new NonlinearAssignment(net_in);
 
 	// Read constraint data
 	ifstream us_file;
-	us_file.open(us_file_name);
+	us_file.open(USER_COST_FILE);
 	if (us_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

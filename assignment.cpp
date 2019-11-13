@@ -222,7 +222,7 @@ void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, d
 }
 
 /// Nonlinear assignment constructor reads in model data from file and sets network pointer.
-NonlinearAssignment::NonlinearAssignment(string input_file, Network * net_in)
+NonlinearAssignment::NonlinearAssignment(Network * net_in)
 {
 	Net = net_in;
 
@@ -231,7 +231,7 @@ NonlinearAssignment::NonlinearAssignment(string input_file, Network * net_in)
 
 	// Read assignment model data
 	ifstream a_file;
-	a_file.open(input_file);
+	a_file.open(ASSIGNMENT_FILE);
 	if (a_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

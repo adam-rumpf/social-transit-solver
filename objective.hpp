@@ -41,7 +41,7 @@ struct Objective
 	int fac_size; // number of facility nodes
 
 	// Public methods
-	Objective(string, Network *); // constructor that reads objective function data and sets network object pointer
+	Objective(Network *); // constructor that reads objective function data and sets network object pointer
 	double calculate(const vector<int> &); // calculates objective value
 	vector<double> all_metrics(const vector<int> &); // calculates gravity metrics for all population centers
 	void population_to_all_facilities(int, vector<double> &); // calculates distance from a given source population center to all facilities and updates distance vector row

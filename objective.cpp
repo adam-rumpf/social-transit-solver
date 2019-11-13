@@ -5,7 +5,7 @@ Objective object constructor that loads objective file input and sets a network 
 
 Requires the name of the objective data input file and a pointer to the network object.
 */
-Objective::Objective(string obj_file_name, Network * net_in)
+Objective::Objective(Network * net_in)
 {
 	Net = net_in;
 	pop_size = Net->population_nodes.size();
@@ -13,7 +13,7 @@ Objective::Objective(string obj_file_name, Network * net_in)
 
 	// Read objective data
 	ifstream obj_file;
-	obj_file.open(obj_file_name);
+	obj_file.open(OBJECTIVE_FILE);
 	if (obj_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

@@ -28,8 +28,9 @@ Global definitions used throughout various submodules.
 
 // Exit codes
 #define SUCCESSFUL_EXIT 0
-#define FILE_NOT_FOUND 1
-#define KEYBOARD_HALT 2
+#define KEYBOARD_HALT 1
+#define FILE_NOT_FOUND 2
+#define INCORRECT_FILE 3
 
 // Node and arc type IDs
 #define STOP_NODE 0
