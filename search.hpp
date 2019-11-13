@@ -7,6 +7,7 @@ Called by the main() function after all subroutine objects have been initialized
 #pragma once
 
 #include <csignal>
+#include <ctime>
 #include <iostream>
 #include "definitions.hpp"
 #include "constraints.hpp"
@@ -33,9 +34,3 @@ struct Search
 	Search(); // constructor initializes network, objective, and constraint objects
 	void solve(); // main driver of the solution algorithm
 };
-
-
-
-
-
-/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).

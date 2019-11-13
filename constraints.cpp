@@ -102,9 +102,15 @@ Requires a solution vector.
 Returns a pair whose first element is the feasibility result (1 for feasible, 0 for infeasible) and whose second element is a vector of constraint function elements, ordered in the same way as the solution log file.
 
 All of the constraint functions are evaluated using either the solution vector directly, or using the flow vector produced by the assignment model.
+
+Note that this entire process is skipped if the user cost percentage increase parameter is negative, which is how the user can specify in the input files to ignore the user cost constraints.
 */
 pair<int, vector<double>> Constraint::calculate(const vector<int> &sol)
 {
+	// Skip process if user cost increase parameter is negative
+	if (uc_percent_increase < 0)
+		return make_pair(FEAS_UNKNOWN, sol_pair.first);
+
 	// Feed solution to assignment model to calculate flow vector
 	sol_pair = Assignment->calculate(sol, sol_pair);
 
@@ -113,9 +119,9 @@ pair<int, vector<double>> Constraint::calculate(const vector<int> &sol)
 
 	// Calculate total user cost and compare to the bound to determine feasibility
 	double total_user_cost = riding_weight*ucc[0] + walking_weight*ucc[1] + waiting_weight*ucc[2];
-	int feas = 1;
+	int feas = FEAS_TRUE;
 	if (total_user_cost > (1 + uc_percent_increase)*initial_user_cost)
-		feas = 0;
+		feas = FEAS_FALSE;
 
 	return make_pair(feas, ucc);
 }

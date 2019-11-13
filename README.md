@@ -177,6 +177,7 @@ Information related to defining the user cost function.
 Contains the following rows:
 
 * `Initial`: User cost of the initial solution. Used for defining the allowable relative increase bounds. Use [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single) to find this initial value.
+* `Percent`: Allowable percentage increase in user cost (expressed as a decimal). Larger values give a larger feasible set. Set to `-1` to ignore the user cost constraints entirely.
 * `Elements`: Number of parameters listed on the following rows. Currently set to `3`.
 * `Riding`: Weight of in-vehicle riding time.
 * `Walking`: Weight of walking time.

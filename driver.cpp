@@ -21,7 +21,7 @@ Search * Solver;
 void STOP_REQUEST(int signum);
 
 /// Main driver.
-int main(int argc, char *argv[])
+int main()
 {
 	// Register signal handler for stop request
 	signal(SIGINT, STOP_REQUEST);

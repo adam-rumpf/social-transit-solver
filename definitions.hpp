@@ -42,5 +42,10 @@ Global definitions used throughout various submodules.
 #define WALKING_ARC 3
 #define ACCESS_ARC 4
 
+// Feasibility codes
+#define FEAS_TRUE 1
+#define FEAS_FALSE 0
+#define FEAS_UNKNOWN -1
+
 // Other technical definitions
 #define EPSILON 0.00000001 // very small positive value
