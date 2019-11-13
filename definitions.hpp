@@ -47,5 +47,8 @@ Global definitions used throughout various submodules.
 #define FEAS_FALSE 0
 #define FEAS_UNKNOWN -1
 
+// Fixed parameters
+#define UC_COMPONENTS 3 // number of components of the user cost vector
+
 // Other technical definitions
 #define EPSILON 0.00000001 // very small positive value

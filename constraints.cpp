@@ -109,7 +109,7 @@ pair<int, vector<double>> Constraint::calculate(const vector<int> &sol)
 {
 	// Skip process if user cost increase parameter is negative
 	if (uc_percent_increase < 0)
-		return make_pair(FEAS_UNKNOWN, sol_pair.first);
+		return make_pair(FEAS_UNKNOWN, vector<double>(UC_COMPONENTS, FEAS_UNKNOWN));
 
 	// Feed solution to assignment model to calculate flow vector
 	sol_pair = Assignment->calculate(sol, sol_pair);
@@ -133,7 +133,7 @@ Returns a vector of the user cost components, in the order of the solution log c
 */
 vector<double> Constraint::user_cost_components()
 {
-	vector<double> uc(3, 0.0);
+	vector<double> uc(UC_COMPONENTS, 0.0);
 	uc[2] = sol_pair.second;
 
 	// In-vehicle riding time
