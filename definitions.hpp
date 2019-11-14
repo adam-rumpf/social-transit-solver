@@ -16,10 +16,11 @@ Global definitions used throughout various submodules.
 #define ASSIGNMENT_FILE "data/assignment_data.txt"
 #define FLOW_FILE "data/initial_flows.txt"
 #define SEARCH_FILE "data/search_parameters.txt"
+#define INPUT_SOLUTION_LOG_FILE "data/initial_solution_log.txt"
 
 // Output file names
 #define METRIC_FILE "log/metrics.txt"
-#define SOLUTION_LOG_FILE "log/solution.txt"
+#define OUTPUT_SOLUTION_LOG_FILE "log/solution.txt"
 #define EVENT_LOG_FILE "log/event.txt"
 #define MEMORY_LOG_FILE "log/memory.txt"
 #define FINAL_SOLUTION_FILE "log/final.txt"
@@ -46,6 +47,10 @@ Global definitions used throughout various submodules.
 #define FEAS_TRUE 1
 #define FEAS_FALSE 0
 #define FEAS_UNKNOWN -1
+
+// Pickup codes
+#define CONTINUE_SEARCH 1
+#define NEW_SEARCH 0
 
 // Fixed parameters
 #define UC_COMPONENTS 3 // number of components of the user cost vector

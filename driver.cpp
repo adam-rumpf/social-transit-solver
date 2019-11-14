@@ -32,8 +32,6 @@ int main()
 	// Call main solver
 	Solver->solve();
 
-	cin.get(); ///////////////// remove later
-
 	return SUCCESSFUL_EXIT;
 }
 

@@ -58,11 +58,12 @@ struct SolutionLog
 {
 	// Public attributes
 	unordered_map<string, tuple<int, vector<double>, double, double, double>> sol_log; // dictionary of solutions, indexed by the string version of the solution vector
+	string initial_key; // string of initial solution
 
 	// Public methods
-	SolutionLog(); // constructor reads the solution log file and initializes the solution memory structure
+	SolutionLog(bool); // constructor reads the solution log file and initializes the solution memory structure
 	~SolutionLog(); // destructor automatically calls the log writing method
 	void write_solution(); // writes the current solution log to the log file
 	string solution_string(const vector<int> &); // returns string version of integer vector
-	vector<int> solution_string_vector(string); // returns an integer vector for a given solution string
+	vector<int> solution_string_vector(const string &); // returns an integer vector for a given solution string
 };

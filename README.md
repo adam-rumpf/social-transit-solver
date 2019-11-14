@@ -17,7 +17,7 @@ This program writes outputs to a local `log/` folder. The following files are pr
 * `memory.txt`: The memory structures associated with the tabu search/simulated annealing hybrid search process. Used to continue a halted search process.
 * `metrics.txt`: Accessibility metrics of each population center for the best known solution.
 * `objective.txt`: Log of the current and best objective values in each iteration of the search process.
-* `solution.txt`: Log of all previously-searched solutions along with their feasibility status, constraint function elements, objective values, and evaluation times. Used to maintain a solution dictionary in order to avoid having to process searched solutions a second time.
+* `solution.txt`: Log of all previously-searched solutions along with their feasibility status, constraint function elements, objective values, and evaluation times. Used to maintain a solution dictionary in order to avoid having to process searched solutions a second time. Due to the unordered map used to store solutions internally during execution, the order of the rows is arbitrary and may change between executions.
 
 ## Data Folder
 
@@ -26,6 +26,7 @@ This program reads input files from a local `data/` folder. The following data f
 * [`arc_data.txt`](#arc_datatxt)
 * [`assignment_data.txt`](#assignment_datatxt)
 * [`initial_flows.txt`](#initial_flowstxt)
+* [`initial_solution_log.txt`](#initial_solution_logtxt)
 * [`node_data.txt`](#node_datatxt)
 * [`objective_data.txt`](#objective_datatxt)
 * [`od_data.txt`](#od_datatxt)
@@ -69,7 +70,7 @@ Contains the following rows:
 
 * `FW_Error_Epsilon`: Optimality gap threshold to use for ending the Frank-Wolfe algorithm.
 * `FW_Flow_Epsilon`: Solution change threshold (inf-norm) to use for ending the Frank-Wolfe algorithm. This bound is for the flow vector.
-* `FW_Waiting_Epsilon`: Solution change threshold to use for ending the Frank-Wolfe algorithm. This bound is for the waiting time scalar, which in general is so large compared to the fleet sizes that a larger threshold is appropriate.
+* `FW_Waiting_Epsilon`: Solution change threshold to use for ending the Frank-Wolfe algorithm. This bound is for the waiting time scalar, which in general is so large compared to the arc flow values that a larger threshold is appropriate.
 * `FW_Cutoff`: Iteration cutoff for the Frank-Wolfe algorithm.
 * `Elements`: Number of parameters listed on the following rows. Currently set to `2`.
 * `alpha`: Alpha parameter of the conical congestion function.
@@ -83,6 +84,20 @@ Contains the following columns:
 
 * `ID`: Arc ID. These should match the IDs of all core arcs.
 * `Flow`: Initial flow value for the given core arc.
+
+### `initial_solution_log.txt`
+
+Initial version of the solution log file, used by the solver to initialize a solution log in memory. This is essentially just a copy of the `solution.txt` file from the `log/` folder except that it should contain only a single row, corresponding to the initial solution vector. Use [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single) to generate this file.
+
+Contains the following columns:
+* `Solution`: String version of the initial fleet size vector, consisting of a sequence of integers separated by underscores (`_`).
+* `Feasible`: Feasibility status of initial solution. By definition this should always be `1`.
+* `UC_Riding`: Initial solution total in-vehicle riding time.
+* `UC_Walking`: Initial solution total walking time.
+* `UC_Waiting`: Initial solution total waiting time.
+* `Con_Time`: Time required (in seconds) to calculate the initial solution's constraint function value.
+* `Objective`: Initial objective value.
+* `Obj_Time`: Time required (in seconds) to calculate the initial solution's objective function value.
 
 ### `node_data.txt`
 
@@ -137,7 +152,8 @@ Parameters for the tabu search/simulated annealing hybrid algorithm.
 
 Contains the following rows:
 
-* `Elements`: Number of parameters listed on the following rows. Currently set to `14`.
+* `Elements`: Number of parameters listed on the following rows. Currently set to `15`.
+* `Continue`: Indicates whether to continue a previously-halted search using its printed log files. Set to `1` to continue the previous search or `0` to start a new search. Note that starting a new search wipes clean all of the files in the `log/` foder (except for the initial row of the solution log file, which is always required for initialization).
 * `Iterations`: Number of iterations to perform during the overall local search algorithm (can be safely terminated before this point by pressing `[Ctrl]+[C]`).
 * `Temp_Init`: Initial simulated annealing temperature.
 * `Temp_Factor`: Factor by which to multiply the temperature when cooling. Should be between `0.0` and `1.0`.
