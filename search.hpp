@@ -10,6 +10,7 @@ Called by the main() function after all subroutine objects have been initialized
 #include <ctime>
 #include <fstream>
 #include <iostream>
+#include <tuple>
 #include "definitions.hpp"
 #include "constraints.hpp"
 #include "logger.hpp"
@@ -29,9 +30,9 @@ struct Search
 	Network * Net; // pointer to main network object
 	Objective * Obj; // pointer to main objective object
 	Constraint * Con; // pointer to main constraint object
-	EventLog * ELog; // pointer to event log object
-	MemoryLog * MLog; // pointer to memory log object
-	SolutionLog * SLog; // pointer to solution log object
+	EventLog * EveLog; // pointer to event log object
+	MemoryLog * MemLog; // pointer to memory log object
+	SolutionLog * SolLog; // pointer to solution log object
 	bool started = false; // whether or not the solve() method has been called
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)

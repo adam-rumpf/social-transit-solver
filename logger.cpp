@@ -106,6 +106,53 @@ void SolutionLog::write_solution()
 		cout << "Failed to write to solution log." << endl;
 }
 
+/**
+Creates or updates a solution log entry for a given solution.
+
+Requires a solution vector reference, feasibility status, constraint function vector reference, constraint calculation time, objective value, and objective calculation time, respectively.
+
+If the solution vector was not already present in the log, this will add a new row. If it was already present, this will overwrite its previous information.
+*/
+void SolutionLog::create(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time, double obj, double obj_time)
+{
+	sol_log[solution_string(sol)] = make_tuple(feas, ucc, uc_time, obj, obj_time);
+}
+
+/// Returns a boolean indicating whether a given solution vector is present in the solution log.
+bool SolutionLog::solution_exists(const vector<int> &sol)
+{
+	if (sol_log.count(solution_string(sol)) > 0)
+		return true;
+	else
+		return false;
+}
+
+/// Returns a tuple containing the feasibility status, vector of constraint function elements, and objective value for a given solution vector.
+tuple<int, vector<double>, double> SolutionLog::lookup(const vector<int> &sol)
+{
+	tuple<int, vector<double>, double, double, double> entry = sol_log[solution_string(sol)]; // raw log entry
+
+	// Output tuple of specified elements
+	return make_tuple(get<SOL_LOG_FEAS>(entry), get<SOL_LOG_UC>(entry), get<SOL_LOG_OBJ>(entry));
+}
+
+/**
+Modifies the feasibility status, constraint function vector, and constraint evaluation time for a previously-logged solution.
+
+Requires a solution vector reference, feasibility status, constraint vector reference, and constraint time, respectively.
+
+This method is used to fill in constraint evaluation information for solutions whose constraint evaluation had previously been skipped during a neighborhood search.
+*/
+void SolutionLog::update(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time)
+{
+	string key = solution_string(sol); // solution log key
+
+	// Update each tuple entry individually
+	get<SOL_LOG_FEAS>(sol_log[key]) = feas;
+	get<SOL_LOG_UC>(sol_log[key]) = ucc;
+	get<SOL_LOG_CON_TIME>(sol_log[key]) = uc_time;
+}
+
 /// Converts a solution vector to a string by simply concatenating its digits separated by underscores.
 string SolutionLog::solution_string(const vector<int> &sol)
 {
