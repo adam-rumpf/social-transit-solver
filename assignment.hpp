@@ -66,6 +66,7 @@ struct NonlinearAssignment
 
 	// Public methods
 	NonlinearAssignment(Network *); // constructor reads assignment model data file and sets network pointer
+	~NonlinearAssignment(); // destructor deletes constant-cost submodel
 	pair<vector<double>, double> calculate(const vector<int> &, const pair<vector<double>, double> &); // calculates flow vector for a given fleet vector and initial assignment model solution
 	double arc_cost(int, double, double); // calculates the nonlinear cost function for a given arc
 	double obj_error(const vector<double> &, const vector<double> &, double, const vector<double> &, double); // calculates an error bound for the current objective value

@@ -3,14 +3,6 @@
 /**
 Network constructor to automatically build network from data files.
 
-Requires the names of the following input data files, in order:
-	node data
-	arc data
-	OD data
-	transit data
-	vehicle data
-	problem data
-
 Reads the contents of these files and uses them to fill its own line, node, and arc lists, while also initializing those objects.
 */
 Network::Network()
@@ -292,6 +284,22 @@ Network::Network()
 		cout << "OD file failed to open." << endl;
 		exit(FILE_NOT_FOUND);
 	}
+}
+
+/// Network destructor deletes all Node, Arc, and Line objects created by the constructor.
+Network::~Network()
+{
+	for (int i = 0; i < lines.size(); i++)
+		delete lines[i];
+
+	for (int i = 0; i < nodes.size(); i++)
+		delete nodes[i];
+
+	for (int i = 0; i < core_arcs.size(); i++)
+		delete core_arcs[i];
+
+	for (int i = 0; i < access_arcs.size(); i++)
+		delete access_arcs[i];
 }
 
 /// Node constructor that sets default value to -1.

@@ -94,6 +94,12 @@ Constraint::Constraint(Network * net_in)
 	}
 }
 
+/// Constraint object destructor deletes the nonlinear model object created by the constructor.
+Constraint::~Constraint()
+{
+	delete Assignment;
+}
+
 /**
 Evaluates the constraint functions for a given solution.
 

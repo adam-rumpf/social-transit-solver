@@ -46,6 +46,7 @@ struct Network
 
 	// Public methods
 	Network(); // constructor uses input data file names from the definition header to automatically build the network
+	~Network(); // destructor deletes all Node, Arc, and Line objects
 };
 
 /**

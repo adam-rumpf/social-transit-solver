@@ -28,9 +28,13 @@ struct Search
 	Network * Net; // pointer to main network object
 	Objective * Obj; // pointer to main objective object
 	Constraint * Con; // pointer to main constraint object
+	EventLog * ELog; // pointer to event log object
+	MemoryLog * MLog; // pointer to memory log object
+	SolutionLog * SLog; // pointer to solution log object
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 
 	// Public methods
-	Search(); // constructor initializes network, objective, and constraint objects
+	Search(); // constructor initializes network, objective, constraint, and various logger objects
+	~Search(); // destructor deletes network, objective, and constraint objects
 	void solve(); // main driver of the solution algorithm
 };

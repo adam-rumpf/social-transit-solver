@@ -278,6 +278,12 @@ NonlinearAssignment::NonlinearAssignment(Network * net_in)
 	}
 }
 
+/// Nonlinear assignment destructor deletes the submodel created by the constructor.
+NonlinearAssignment::~NonlinearAssignment()
+{
+	delete Submodel;
+}
+
 /**
 Nonlinear cost assignment model evaluation for a given solution.
 
