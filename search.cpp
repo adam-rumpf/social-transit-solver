@@ -58,8 +58,15 @@ void Search::solve()
 			switch (count)
 			{
 				case 1:
-					if (stoi(piece) == 0)
+					if (stoi(piece) == NEW_SEARCH)
 						pickup = false;
+					else if (stoi(piece) == CONTINUE_SEARCH)
+						pickup = true;
+					else
+					{
+						cout << "Unrecognized search continuation specification. Use '" << NEW_SEARCH << "' for a new search or '" << CONTINUE_SEARCH << "' to continue a previous search." << endl;
+						exit(INCORRECT_FILE);
+					}
 					break;
 				case 2:
 					max_iterations = stoi(piece);
@@ -115,6 +122,9 @@ void Search::solve()
 	}
 
 	// Initialize logger objects
+	ELog = new EventLog();////////////////////////////
+	MLog = new MemoryLog();///////////////////////////
+	SLog = new SolutionLog(pickup);
 
 	///////////////// Test a variety of circumstances, including saving/loading (CONTINUE_SEARCH, NEW_SEARCH).
 
@@ -124,6 +134,4 @@ void Search::solve()
 
 
 	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
-
-	cin.get();///////////////////////////////////
 }

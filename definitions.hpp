@@ -52,6 +52,13 @@ Global definitions used throughout various submodules.
 #define CONTINUE_SEARCH 1
 #define NEW_SEARCH 0
 
+// Solution log tuple elements
+#define SOL_LOG_FEAS 0
+#define SOL_LOG_UC 1
+#define SOL_LOG_CON_TIME 2
+#define SOL_LOG_OBJ 3
+#define SOL_LOG_OBJ_TIME 4
+
 // Fixed parameters
 #define UC_COMPONENTS 3 // number of components of the user cost vector
 #define DELIMITER '_' // delimiter to use for defining solution log names

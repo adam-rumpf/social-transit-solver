@@ -8,6 +8,7 @@ Called by the main() function after all subroutine objects have been initialized
 
 #include <csignal>
 #include <ctime>
+#include <fstream>
 #include <iostream>
 #include "definitions.hpp"
 #include "constraints.hpp"
@@ -33,7 +34,7 @@ struct Search
 	SolutionLog * SLog; // pointer to solution log object
 	bool started = false; // whether or not the solve() method has been called
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
-	bool pickup = true; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
+	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
 	int max_iterations; // maximum number of search iterations
 	double temp_init; // initial simulated annealing temperature
 	double temp_factor; // simulated annealing decay factor
