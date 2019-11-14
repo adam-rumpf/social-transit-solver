@@ -95,9 +95,9 @@ Contains the following columns:
 * `UC_Riding`: Initial solution total in-vehicle riding time.
 * `UC_Walking`: Initial solution total walking time.
 * `UC_Waiting`: Initial solution total waiting time.
-* `Con_Time`: Time required (in seconds) to calculate the initial solution's constraint function value.
+* `Con_Time`: Time required (in seconds) to calculate the initial solution's constraint function value. This is not used for any calculations and is only included out of interest.
 * `Objective`: Initial objective value.
-* `Obj_Time`: Time required (in seconds) to calculate the initial solution's objective function value.
+* `Obj_Time`: Time required (in seconds) to calculate the initial solution's objective function value. This is not used for any calculations and is only included out of interest.
 
 ### `node_data.txt`
 
@@ -153,7 +153,7 @@ Parameters for the tabu search/simulated annealing hybrid algorithm.
 Contains the following rows:
 
 * `Elements`: Number of parameters listed on the following rows. Currently set to `15`.
-* `Continue`: Indicates whether to continue a previously-halted search using its printed log files. Set to `1` to continue the previous search or `0` to start a new search. Note that starting a new search wipes clean all of the files in the `log/` foder (except for the initial row of the solution log file, which is always required for initialization).
+* `Continue`: Indicates whether to continue a previously-halted search using its printed log files. Set to `1` to continue the previous search or `0` to start a new search. Note that starting a new search wipes clean all of the files in the `log/` folder (except for the initial row of the solution log file, which is always required for initialization).
 * `Iterations`: Number of iterations to perform during the overall local search algorithm (can be safely terminated before this point by pressing `[Ctrl]+[C]`).
 * `Temp_Init`: Initial simulated annealing temperature.
 * `Temp_Factor`: Factor by which to multiply the temperature when cooling. Should be between `0.0` and `1.0`.
