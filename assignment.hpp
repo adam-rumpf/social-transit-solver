@@ -24,6 +24,10 @@ using namespace concurrency;
 
 typedef pair<double, int> arc_cost_pair; // used to define a priority queue of combined cost/ID pairs sorted by the first element
 
+// Structure declarations
+struct ConstantAssignment;
+struct NonlinearAssignment;
+
 /**
 Constant-cost assignment model class.
 

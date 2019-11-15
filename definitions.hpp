@@ -1,6 +1,4 @@
-/**
-Global definitions used throughout various submodules.
-*/
+/// Global definitions used throughout various submodules.
 
 #pragma once
 
