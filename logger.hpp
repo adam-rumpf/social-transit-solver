@@ -18,6 +18,11 @@ Logger objects for reading and writing various files required by the main soluti
 
 using namespace std;
 
+// Global function prototypes
+pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
+string vec2str(const vector<int> &); // returns string version of integer vector
+vector<int> str2vec(string); // returns an integer vector for a given solution string
+
 /**
 Event logger.
 
@@ -75,7 +80,7 @@ struct MemoryLog
 	MemoryLog(int, bool); // constructor initializes internal search parameters associated with memory file
 	~MemoryLog(); // destructor automatically calls the memory writing method
 	void load_memory(); // reads contents of memory log file into memory log object
-	void reset_memory() {}; // sets memory structures according to the initial values from the search parameter file
+	void reset_memory(); // sets memory structures according to the initial values from the search parameter file and the initial solution log file
 	void save_memory() {}; // writes contents of memory log object to the memory log file
 };
 
@@ -109,7 +114,4 @@ struct SolutionLog
 	bool solution_exists(const vector<int> &); // determines whether a given solution vector is present in the solution log
 	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
 	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
-	pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
-	string vec2str(const vector<int> &); // returns string version of integer vector
-	vector<int> str2vec(string); // returns an integer vector for a given solution string
 };

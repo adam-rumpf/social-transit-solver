@@ -129,8 +129,21 @@ void Search::solve()
 
 	cout << "Search initialized." << endl;
 
+	////////////////////////////////////
+
+	cout << "Initial temp: " << MemLog->temperature << endl;
+	cout << "Initial tenure: " << MemLog->tenure << endl;
+
+	cout << "Initial memory current solution: " << endl;
+	for (int i = 0; i < MemLog->sol_current.size(); i++)
+		cout << MemLog->sol_current[i] << '\t';
+	cout << endl;
+	cout << "Initial memory current objective: " << MemLog->obj_current << endl;
+
+	//////////////////////////////////////
+
 	cout << "Initial log entries:" << endl;
-	vector<int> temp_sol = SolLog->str2vec(SolLog->sol_log.begin()->first);
+	vector<int> temp_sol = str2vec(SolLog->sol_log.begin()->first);
 	for (int i = 0; i < temp_sol.size(); i++)
 		cout << temp_sol[i] << '\t';
 	cout << endl;
@@ -150,7 +163,7 @@ void Search::solve()
 	SolLog->update_row(new_sol, 0, new_sol_con, 0.445);
 
 	cout << "Getting initial solution." << endl;
-	pair<vector<int>, double> initial_pair = SolLog->get_initial_solution();
+	pair<vector<int>, double> initial_pair = get_initial_solution();
 	for (int i = 0; i < initial_pair.first.size(); i++)
 		cout << initial_pair.first[i] << '\t';
 	cout << '\n' << initial_pair.second << endl;

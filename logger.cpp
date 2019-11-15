@@ -1,5 +1,86 @@
 #include "logger.hpp"
 
+
+/**
+Reads the initial solution vector and objective value from the initial solution log file.
+
+Returns a pair consisting of the initial fleet size vector along with its objective value, respectively.
+
+Normally the current and best solutions along with their objective values are stored in the memory log file, and can be passed to the search object in order to continue a search. If we are starting with a new search, however, the initial solution information must be (re-)acquired from the initial solution log file.
+*/
+pair<vector<int>, double> get_initial_solution()
+{
+	// Initialize containers to temporarily hold row contents
+	string row_sol;
+	double row_obj;
+
+	// Read specified file
+	ifstream log_file;
+	log_file.open(INPUT_SOLUTION_LOG_FILE);
+	if (log_file.is_open())
+	{
+		string line, piece; // whole line and line element being read
+		getline(log_file, line); // skip comment line
+
+		while (log_file.eof() == false)
+		{
+			// Get whole line as a string stream
+			getline(log_file, line);
+			if (line.size() == 0)
+				// Break for blank line at file end
+				break;
+			stringstream stream(line);
+
+			// Go through each piece of the line
+			getline(stream, piece, '\t'); // Solution
+			row_sol = piece;
+			getline(stream, piece, '\t'); // Feasible
+			for (int i = 0; i < UC_COMPONENTS; i++)
+				// User cost components
+				getline(stream, piece, '\t');
+			getline(stream, piece, '\t'); // Constraint time
+			getline(stream, piece, '\t'); // Objective
+			row_obj = stod(piece);
+			getline(stream, piece, '\t'); // Objective time
+		}
+
+		log_file.close();
+	}
+	else
+	{
+		cout << "Solution log file failed to open." << endl;
+		exit(FILE_NOT_FOUND);
+	}
+
+	// Return solution pair
+	return make_pair(str2vec(row_sol), row_obj);
+}
+
+/// Converts a solution vector to a string by simply concatenating its digits separated by underscores.
+string vec2str(const vector<int> &sol)
+{
+	string out = "";
+
+	for (int i = 0; i < sol.size(); i++)
+		out += to_string(sol[i]) + DELIMITER;
+	out.pop_back();
+
+	return out;
+}
+
+/// Converts a solution string back into an integer solution vector.
+vector<int> str2vec(string sol)
+{
+	vector<int> out;
+	stringstream sol_stream(sol);
+	string element;
+
+	while (getline(sol_stream, element, DELIMITER))
+		out.push_back(stoi(element));
+
+	return out;
+}
+
 /**
 Memory log constructor either reads the memory log file into the object's local attributes or sets initial values.
 
@@ -19,7 +100,7 @@ MemoryLog::MemoryLog(int size_in, bool pickup)
 		load_memory();
 	else
 		// If starting a new run, initialize the memory structures using the search parameter file
-		0;// reset_memory();
+		reset_memory();
 }
 
 /// Memory log destructor automatically calls the writing method to export the current memory structures to a file.
@@ -31,7 +112,7 @@ MemoryLog::~MemoryLog()
 /// Reads the memory log file to set memory log attributes.
 void MemoryLog::load_memory()
 {
-	// Read specified file
+	// Read memory log file
 	ifstream log_file;
 	log_file.open(MEMORY_LOG_FILE);
 	if (log_file.is_open())
@@ -160,6 +241,68 @@ void MemoryLog::load_memory()
 		cout << "Memory log file failed to open." << endl;
 		exit(FILE_NOT_FOUND);
 	}
+}
+
+/// Initializes memory log attributes according to search parameter file and the initial solution log file.
+void MemoryLog::reset_memory()
+{
+	// Set fresh memory structure values
+	iteration = 1;
+	nonimp_in = 0;
+	nonimp_out = 0;
+	attractive_solutions.clear();
+	for (int i = 0; i < sol_size; i++)
+	{
+		add_tenure[i] = 0;
+		drop_tenure[i] = 0;
+	}
+
+	// Read search parameter file
+	ifstream param_file;
+	param_file.open(SEARCH_FILE);
+	if (param_file.is_open())
+	{
+		string line, piece; // whole line and line element being read
+		getline(param_file, line); // skip comment line
+
+		int count = 0;
+
+		while (param_file.eof() == false)
+		{
+			count++;
+
+			// Get whole line as a string stream
+			getline(param_file, line);
+			if (line.size() == 0)
+				// Break for blank line at file end
+				break;
+			stringstream stream(line);
+
+			// Go through each piece of the line
+			getline(stream, piece, '\t'); // Label
+			getline(stream, piece, '\t'); // Value
+
+			// Expected data
+			if (count == 3)
+				temperature = stod(piece);
+			if (count == 11)
+				tenure = stod(piece);
+		}
+
+		param_file.close();
+	}
+	else
+	{
+		cout << "Search parameter file failed to open." << endl;
+		exit(FILE_NOT_FOUND);
+	}
+
+	// Read initial solution log file and use for both current and best solutions
+	pair<vector<int>, double> initial_sol = get_initial_solution();
+	sol_current = initial_sol.first;
+	sol_best = initial_sol.first;
+	obj_current = initial_sol.second;
+	obj_best = initial_sol.second;
 }
 
 /**
@@ -313,84 +456,4 @@ void SolutionLog::update_row(const vector<int> &sol, int feas, const vector<doub
 	get<SOL_LOG_FEAS>(sol_log[key]) = feas;
 	get<SOL_LOG_UC>(sol_log[key]) = ucc;
 	get<SOL_LOG_CON_TIME>(sol_log[key]) = uc_time;
-}
-
-/**
-Reads the initial solution vector and objective value from the initial solution log file.
-
-Returns a pair consisting of the initial fleet size vector along with its objective value, respectively.
-
-Normally the current and best solutions along with their objective values are stored in the memory log file, and can be passed to the search object in order to continue a search. If we are starting with a new search, however, the initial solution information must be (re-)acquired from the initial solution log file.
-*/
-pair<vector<int>, double> SolutionLog::get_initial_solution()
-{
-	// Initialize containers to temporarily hold row contents
-	string row_sol;
-	double row_obj;
-
-	// Read specified file
-	ifstream log_file;
-	log_file.open(INPUT_SOLUTION_LOG_FILE);
-	if (log_file.is_open())
-	{
-		string line, piece; // whole line and line element being read
-		getline(log_file, line); // skip comment line
-
-		while (log_file.eof() == false)
-		{
-			// Get whole line as a string stream
-			getline(log_file, line);
-			if (line.size() == 0)
-				// Break for blank line at file end
-				break;
-			stringstream stream(line);
-
-			// Go through each piece of the line
-			getline(stream, piece, '\t'); // Solution
-			row_sol = piece;
-			getline(stream, piece, '\t'); // Feasible
-			for (int i = 0; i < UC_COMPONENTS; i++)
-				// User cost components
-				getline(stream, piece, '\t');
-			getline(stream, piece, '\t'); // Constraint time
-			getline(stream, piece, '\t'); // Objective
-			row_obj = stod(piece);
-			getline(stream, piece, '\t'); // Objective time
-		}
-
-		log_file.close();
-	}
-	else
-	{
-		cout << "Solution log file failed to open." << endl;
-		exit(FILE_NOT_FOUND);
-	}
-
-	// Return solution pair
-	return make_pair(str2vec(row_sol), row_obj);
-}
-
-/// Converts a solution vector to a string by simply concatenating its digits separated by underscores.
-string SolutionLog::vec2str(const vector<int> &sol)
-{
-	string out = "";
-
-	for (int i = 0; i < sol.size(); i++)
-		out += to_string(sol[i]) + DELIMITER;
-	out.pop_back();
-
-	return out;
-}
-
-/// Converts a solution string back into an integer solution vector.
-vector<int> SolutionLog::str2vec(string sol)
-{
-	vector<int> out;
-	stringstream sol_stream(sol);
-	string element;
-
-	while (getline(sol_stream, element, DELIMITER))
-		out.push_back(stoi(element));
-
-	return out;
 }
