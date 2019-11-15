@@ -43,13 +43,15 @@ Contains search-related attributes and pointers to the main subroutine objects, 
 */
 struct Search
 {
-	// Public attributes
+	// Public attributes (object pointers)
 	Network * Net; // pointer to main network object
 	Objective * Obj; // pointer to main objective object
 	Constraint * Con; // pointer to main constraint object
 	EventLog * EveLog; // pointer to event log object
 	MemoryLog * MemLog; // pointer to memory log object
 	SolutionLog * SolLog; // pointer to solution log object
+
+	// Public attributes (search parameters and technical)
 	bool started = false; // whether or not the solve() method has been called
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
@@ -66,6 +68,20 @@ struct Search
 	int nonimp_in_max; // cutoff for inner nonimprovement counter
 	int nonimp_out_max; // cutoff for outer nonimprovement counter
 	int step; // step size for moves
+
+	// Public attributes (solution algorithm memory)
+	vector<double> add_tenure; // vector of tabu tenures for ADD moves to each solution vector element
+	vector<double> drop_tenure; // vector of tabu tenures for DROP moves to each solution vector element
+	vector<int> sol_current; // current solution vector
+	vector<int> sol_best; // best known solution vector
+	double obj_current; // current objective value
+	double obj_best; // best known objective value
+	int iteration; // current iteration number
+	int nonimp_in; // inner nonimprovement counter
+	int nonimp_out; // outer nonimprovement counter
+	double tenure; // tabu tenure for newly-added tabu moves
+	double temperature; // simulated annealing temperature
+	vector<pair<vector<int>, double>> attractive_solutions; // vector of attractive solutions, stored as solution vector/objective value pairs
 
 	// Public methods
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
@@ -119,18 +135,6 @@ struct MemoryLog
 	// Public attributes
 	Search * Solver; // pointer to calling search object
 	int sol_size; // length of solution vector
-	vector<double> add_tenure; // vector of tabu tenures for ADD moves to each solution vector element
-	vector<double> drop_tenure; // vector of tabu tenures for DROP moves to each solution vector element
-	vector<int> sol_current; // current solution vector
-	vector<int> sol_best; // best known solution vector
-	double obj_current; // current objective value
-	double obj_best; // best known objective value
-	int iteration; // current iteration number
-	int nonimp_in; // inner nonimprovement counter
-	int nonimp_out; // outer nonimprovement counter
-	double tenure; // tabu tenure for newly-added tabu moves
-	double temperature; // simulated annealing temperature
-	vector<pair<vector<int>, double>> attractive_solutions; // vector of attractive solutions, stored as solution vector/objective value pairs
 
 	// Public methods
 	MemoryLog(Search *, bool); // constructor initializes internal search parameters associated with memory file

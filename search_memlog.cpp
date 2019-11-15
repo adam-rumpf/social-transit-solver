@@ -12,10 +12,10 @@ MemoryLog::MemoryLog(Search * search_in, bool pickup)
 	// Set pointer and immediately resize corresponding vectors
 	Solver = search_in;
 	sol_size = Solver->Net->lines.size();
-	add_tenure.resize(sol_size);
-	drop_tenure.resize(sol_size);
-	sol_current.resize(sol_size);
-	sol_best.resize(sol_size);
+	Solver->add_tenure.resize(sol_size);
+	Solver->drop_tenure.resize(sol_size);
+	Solver->sol_current.resize(sol_size);
+	Solver->sol_best.resize(sol_size);
 
 	if (pickup == true)
 		// If continuing from a previous run, read in the existing memory log
@@ -67,7 +67,7 @@ void MemoryLog::load_memory()
 					for (int i = 0; i < sol_size; i++)
 					{
 						getline(stream, piece, '\t');
-						add_tenure[i] = stod(piece);
+						Solver->add_tenure[i] = stod(piece);
 					}
 					break;
 				case 2:
@@ -75,7 +75,7 @@ void MemoryLog::load_memory()
 					for (int i = 0; i < sol_size; i++)
 					{
 						getline(stream, piece, '\t');
-						drop_tenure[i] = stod(piece);
+						Solver->drop_tenure[i] = stod(piece);
 					}
 					break;
 				case 3:
@@ -83,7 +83,7 @@ void MemoryLog::load_memory()
 					for (int i = 0; i < sol_size; i++)
 					{
 						getline(stream, piece, '\t');
-						sol_current[i] = stoi(piece);
+						Solver->sol_current[i] = stoi(piece);
 					}
 					break;
 				case 4:
@@ -91,43 +91,43 @@ void MemoryLog::load_memory()
 					for (int i = 0; i < sol_size; i++)
 					{
 						getline(stream, piece, '\t');
-						sol_best[i] = stoi(piece);
+						Solver->sol_best[i] = stoi(piece);
 					}
 					break;
 				case 5:
 					// current objective
 					getline(stream, piece, '\t');
-					obj_current = stod(piece);
+					Solver->obj_current = stod(piece);
 					break;
 				case 6:
 					// best objective
 					getline(stream, piece, '\t');
-					obj_best = stod(piece);
+					Solver->obj_best = stod(piece);
 					break;
 				case 7:
 					// iteration number
 					getline(stream, piece, '\t');
-					iteration = stoi(piece);
+					Solver->iteration = stoi(piece);
 					break;
 				case 8:
 					// inner nonimprovement counter
 					getline(stream, piece, '\t');
-					nonimp_in = stoi(piece);
+					Solver->nonimp_in = stoi(piece);
 					break;
 				case 9:
 					// outer nonimprovement counter
 					getline(stream, piece, '\t');
-					nonimp_out = stoi(piece);
+					Solver->nonimp_out = stoi(piece);
 					break;
 				case 10:
 					// tabu tenure
 					getline(stream, piece, '\t');
-					tenure = stod(piece);
+					Solver->tenure = stod(piece);
 					break;
 				case 11:
 					// simulated annealing temperature
 					getline(stream, piece, '\t');
-					temperature = stod(piece);
+					Solver->temperature = stod(piece);
 					break;
 				case 12:
 					// attractive solution objectives
@@ -145,7 +145,7 @@ void MemoryLog::load_memory()
 						getline(stream, piece, '\t');
 						asol[i] = stoi(piece);
 					}
-					attractive_solutions.push_back(make_pair(asol, attractive_objectives.front()));
+					Solver->attractive_solutions.push_back(make_pair(asol, attractive_objectives.front()));
 					attractive_objectives.pop();
 				}
 			}
@@ -169,14 +169,14 @@ void MemoryLog::load_memory()
 void MemoryLog::reset_memory()
 {
 	// Set fresh memory structure values
-	iteration = 1;
-	nonimp_in = 0;
-	nonimp_out = 0;
-	attractive_solutions.clear();
+	Solver->iteration = 1;
+	Solver->nonimp_in = 0;
+	Solver->nonimp_out = 0;
+	Solver->attractive_solutions.clear();
 	for (int i = 0; i < sol_size; i++)
 	{
-		add_tenure[i] = 0;
-		drop_tenure[i] = 0;
+		Solver->add_tenure[i] = 0;
+		Solver->drop_tenure[i] = 0;
 	}
 
 	// Read search parameter file
@@ -206,9 +206,9 @@ void MemoryLog::reset_memory()
 
 			// Expected data
 			if (count == 3)
-				temperature = stod(piece);
+				Solver->temperature = stod(piece);
 			if (count == 11)
-				tenure = stod(piece);
+				Solver->tenure = stod(piece);
 		}
 
 		param_file.close();
@@ -221,10 +221,10 @@ void MemoryLog::reset_memory()
 
 	// Read initial solution log file and use for both current and best solutions
 	pair<vector<int>, double> initial_sol = get_initial_solution();
-	sol_current = initial_sol.first;
-	sol_best = initial_sol.first;
-	obj_current = initial_sol.second;
-	obj_best = initial_sol.second;
+	Solver->sol_current = initial_sol.first;
+	Solver->sol_best = initial_sol.first;
+	Solver->obj_current = initial_sol.second;
+	Solver->obj_best = initial_sol.second;
 }
 
 /// Writes memory log attributes to the memory log file. Also calls a method to output the best known solution as a separate file.
@@ -239,39 +239,39 @@ void MemoryLog::save_memory()
 
 		// Write tabu tenure vectors
 		for (int i = 0; i < sol_size; i++)
-			log_file << add_tenure[i] << '\t';
+			log_file << Solver->add_tenure[i] << '\t';
 		log_file << endl;
 		for (int i = 0; i < sol_size; i++)
-			log_file << drop_tenure[i] << '\t';
+			log_file << Solver->drop_tenure[i] << '\t';
 		log_file << endl;
 
 		// Write solution vectors
 		for (int i = 0; i < sol_size; i++)
-			log_file << sol_current[i] << '\t';
+			log_file << Solver->sol_current[i] << '\t';
 		log_file << endl;
 		for (int i = 0; i < sol_size; i++)
-			log_file << sol_best[i] << '\t';
+			log_file << Solver->sol_best[i] << '\t';
 		log_file << endl;
 
 		// Write scalars
-		log_file << obj_current << endl;
-		log_file << obj_best << endl;
-		log_file << iteration << endl;
-		log_file << nonimp_in << endl;
-		log_file << nonimp_out << endl;
-		log_file << tenure << endl;
-		log_file << temperature << endl;
+		log_file << Solver->obj_current << endl;
+		log_file << Solver->obj_best << endl;
+		log_file << Solver->iteration << endl;
+		log_file << Solver->nonimp_in << endl;
+		log_file << Solver->nonimp_out << endl;
+		log_file << Solver->tenure << endl;
+		log_file << Solver->temperature << endl;
 
 		// Write attractive solution objective vector
-		for (int i = 0; i < attractive_solutions.size(); i++)
-			log_file << attractive_solutions[i].second << '\t';
+		for (int i = 0; i < Solver->attractive_solutions.size(); i++)
+			log_file << Solver->attractive_solutions[i].second << '\t';
 		log_file << endl;
 
 		// Write attractive solution vectors
-		for (int i = 0; i < attractive_solutions.size(); i++)
+		for (int i = 0; i < Solver->attractive_solutions.size(); i++)
 		{
 			for (int j = 0; j < sol_size; j++)
-				log_file << attractive_solutions[i].first[j] << '\t';
+				log_file << Solver->attractive_solutions[i].first[j] << '\t';
 			log_file << endl;
 		}
 
@@ -297,11 +297,11 @@ void MemoryLog::output_best()
 
 		// Write best solution vector
 		for (int i = 0; i < sol_size; i++)
-			log_file << sol_best[i] << '\t';
+			log_file << Solver->sol_best[i] << '\t';
 		log_file << endl;
 
 		// Write best solution objective
-		log_file << obj_best << endl;
+		log_file << Solver->obj_best << endl;
 
 		log_file.close();
 		cout << "Successfully recorded final solution." << endl;

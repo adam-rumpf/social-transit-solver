@@ -124,6 +124,10 @@ void Search::solve()
 	MemLog = new MemoryLog(this, pickup);
 	SolLog = new SolutionLog(pickup);
 
+	/////////////////////////////////////////
+
+
+
 
 
 	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
