@@ -150,6 +150,12 @@ void Search::solve()
 	new_sol_con = { 2.1, 3.4, 7.11 };
 	SolLog->update(new_sol, 0, new_sol_con, 0.445);
 
+	cout << "Getting initial solution." << endl;
+	pair<vector<int>, double> initial_pair = SolLog->get_initial_solution();
+	for (int i = 0; i < initial_pair.first.size(); i++)
+		cout << initial_pair.first[i] << '\t';
+	cout << '\n' << initial_pair.second << endl;
+
 
 
 

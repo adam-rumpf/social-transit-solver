@@ -73,6 +73,7 @@ struct SolutionLog
 	bool solution_exists(const vector<int> &); // determines whether a given solution vector is present in the solution log
 	tuple<int, vector<double>, double> lookup(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
 	void update(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
+	pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
 	string solution_string(const vector<int> &); // returns string version of integer vector
 	vector<int> solution_string_vector(string); // returns an integer vector for a given solution string
 };
