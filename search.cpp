@@ -124,14 +124,5 @@ void Search::solve()
 
 
 
-	////////////////////////////////
-	cout << "Max iterations: " << EveLog->max_iterations << endl;
-	EveLog->iteration_header(1);
-	EveLog->log_objective(1, 100, 100);
-	EveLog->iteration_header(2);
-	EveLog->log_objective(2, 110, 100);
-
-
-
 	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
 }

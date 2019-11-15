@@ -27,6 +27,8 @@ vector<int> str2vec(string); // returns an integer vector for a given solution s
 Event logger.
 
 Reports the events that occur during each iteration of the search process and prints them to an output log for later review. Also outputs a log of the current and best objective values in each iteration.
+
+In order to reduce the number of times we need to open the output file, the results of an iteration are only written at the end of an iteration. Until that point, internal attributes and search object attributes are used to store the events of the iteration.
 */
 struct EventLog
 {
@@ -36,8 +38,7 @@ struct EventLog
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
-	void iteration_header(int); // writes header for a specified iteration in the event log
-	void log_objective(int, double, double); // appends a row to the objective log file
+	void log_iteration(int, double, double); // appends an iteration report to the event log file
 };
 
 /**

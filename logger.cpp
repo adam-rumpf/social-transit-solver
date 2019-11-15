@@ -161,20 +161,29 @@ EventLog::EventLog(bool pickup)
 		max_iterations = -1;
 }
 
-/// Writes a header for the specified iteration in the event log file.
-void EventLog::iteration_header(int iteration)
+/**
+Appends an iteration summary to the event log file.
+
+Requires the following arguments, respectively:
+	current iteration number
+	current objective value
+	best objective value
+*/
+void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 {
+	// Write to event log file
 	ofstream event_file(EVENT_LOG_FILE, mode);
 	if (event_file.is_open())
 	{
+		// Write iteration header
 		event_file << "\n==================================================\nIteration " << iteration << " / " << max_iterations << "\n==================================================\n\n";
+
+		///////////////////////////////////////////////////////////////////
+
 		event_file.close();
 	}
-}
 
-/// Appends a row to the objective log file with the given iteration number, current objective, and best objective.
-void EventLog::log_objective(int iteration, double obj_current, double obj_best)
-{
+	// Write to objective log file
 	ofstream obj_file(OBJECTIVE_LOG_FILE, mode);
 	if (obj_file.is_open())
 	{
