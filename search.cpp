@@ -123,7 +123,7 @@ void Search::solve()
 
 	// Initialize logger objects
 	EveLog = new EventLog();////////////////////////////
-	MemLog = new MemoryLog(pickup);///////////////////////////
+	MemLog = new MemoryLog(Net->lines.size(), pickup);
 	SolLog = new SolutionLog(pickup);
 
 	///////////////// Test a variety of circumstances, including saving/loading (CONTINUE_SEARCH, NEW_SEARCH).

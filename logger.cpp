@@ -3,10 +3,17 @@
 /**
 Memory log constructor either reads the memory log file into the object's local attributes or sets initial values.
 
-Accepts a boolean argument (default true) to specify whether to begin by loading the existing memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory log file is ignored and the attributes are instead set according to the search parameter file.
+Requires the size of the solution vector and a boolean argument to specify whether to begin by loading the existing memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory log file is ignored and the attributes are instead set according to the search parameter file.
 */
-MemoryLog::MemoryLog(bool pickup = true)
+MemoryLog::MemoryLog(int size_in, bool pickup)
 {
+	// Get solution vector size and immediately resize corresponding vectors
+	sol_size = size_in;
+	add_tenure.resize(sol_size);
+	drop_tenure.resize(sol_size);
+	sol_current.resize(sol_size);
+	sol_best.resize(sol_size);
+
 	if (pickup == true)
 		// If continuing from a previous run, read in the existing memory log
 		load_memory();
@@ -24,9 +31,9 @@ MemoryLog::~MemoryLog()
 /**
 Solution log constructor reads the solution log file into the solution log unordered map.
 
-Accepts a boolean argument (default true) to specify whether to begin by loading the existing log files. If true, the existing solution log is loaded. If false, the existing log file is overwritten.
+Requires a boolean argument to specify whether to begin by loading the existing log files. If true, the existing solution log is loaded. If false, the existing log file is overwritten.
 */
-SolutionLog::SolutionLog(bool pickup = true)
+SolutionLog::SolutionLog(bool pickup)
 {
 	if (pickup == true)
 		// If continuing from a previous run, read in the existing log
