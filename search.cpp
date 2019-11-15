@@ -124,5 +124,11 @@ void Search::solve()
 
 
 
+	////////////////////////////////
+	EveLog->log_objective(0, 100, 100);
+	EveLog->log_objective(1, 110, 100);
+
+
+
 	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
 }

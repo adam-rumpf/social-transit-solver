@@ -122,6 +122,17 @@ EventLog::EventLog(bool pickup)
 	mode = ofstream::app;
 }
 
+/// Appends a row to the objective log file with the given iteration number, current objective, and best objective.
+void EventLog::log_objective(int iteration, double obj_current, double obj_best)
+{
+	ofstream obj_file(OBJECTIVE_LOG_FILE, mode);
+	if (obj_file.is_open())
+	{
+		obj_file << iteration << '\t' << obj_current << '\t' << obj_best << fixed << setprecision(15) << endl;
+		obj_file.close();
+	}
+}
+
 /**
 Memory log constructor either reads the memory log file into the object's local attributes or sets initial values.
 

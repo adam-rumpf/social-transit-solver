@@ -35,6 +35,7 @@ struct EventLog
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
+	void log_objective(int, double, double); // appends a row to the objective log file
 };
 
 /**
