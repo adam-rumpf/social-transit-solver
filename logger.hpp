@@ -26,14 +26,15 @@ vector<int> str2vec(string); // returns an integer vector for a given solution s
 /**
 Event logger.
 
-Reports the events that occur during each iteration of the search process and prints them to an output log for later review.
+Reports the events that occur during each iteration of the search process and prints them to an output log for later review. Also outputs a log of the current and best objective values in each iteration.
 */
 struct EventLog
 {
 	// Public attributes
+	ios_base::openmode mode; // file open mode (append or truncate)
 
 	// Public methods
-	EventLog() {};
+	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
 };
 
 /**

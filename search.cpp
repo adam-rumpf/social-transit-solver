@@ -118,7 +118,7 @@ void Search::solve()
 	}
 
 	// Initialize logger objects
-	EveLog = new EventLog();////////////////////////////
+	EveLog = new EventLog(pickup);
 	MemLog = new MemoryLog(Net->lines.size(), pickup);
 	SolLog = new SolutionLog(pickup);
 

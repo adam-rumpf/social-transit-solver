@@ -1,6 +1,5 @@
 #include "logger.hpp"
 
-
 /**
 Reads the initial solution vector and objective value from the initial solution log file.
 
@@ -79,6 +78,48 @@ vector<int> str2vec(string sol)
 		out.push_back(stoi(element));
 
 	return out;
+}
+
+/**
+Event log constructor writes headers of event log files and clears if necessary.
+
+Requires a boolean argument to specify whether to continue or restart the log files. If true, the existing files are appended to. If false, the existing files are overwritten.
+*/
+EventLog::EventLog(bool pickup)
+{
+	string event_header; // event log header
+
+	if (pickup == true)
+	{
+		// If continuing from a previous run, set mode to append and create a longer event header
+		mode = ofstream::app;
+		event_header = "\n############################################################\nResuming Session\n############################################################\n\nInitializing.\n";
+	}
+	else
+	{
+		// If starting a new run, set mode to truncate, create a fresh event header, and rewrite the objective log header
+		mode = ofstream::trunc;
+		event_header = "Initializing.\n";
+
+		// Write objective log header
+		ofstream obj_file(OBJECTIVE_LOG_FILE, mode);
+		if (obj_file.is_open())
+		{
+			obj_file << "Iteration\tObj_Current\tObj_Best\n";
+			obj_file.close();
+		}
+	}
+
+	// Always write event log header
+	ofstream event_file(EVENT_LOG_FILE, mode);
+	if (event_file.is_open())
+	{
+		event_file << event_header;
+		event_file.close();
+	}
+
+	// After header creation we should always append
+	mode = ofstream::app;
 }
 
 /**
