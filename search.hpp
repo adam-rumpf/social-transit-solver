@@ -20,7 +20,6 @@ Called by the main() function after all subroutine objects have been initialized
 #include <vector>
 #include "definitions.hpp"
 #include "constraints.hpp"
-#include "logger.hpp"
 #include "network.hpp"
 #include "objective.hpp"
 
