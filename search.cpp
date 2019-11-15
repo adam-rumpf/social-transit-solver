@@ -125,8 +125,11 @@ void Search::solve()
 
 
 	////////////////////////////////
-	EveLog->log_objective(0, 100, 100);
-	EveLog->log_objective(1, 110, 100);
+	cout << "Max iterations: " << EveLog->max_iterations << endl;
+	EveLog->iteration_header(1);
+	EveLog->log_objective(1, 100, 100);
+	EveLog->iteration_header(2);
+	EveLog->log_objective(2, 110, 100);
 
 
 
