@@ -38,7 +38,6 @@ struct Search
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
 	int max_iterations; // maximum number of search iterations
-	double temp_init; // initial simulated annealing temperature
 	double temp_factor; // simulated annealing decay factor
 	int attractive_max; // number of attractive solutions to store for tabu search
 	int nbhd_add_lim1; // ADD moves to collect in first pass of neighborhood search

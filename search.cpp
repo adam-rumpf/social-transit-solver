@@ -70,9 +70,6 @@ void Search::solve()
 				case 2:
 					max_iterations = stoi(piece);
 					break;
-				case 3:
-					temp_init = stod(piece);
-					break;
 				case 4:
 					temp_factor = stod(piece);
 					break;

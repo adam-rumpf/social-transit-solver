@@ -305,7 +305,7 @@ void MemoryLog::reset_memory()
 	obj_best = initial_sol.second;
 }
 
-/// Writes memory log attributes to the memory log file.
+/// Writes memory log attributes to the memory log file. Also calls a method to output the best known solution as a separate file.
 void MemoryLog::save_memory()
 {
 	ofstream log_file(MEMORY_LOG_FILE);
@@ -358,6 +358,34 @@ void MemoryLog::save_memory()
 	}
 	else
 		cout << "Failed to write to memory log." << endl;
+
+	// Also write the best known solution to its own file
+	output_best();
+}
+
+/// Writes an output file containing only the best solution and its objective value.
+void MemoryLog::output_best()
+{
+	ofstream log_file(FINAL_SOLUTION_FILE);
+
+	if (log_file.is_open())
+	{
+		// Format output
+		log_file << fixed << setprecision(15);
+
+		// Write best solution vector
+		for (int i = 0; i < sol_size; i++)
+			log_file << sol_best[i] << '\t';
+		log_file << endl;
+
+		// Write best solution objective
+		log_file << obj_best << endl;
+
+		log_file.close();
+		cout << "Successfully recorded final solution." << endl;
+	}
+	else
+		cout << "Failed to write final solution." << endl;
 }
 
 /**
