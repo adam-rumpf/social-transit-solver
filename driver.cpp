@@ -9,7 +9,7 @@ The exit code should correspond to the circumstances of the exit.
 */
 
 #include <iostream>
-#include "definitions.hpp"
+#include "DEFINITIONS.hpp"
 #include "search.hpp"
 
 using namespace std;

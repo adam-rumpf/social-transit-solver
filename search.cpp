@@ -1,132 +1,5 @@
 #include "search.hpp"
 
-/// Search constructor initializes Network, Objective, and Constraint objects.
-Search::Search()
-{
-	Net = new Network(); // network object
-	Obj = new Objective(Net); // objective function object
-	Con = new Constraint(Net); // constraint function object
-}
-
-/// Search constructor deletes Network, Objective, and Constraint objects created by the constructor.
-Search::~Search()
-{
-	delete Net;
-	delete Obj;
-	delete Con;
-
-	// Only delete logger objects if they have been instantiated
-	if (started == true)
-	{
-		delete EveLog;
-		delete MemLog;
-		delete SolLog;
-	}
-}
-
-/// Main driver of the solution algorithm. Loads parameter files, calls main search loop, and handles final output.
-void Search::solve()
-{
-	started = true;
-
-	// Load search parameters
-	ifstream parameter_file;
-	parameter_file.open(SEARCH_FILE);
-	if (parameter_file.is_open())
-	{
-		string line, piece; // whole line and line element being read
-		getline(parameter_file, line); // skip comment line
-		int count = 0;
-
-		while (parameter_file.eof() == false)
-		{
-			count++;
-
-			// Get whole line as a string stream
-			getline(parameter_file, line);
-			if (line.size() == 0)
-				// Break for blank line at file end
-				break;
-			stringstream stream(line);
-
-			// Go through each piece of the line
-			getline(stream, piece, '\t'); // Label
-			getline(stream, piece, '\t'); // Value
-
-			// Expected data
-			switch (count)
-			{
-				case 1:
-					if (stoi(piece) == NEW_SEARCH)
-						pickup = false;
-					else if (stoi(piece) == CONTINUE_SEARCH)
-						pickup = true;
-					else
-					{
-						cout << "Unrecognized search continuation specification. Use '" << NEW_SEARCH << "' for a new search or '" << CONTINUE_SEARCH << "' to continue a previous search." << endl;
-						exit(INCORRECT_FILE);
-					}
-					break;
-				case 2:
-					max_iterations = stoi(piece);
-					break;
-				case 4:
-					temp_factor = stod(piece);
-					break;
-				case 5:
-					attractive_max = stoi(piece);
-					break;
-				case 6:
-					nbhd_add_lim1 = stoi(piece);
-					break;
-				case 7:
-					nbhd_add_lim2 = stoi(piece);
-					break;
-				case 8:
-					nbhd_drop_lim1 = stoi(piece);
-					break;
-				case 9:
-					nbhd_drop_lim2 = stoi(piece);
-					break;
-				case 10:
-					nbhd_swap_lim = stoi(piece);
-					break;
-				case 11:
-					tenure_init = stod(piece);
-					break;
-				case 12:
-					tenure_factor = stod(piece);
-					break;
-				case 13:
-					nonimp_in_max = stoi(piece);
-					break;
-				case 14:
-					nonimp_out_max = stoi(piece);
-					break;
-				case 15:
-					step = stoi(piece);
-					break;
-			}
-		}
-
-		parameter_file.close();
-	}
-	else
-	{
-		cout << "Search parameter file failed to open." << endl;
-		exit(FILE_NOT_FOUND);
-	}
-
-	// Initialize logger objects
-	EveLog = new EventLog(pickup);
-	MemLog = new MemoryLog(Net->lines.size(), pickup);
-	SolLog = new SolutionLog(pickup);
-
-
-
-	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
-}
-
 /**
 Reads the initial solution vector and objective value from the initial solution log file.
 
@@ -207,6 +80,133 @@ vector<int> str2vec(string sol)
 	return out;
 }
 
+/// Search constructor initializes Network, Objective, and Constraint objects.
+Search::Search()
+{
+	Net = new Network(); // network object
+	Obj = new Objective(Net); // objective function object
+	Con = new Constraint(Net); // constraint function object
+}
+
+/// Search constructor deletes Network, Objective, and Constraint objects created by the constructor.
+Search::~Search()
+{
+	delete Net;
+	delete Obj;
+	delete Con;
+
+	// Only delete logger objects if they have been instantiated
+	if (started == true)
+	{
+		delete EveLog;
+		delete MemLog;
+		delete SolLog;
+	}
+}
+
+/// Main driver of the solution algorithm. Loads parameter files, calls main search loop, and handles final output.
+void Search::solve()
+{
+	started = true;
+
+	// Load search parameters
+	ifstream parameter_file;
+	parameter_file.open(SEARCH_FILE);
+	if (parameter_file.is_open())
+	{
+		string line, piece; // whole line and line element being read
+		getline(parameter_file, line); // skip comment line
+		int count = 0;
+
+		while (parameter_file.eof() == false)
+		{
+			count++;
+
+			// Get whole line as a string stream
+			getline(parameter_file, line);
+			if (line.size() == 0)
+				// Break for blank line at file end
+				break;
+			stringstream stream(line);
+
+			// Go through each piece of the line
+			getline(stream, piece, '\t'); // Label
+			getline(stream, piece, '\t'); // Value
+
+			// Expected data
+			switch (count)
+			{
+			case 1:
+				if (stoi(piece) == NEW_SEARCH)
+					pickup = false;
+				else if (stoi(piece) == CONTINUE_SEARCH)
+					pickup = true;
+				else
+				{
+					cout << "Unrecognized search continuation specification. Use '" << NEW_SEARCH << "' for a new search or '" << CONTINUE_SEARCH << "' to continue a previous search." << endl;
+					exit(INCORRECT_FILE);
+				}
+				break;
+			case 2:
+				max_iterations = stoi(piece);
+				break;
+			case 4:
+				temp_factor = stod(piece);
+				break;
+			case 5:
+				attractive_max = stoi(piece);
+				break;
+			case 6:
+				nbhd_add_lim1 = stoi(piece);
+				break;
+			case 7:
+				nbhd_add_lim2 = stoi(piece);
+				break;
+			case 8:
+				nbhd_drop_lim1 = stoi(piece);
+				break;
+			case 9:
+				nbhd_drop_lim2 = stoi(piece);
+				break;
+			case 10:
+				nbhd_swap_lim = stoi(piece);
+				break;
+			case 11:
+				tenure_init = stod(piece);
+				break;
+			case 12:
+				tenure_factor = stod(piece);
+				break;
+			case 13:
+				nonimp_in_max = stoi(piece);
+				break;
+			case 14:
+				nonimp_out_max = stoi(piece);
+				break;
+			case 15:
+				step = stoi(piece);
+				break;
+			}
+		}
+
+		parameter_file.close();
+	}
+	else
+	{
+		cout << "Search parameter file failed to open." << endl;
+		exit(FILE_NOT_FOUND);
+	}
+
+	// Initialize logger objects
+	EveLog = new EventLog(pickup);
+	MemLog = new MemoryLog(this, pickup);
+	SolLog = new SolutionLog(pickup);
+
+
+
+	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
+}
+
 /**
 Event log constructor writes headers of event log files and clears if necessary.
 
@@ -277,7 +277,7 @@ EventLog::EventLog(bool pickup)
 			getline(stream, piece, '\t'); // Label
 			getline(stream, piece, '\t'); // Value
 
-										  // Expected data
+			// Expected data
 			if (count == 2)
 				max_iterations = stoi(piece);
 		}
@@ -292,9 +292,9 @@ EventLog::EventLog(bool pickup)
 Appends an iteration summary to the event log file.
 
 Requires the following arguments, respectively:
-current iteration number
-current objective value
-best objective value
+	current iteration number
+	current objective value
+	best objective value
 */
 void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 {
@@ -324,10 +324,11 @@ Memory log constructor either reads the memory log file into the object's local 
 
 Requires the size of the solution vector and a boolean argument to specify whether to begin by loading the existing memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory log file is ignored and the attributes are instead set according to the search parameter file.
 */
-MemoryLog::MemoryLog(int size_in, bool pickup)
+MemoryLog::MemoryLog(Search * search_in, bool pickup)
 {
-	// Get solution vector size and immediately resize corresponding vectors
-	sol_size = size_in;
+	// Set pointer and immediately resize corresponding vectors
+	Solver = search_in;
+	sol_size = Solver->Net->lines.size();
 	add_tenure.resize(sol_size);
 	drop_tenure.resize(sol_size);
 	sol_current.resize(sol_size);
@@ -520,7 +521,7 @@ void MemoryLog::reset_memory()
 			getline(stream, piece, '\t'); // Label
 			getline(stream, piece, '\t'); // Value
 
-										  // Expected data
+			// Expected data
 			if (count == 3)
 				temperature = stod(piece);
 			if (count == 11)
@@ -758,7 +759,7 @@ tuple<int, vector<double>, double> SolutionLog::lookup_row(const vector<int> &so
 {
 	tuple<int, vector<double>, double, double, double> entry = sol_log[vec2str(sol)]; // raw log entry
 
-																					  // Output tuple of specified elements
+	// Output tuple of specified elements
 	return make_tuple(get<SOL_LOG_FEAS>(entry), get<SOL_LOG_UC>(entry), get<SOL_LOG_OBJ>(entry));
 }
 
@@ -773,7 +774,7 @@ void SolutionLog::update_row(const vector<int> &sol, int feas, const vector<doub
 {
 	string key = vec2str(sol); // solution log key
 
-							   // Update each tuple entry individually
+	// Update each tuple entry individually
 	get<SOL_LOG_FEAS>(sol_log[key]) = feas;
 	get<SOL_LOG_UC>(sol_log[key]) = ucc;
 	get<SOL_LOG_CON_TIME>(sol_log[key]) = uc_time;

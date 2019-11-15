@@ -12,6 +12,7 @@ Includes a variety of functions for calculating the constraint function values f
 #include <string>
 #include <utility>
 #include <vector>
+#include "DEFINITIONS.hpp"
 #include "network.hpp"
 #include "assignment.hpp"
 

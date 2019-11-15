@@ -12,7 +12,7 @@ Includes a Network, Arc, Node, and Line class. Objects from these classes are bu
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "definitions.hpp"
+#include "DEFINITIONS.hpp"
 
 using namespace std;
 

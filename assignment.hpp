@@ -16,10 +16,8 @@ Solves the Spiess and Florian model to return the user flows based on a given so
 #include <utility>
 #include <unordered_set>
 #include <vector>
+#include "DEFINITIONS.hpp"
 #include "network.hpp"
-
-// Other technical definitions
-#define EPSILON 0.000001 // very small positive value
 
 using namespace std;
 using namespace concurrency;
