@@ -52,7 +52,6 @@ void Search::solve()
 			// Go through each piece of the line
 			getline(stream, piece, '\t'); // Label
 			getline(stream, piece, '\t'); // Value
-			string value = piece;
 
 			// Expected data
 			switch (count)
@@ -156,6 +155,36 @@ void Search::solve()
 		cout << initial_pair.first[i] << '\t';
 	cout << '\n' << initial_pair.second << endl;
 
+	///////////////////////////////
+
+	cout << "Loading memory file." << endl;
+	MemLog->load_memory();
+	cout << "ADD tenures:" << endl;
+	for (int i = 0; i < MemLog->add_tenure.size(); i++)
+		cout << MemLog->add_tenure[i] << '\t';
+	cout << endl;
+
+	cout << "Current solution:" << endl;
+	for (int i = 0; i < MemLog->sol_current.size(); i++)
+		cout << MemLog->sol_current[i] << '\t';
+	cout << endl;
+
+	cout << "Current objective: " << MemLog->obj_current << endl;
+	cout << "Temperature: " << MemLog->temperature << endl;
+
+	cout << "Attractive solution objectives:" << endl;
+	cout << MemLog->attractive_solutions.size() << endl;
+	for (int i = 0; i < MemLog->attractive_solutions.size(); i++)
+		cout << MemLog->attractive_solutions[i].second << '\t';
+	cout << endl;
+
+	cout << "Attractive solutions:" << endl;
+	for (int i = 0; i < MemLog->attractive_solutions.size(); i++)
+	{
+		for (int j=0; j < MemLog->attractive_solutions[i].first.size(); j++)
+			cout << MemLog->attractive_solutions[i].first[j] << '\t';
+		cout << endl;
+	}
 
 
 

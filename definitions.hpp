@@ -31,6 +31,7 @@ Global definitions used throughout various submodules.
 #define KEYBOARD_HALT 1
 #define FILE_NOT_FOUND 2
 #define INCORRECT_FILE 3
+#define INCOMPATIBLE_DATA 4
 
 // Node and arc type IDs
 #define STOP_NODE 0

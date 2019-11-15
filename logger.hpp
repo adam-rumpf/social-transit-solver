@@ -7,6 +7,7 @@ Logger objects for reading and writing various files required by the main soluti
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <queue>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -74,8 +75,8 @@ struct MemoryLog
 	MemoryLog(int, bool); // constructor initializes internal search parameters associated with memory file
 	~MemoryLog(); // destructor automatically calls the memory writing method
 	void load_memory(); // reads contents of memory log file into memory log object
-	void reset_memory(); // sets memory structures according to the initial values from the search parameter file
-	void save_memory(); // writes contents of memory log object to the memory log file
+	void reset_memory() {}; // sets memory structures according to the initial values from the search parameter file
+	void save_memory() {}; // writes contents of memory log object to the memory log file
 };
 
 /**
