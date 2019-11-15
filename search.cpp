@@ -123,7 +123,7 @@ void Search::solve()
 
 	// Initialize logger objects
 	EveLog = new EventLog();////////////////////////////
-	MemLog = new MemoryLog();///////////////////////////
+	MemLog = new MemoryLog(pickup);///////////////////////////
 	SolLog = new SolutionLog(pickup);
 
 	///////////////// Test a variety of circumstances, including saving/loading (CONTINUE_SEARCH, NEW_SEARCH).
@@ -131,11 +131,11 @@ void Search::solve()
 	cout << "Search initialized." << endl;
 
 	cout << "Initial log entries:" << endl;
-	vector<int> temp_sol = SolLog->solution_string_vector(SolLog->sol_log.begin()->first);
+	vector<int> temp_sol = SolLog->str2vec(SolLog->sol_log.begin()->first);
 	for (int i = 0; i < temp_sol.size(); i++)
 		cout << temp_sol[i] << '\t';
 	cout << endl;
-	tuple<int, vector<double>, double> temp = SolLog->lookup(temp_sol);
+	tuple<int, vector<double>, double> temp = SolLog->lookup_row(temp_sol);
 	cout << get<0>(temp) << '\t';
 	for (int i = 0; i < UC_COMPONENTS; i++)
 		cout << get<1>(temp)[i] << '\t';
@@ -144,11 +144,11 @@ void Search::solve()
 	cout << "Writing new entry." << endl;
 	vector<int> new_sol = { 11, 22, 33 };
 	vector<double> new_sol_con = { 1.1, 2.3, 5.8 };
-	SolLog->create(new_sol, -1, new_sol_con, 0.125, 999999999, 0.294);
+	SolLog->create_row(new_sol, -1, new_sol_con, 0.125, 999999999, 0.294);
 
 	cout << "Updating entry." << endl;
 	new_sol_con = { 2.1, 3.4, 7.11 };
-	SolLog->update(new_sol, 0, new_sol_con, 0.445);
+	SolLog->update_row(new_sol, 0, new_sol_con, 0.445);
 
 	cout << "Getting initial solution." << endl;
 	pair<vector<int>, double> initial_pair = SolLog->get_initial_solution();

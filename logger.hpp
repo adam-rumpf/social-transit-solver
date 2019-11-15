@@ -33,14 +33,20 @@ struct EventLog
 /**
 Memory logger.
 
-Writes the TS/SA algorithm's memory structures to an output file. This allows the search process to be halted and resumed later.
+Reads and writes the TS/SA algorithm's memory structures from and to an output file. This allows the search process to be halted and resumed later.
+
+Most of the memory structures associated with the search process are stored as public attributes of the main search's memory log object, meaning that the memory log object should be involved whenever these values are accessed or modified.
 */
 struct MemoryLog
 {
 	// Public attributes
 
 	// Public methods
-	MemoryLog() {};
+	MemoryLog(bool); // constructor initializes internal search parameters associated with memory file
+	~MemoryLog(); // destructor automatically calls the memory writing method
+	void load_memory() {}; // reads contents of memory log file into memory log object
+	void reset_memory() {}; // sets memory structures according to the initial values from the search parameter file
+	void save_memory() {}; // writes contents of memory log object to the memory log file
 };
 
 /**
@@ -67,13 +73,13 @@ struct SolutionLog
 	// Public methods
 	SolutionLog(bool); // constructor reads the solution log file and initializes the solution memory structure
 	~SolutionLog(); // destructor automatically calls the log writing method
-	void read_solution(string); // reads a given solution log into the dictionary
-	void write_solution(); // writes the current solution log to the log file
-	void create(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information
+	void load_solution(string); // reads a given solution log into the dictionary
+	void save_solution(); // writes the current solution log to the log file
+	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information
 	bool solution_exists(const vector<int> &); // determines whether a given solution vector is present in the solution log
-	tuple<int, vector<double>, double> lookup(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
-	void update(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
+	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
+	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
 	pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
-	string solution_string(const vector<int> &); // returns string version of integer vector
-	vector<int> solution_string_vector(string); // returns an integer vector for a given solution string
+	string vec2str(const vector<int> &); // returns string version of integer vector
+	vector<int> str2vec(string); // returns an integer vector for a given solution string
 };

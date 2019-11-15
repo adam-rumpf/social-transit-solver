@@ -1,28 +1,49 @@
 #include "logger.hpp"
 
 /**
+Memory log constructor either reads the memory log file into the object's local attributes or sets initial values.
+
+Accepts a boolean argument (default true) to specify whether to begin by loading the existing memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory log file is ignored and the attributes are instead set according to the search parameter file.
+*/
+MemoryLog::MemoryLog(bool pickup = true)
+{
+	if (pickup == true)
+		// If continuing from a previous run, read in the existing memory log
+		load_memory();
+	else
+		// If starting a new run, initialize the memory structures using the search parameter file
+		reset_memory();
+}
+
+/// Memory log destructor automatically calls the writing method to export the current memory structures to a file.
+MemoryLog::~MemoryLog()
+{
+	save_memory();
+}
+
+/**
 Solution log constructor reads the solution log file into the solution log unordered map.
 
 Accepts a boolean argument (default true) to specify whether to begin by loading the existing log files. If true, the existing solution log is loaded. If false, the existing log file is overwritten.
 */
-SolutionLog::SolutionLog(bool pickup=true)
+SolutionLog::SolutionLog(bool pickup = true)
 {
 	if (pickup == true)
 		// If continuing from a previous run, read in the existing log
-		read_solution(OUTPUT_SOLUTION_LOG_FILE);
+		load_solution(OUTPUT_SOLUTION_LOG_FILE);
 	else
 		// If starting a new run, read in only the initial solution log
-		read_solution(INPUT_SOLUTION_LOG_FILE);
+		load_solution(INPUT_SOLUTION_LOG_FILE);
 }
 
 /// Solution log destructor automatically calls the writing method to export the unordered map to a file.
 SolutionLog::~SolutionLog()
 {
-	write_solution();
+	save_solution();
 }
 
 /// Reads a given solution log file into the solution dictionary.
-void SolutionLog::read_solution(string in_file)
+void SolutionLog::load_solution(string in_file)
 {
 	// Read specified file
 	ifstream log_file;
@@ -81,7 +102,7 @@ void SolutionLog::read_solution(string in_file)
 }
 
 /// Writes the current contents of the solution log to the solution log output file.
-void SolutionLog::write_solution()
+void SolutionLog::save_solution()
 {
 	ofstream log_file(OUTPUT_SOLUTION_LOG_FILE);
 
@@ -113,24 +134,24 @@ Requires a solution vector reference, feasibility status, constraint function ve
 
 If the solution vector was not already present in the log, this will add a new row. If it was already present, this will overwrite its previous information.
 */
-void SolutionLog::create(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time, double obj, double obj_time)
+void SolutionLog::create_row(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time, double obj, double obj_time)
 {
-	sol_log[solution_string(sol)] = make_tuple(feas, ucc, uc_time, obj, obj_time);
+	sol_log[vec2str(sol)] = make_tuple(feas, ucc, uc_time, obj, obj_time);
 }
 
 /// Returns a boolean indicating whether a given solution vector is present in the solution log.
 bool SolutionLog::solution_exists(const vector<int> &sol)
 {
-	if (sol_log.count(solution_string(sol)) > 0)
+	if (sol_log.count(vec2str(sol)) > 0)
 		return true;
 	else
 		return false;
 }
 
 /// Returns a tuple containing the feasibility status, vector of constraint function elements, and objective value for a given solution vector.
-tuple<int, vector<double>, double> SolutionLog::lookup(const vector<int> &sol)
+tuple<int, vector<double>, double> SolutionLog::lookup_row(const vector<int> &sol)
 {
-	tuple<int, vector<double>, double, double, double> entry = sol_log[solution_string(sol)]; // raw log entry
+	tuple<int, vector<double>, double, double, double> entry = sol_log[vec2str(sol)]; // raw log entry
 
 	// Output tuple of specified elements
 	return make_tuple(get<SOL_LOG_FEAS>(entry), get<SOL_LOG_UC>(entry), get<SOL_LOG_OBJ>(entry));
@@ -143,9 +164,9 @@ Requires a solution vector reference, feasibility status, constraint vector refe
 
 This method is used to fill in constraint evaluation information for solutions whose constraint evaluation had previously been skipped during a neighborhood search.
 */
-void SolutionLog::update(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time)
+void SolutionLog::update_row(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time)
 {
-	string key = solution_string(sol); // solution log key
+	string key = vec2str(sol); // solution log key
 
 	// Update each tuple entry individually
 	get<SOL_LOG_FEAS>(sol_log[key]) = feas;
@@ -205,11 +226,11 @@ pair<vector<int>, double> SolutionLog::get_initial_solution()
 	}
 
 	// Return solution pair
-	return make_pair(solution_string_vector(row_sol), row_obj);
+	return make_pair(str2vec(row_sol), row_obj);
 }
 
 /// Converts a solution vector to a string by simply concatenating its digits separated by underscores.
-string SolutionLog::solution_string(const vector<int> &sol)
+string SolutionLog::vec2str(const vector<int> &sol)
 {
 	string out = "";
 
@@ -221,7 +242,7 @@ string SolutionLog::solution_string(const vector<int> &sol)
 }
 
 /// Converts a solution string back into an integer solution vector.
-vector<int> SolutionLog::solution_string_vector(string sol)
+vector<int> SolutionLog::str2vec(string sol)
 {
 	vector<int> out;
 	stringstream sol_stream(sol);
