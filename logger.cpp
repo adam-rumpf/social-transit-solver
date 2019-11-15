@@ -305,6 +305,61 @@ void MemoryLog::reset_memory()
 	obj_best = initial_sol.second;
 }
 
+/// Writes memory log attributes to the memory log file.
+void MemoryLog::save_memory()
+{
+	ofstream log_file(MEMORY_LOG_FILE);
+
+	if (log_file.is_open())
+	{
+		// Write comment line
+		log_file << "[add_tenure], [drop_tenure], [sol_current], [sol_best], obj_current, obj_best, iteration, nonimp_in, nonimp_out, tenure, temperature, [attractive_objectives], [[attractive_solutions]]" << fixed << setprecision(15) << endl;
+
+		// Write tabu tenure vectors
+		for (int i = 0; i < sol_size; i++)
+			log_file << add_tenure[i] << '\t';
+		log_file << endl;
+		for (int i = 0; i < sol_size; i++)
+			log_file << drop_tenure[i] << '\t';
+		log_file << endl;
+
+		// Write solution vectors
+		for (int i = 0; i < sol_size; i++)
+			log_file << sol_current[i] << '\t';
+		log_file << endl;
+		for (int i = 0; i < sol_size; i++)
+			log_file << sol_best[i] << '\t';
+		log_file << endl;
+
+		// Write scalars
+		log_file << obj_current << endl;
+		log_file << obj_best << endl;
+		log_file << iteration << endl;
+		log_file << nonimp_in << endl;
+		log_file << nonimp_out << endl;
+		log_file << tenure << endl;
+		log_file << temperature << endl;
+
+		// Write attractive solution objective vector
+		for (int i = 0; i < attractive_solutions.size(); i++)
+			log_file << attractive_solutions[i].second << '\t';
+		log_file << endl;
+
+		// Write attractive solution vectors
+		for (int i = 0; i < attractive_solutions.size(); i++)
+		{
+			for (int j = 0; j < sol_size; j++)
+				log_file << attractive_solutions[i].first[j] << '\t';
+			log_file << endl;
+		}
+
+		log_file.close();
+		cout << "Successfully recorded memory log." << endl;
+	}
+	else
+		cout << "Failed to write to memory log." << endl;
+}
+
 /**
 Solution log constructor reads the solution log file into the solution log unordered map.
 

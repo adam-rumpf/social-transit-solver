@@ -81,7 +81,7 @@ struct MemoryLog
 	~MemoryLog(); // destructor automatically calls the memory writing method
 	void load_memory(); // reads contents of memory log file into memory log object
 	void reset_memory(); // sets memory structures according to the initial values from the search parameter file and the initial solution log file
-	void save_memory() {}; // writes contents of memory log object to the memory log file
+	void save_memory(); // writes contents of memory log object to the memory log file
 };
 
 /**
