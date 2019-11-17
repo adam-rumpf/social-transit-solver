@@ -41,6 +41,7 @@
 #define ALIGHTING_ARC 2
 #define WALKING_ARC 3
 #define ACCESS_ARC 4
+#define NO_ID -1
 
 // Feasibility codes
 #define FEAS_TRUE 1

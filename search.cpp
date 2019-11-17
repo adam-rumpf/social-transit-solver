@@ -126,13 +126,11 @@ void Search::solve()
 	SolLog = new SolutionLog(pickup);
 
 	// Initialize neighborhood search solution container and set references to its elements
-	pair<pair<vector<int>, double>, pair<vector<int>, double>> nbhd_sol;
-	vector<int> & nbhd_sol1 = nbhd_sol.first.first;
-	vector<int> & nbhd_sol2 = nbhd_sol.second.first;
+	neighbor_pair nbhd_sol;
+	pair<int, int> & nbhd_sol1 = nbhd_sol.first.first;
+	pair<int, int> & nbhd_sol2 = nbhd_sol.second.first;
 	double & nbhd_obj1 = nbhd_sol.first.second;
 	double & nbhd_obj2 = nbhd_sol.second.second;
-	nbhd_sol1.resize(sol_size);
-	nbhd_sol2.resize(sol_size);
 
 	// Main search loop
 
@@ -147,15 +145,33 @@ void Search::solve()
 		//////////////////////////////////////////////////////// placeholder neighborhood search test
 		cout << "Neighborhood search results:" << endl;
 		cout << "1st best objective: " << nbhd_obj1 << endl;
-		cout << "1st best solution:" << endl;
-		for (int i = 0; i < nbhd_sol1.size(); i++)
-			cout << nbhd_sol1[i] << '\t';
-		cout << endl;
+		cout << "1st best solution: " << nbhd_sol1.first << ", " << nbhd_sol2.second << endl;
 		cout << "2nd best objective: " << nbhd_obj2 << endl;
-		cout << "2nd best solution:" << endl;
-		for (int i = 0; i < nbhd_sol2.size(); i++)
-			cout << nbhd_sol2[i] << '\t';
+		cout << "2nd best solution: " << nbhd_sol2.first << ", " << nbhd_sol2.second << endl;
+		cout << "Current solution:" << endl;
+		for (int i = 0; i < sol_current.size(); i++)
+			cout << sol_current[i] << '\t';
 		cout << endl;
+		cout << "Showing result of ADDing to 2 and DROPping from 3:" << endl;
+		sol_current = move2sol(2, 3);
+		for (int i = 0; i < sol_current.size(); i++)
+			cout << sol_current[i] << '\t';
+		cout << endl;
+
+		// TS/SA updates depending on search results
+
+		if (nbhd_obj1 < obj_current)
+		{
+			// Improvement iteration
+
+			nonimp_out = 0; // reset outer nonimprovement counter
+			tenure = tenure_init; // reset tabu tenures
+
+		}
+		else
+		{
+			// Nonimprovement iteration
+		}
 
 
 
@@ -191,9 +207,14 @@ void Search::solve()
 /**
 Performs the neighborhood search of the tabu search/simulated annealing hybrid algorithm.
 
-Returns a pair of pairs, with each pair containing a solution vector and objective value for the best and second best solutions found.
+Returns a structure of nested pairs to represent the best and second best solutions found. The structure is arranged as follows:
+	The overall pair's elements <pair, pair> correspond to the best and second best solutions, respectively.
+		For each solution we have a pair <pair, double> to represent the move and the objective value, respectively.
+			For each move we have a pair <int, int> containing the line IDs of the ADD and DROP lines, respectively.
+
+A move is represented as a pair of integers containing the line IDs of the lines being ADDed to or DROPped from, respectively. If the move does not involve an ADD or a DROP, then one of these elements will be set to "NO_ID" to indicate no change. SWAP moves should always include two legitimate line IDs.
 */
-pair<pair<vector<int>, double>, pair<vector<int>, double>> Search::neighborhood_search()
+neighbor_pair Search::neighborhood_search()
 {
 
 
@@ -201,7 +222,29 @@ pair<pair<vector<int>, double>, pair<vector<int>, double>> Search::neighborhood_
 
 
 	/////////////////////////////////////////////////////////////////////////////////
-	return make_pair(make_pair(vector<int>(Net->lines.size(), 0.0), 0.0), make_pair(vector<int>(Net->lines.size(), 0.0), 0.0));
+	return make_pair(make_pair(make_pair(NO_ID, NO_ID), 0.0), make_pair(make_pair(NO_ID, NO_ID), 0.0));
+}
+
+/**
+Generates the solution vector resulting from a specified move.
+
+Requires an ADD line ID and a DROP line ID. Use an ID of "NO_ID" to ignore one of the move types.
+
+Returns a vector resulting from applying the specified move to the current solution.
+*/
+vector<int> Search::move2sol(int add_id, int drop_id)
+{
+	vector<int> sol = sol_current;
+
+	// ADD move
+	if (add_id != NO_ID)
+		sol[add_id] += step;
+
+	// DROP move
+	if (drop_id != NO_ID)
+		sol[drop_id] -= step;
+
+	return sol;
 }
 
 /// Writes current memory structures to the output logs.

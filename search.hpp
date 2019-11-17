@@ -25,6 +25,8 @@ Called by the main() function after all subroutine objects have been initialized
 
 using namespace std;
 
+typedef pair<pair<pair<int, int>, double>, pair<pair<int, int>, double>> neighbor_pair; // structure of neighborhood search output
+
 // Global function prototypes
 pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
 string vec2str(const vector<int> &); // returns string version of integer vector
@@ -88,7 +90,8 @@ struct Search
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
 	~Search(); // destructor deletes network, objective, and constraint objects
 	void solve(); // main driver of the solution algorithm
-	pair<pair<vector<int>, double>, pair<vector<int>, double>> neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
+	neighbor_pair neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
+	vector<int> move2sol(int, int); // returns the results of applying a move to the current solution
 	void save_data(); // writes all current progress to the log files
 };
 
