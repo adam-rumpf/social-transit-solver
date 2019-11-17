@@ -339,7 +339,7 @@ neighbor_pair Search::neighborhood_search()
 	cout << "Beginning neighborhood search." << endl << endl;
 	clock_t nbhd_time = clock(); // neighborhood search timer for event log
 
-	// Initialize candidate move containers (all min-priority queues of objective/move pairs, where each move is a pair of ADD/DROP line IDs)
+	// Initialize candidate move containers (all min-priority queues of 3-tupes, respectivaly containing an objective value, ADD/DROP pair, and boolean flag to indicate new log entries)
 	move_queue add_moves1; // candidate ADD moves after first pass
 	move_queue add_moves2; // candidate ADD moves after second pass
 	move_queue drop_moves1; // candidate DROP moves after first pass
@@ -374,50 +374,69 @@ neighbor_pair Search::neighborhood_search()
 			// Pop a random ADD move from the candidate list
 			int choice = add_candidates.back();
 			add_candidates.pop_back();
-			cout << "Considering move ADD " << choice << endl;
+			cout << "\nConsidering move ADD " << choice << endl;
 
-			// Filter out moves that would violate constant fleet size bounds
+			// Filter out moves that would violate a line fleet bound
 			if (sol_current[choice] + step > line_max[choice])
 			{
 				// Skip ADD moves that would exceed a line's vehicle bound
 				cout << "Skipping: That would add too many vehicles to line " << choice << endl;
 				continue;
 			}
-			/////////////////////////// REIMPLEMENT LATER (causing us to skip everything since initial solution begins at max fleet size)
-			/*if (current_vehicles[vehicle_type[choice]] + 1 > max_vehicles[vehicle_type[choice]])
+			if (current_vehicles[vehicle_type[choice]] + 1 > max_vehicles[vehicle_type[choice]])
 			{
 				// Skip ADD moves that would exceed a total vehicle bound
 				cout << "Skipping: We don't have enough of that vehicle type." << endl;
 				continue;
-			}*/
+			}
 
 			// Find objective and logged information for candidate solution
 			vector<int> candidate_sol = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
 			double candidate_obj; // objective of candidate solution
+			bool new_candidate; // whether the candidate is new to the solution log
 			if (SolLog->solution_exists(candidate_sol) == true)
 			{
 				// If the solution is logged already, look up its feasibility status and objective
 				cout << "We've seen this!" << endl;
+				new_candidate = false;
 				lookups++;
 				pair<int, double> info = SolLog->lookup_row_quick(candidate_sol);
 				if (info.first == FEAS_FALSE)
+				{
 					// Skip solutions known to be infeasible
+					cout << "Skipping: We already know that this solution is infeasible." << endl;
 					continue;
+				}
 				candidate_obj = info.second;
 			}
 			else
 			{
 				// If the solution is new, calculate its objective and create a tentative log entry
 				cout << "This is new!" << endl;
+				new_candidate = true;
 				new_sols++;
 				clock_t start = clock(); // objective calculation timer
 				candidate_obj = Obj->calculate(candidate_sol); // calculate objective value
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
 				SolLog->create_partial_row(candidate_sol, candidate_obj, candidate_time); // create an initial solution log entry for the candidate solution
+				cout << "Logging new solution with objective " << candidate_obj << " calculated in " << candidate_time << " seconds." << endl;
 			}
 
+			// Skip a tabu move, unless it would improve our best known solution
+			if (add_tenure[choice] > 0)
+			{
+				if (candidate_obj >= obj_best)
+				{
+					cout << "Skipping tabu move." << endl;
+					continue;
+				}
+				else
+					cout << "Keeping tabu move due to improved best aspiration!" << endl;
+			}
 
-			break;//////////////////////////////////////
+			// Add candidate move to the first-pass queue
+			cout << "Adding move as a candidate." << endl;
+			add_moves1.push(make_tuple(candidate_obj, make_pair(choice, NO_ID), new_candidate));
 		}
 
 
