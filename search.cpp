@@ -161,7 +161,7 @@ void Search::solve()
 		cout << "2nd best objective: " << nbhd_obj2 << endl;
 		cout << "2nd best solution: " << nbhd_sol2.first << ", " << nbhd_sol2.second << endl;
 		cout << "Current solution:" << endl;
-		for (int i = 0; i < sol_current.size(); i++)
+		/*for (int i = 0; i < sol_current.size(); i++)
 			cout << sol_current[i] << '\t';
 		cout << endl;
 		cout << "Showing result of ADDing to 2 and DROPping from 3:" << endl;
@@ -172,7 +172,7 @@ void Search::solve()
 		cout << "\n\nTesting vehicles." << endl;
 		for (int i = 0; i < Net->vehicles.size(); i++)
 			cout << "Type " << i << " (current, max, cap): " << current_vehicles[i] << ", " << Net->vehicles[i]->max_fleet << ", " << Net->vehicles[i]->capacity << endl;
-		cout << endl;
+		cout << endl;*/
 
 		// TS/SA updates depending on search results
 
@@ -302,6 +302,9 @@ void Search::solve()
 			exit(KEYBOARD_HALT);
 		}
 	}
+
+	// Perform final saves after search completes
+	save_data();
 }
 
 /**
@@ -316,12 +319,79 @@ A move is represented as a pair of integers containing the line IDs of the lines
 */
 neighbor_pair Search::neighborhood_search()
 {
+	/*
+	The neighborhood search is conducted in two passes in order to minimize the number of constraint function evaluations, since evaluating the constraints is many orders of magnitude more expensive than evaluating the objective.
+
+	In the first pass we generate candidate ADD and DROP moves that satisfy the constant vehicle bound constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also calculate the objective values of these candidates.
+
+	In the second pass we go through our candidates from the first pass in ascending order of objective value, evaluating the constraint function value for each and collecting the feasible results into a final candidate vector.
+	*/
+
+	cout << "Beginning neighborhood search." << endl << endl;
+	clock_t nbhd_time = clock(); // neighborhood search timer for event log
+
+	// Initialize candidate move containers (all min-priority queues of objective/move pairs, where each move is a pair of ADD/DROP line IDs)
+	move_queue add_moves1; // candidate ADD moves after first pass
+	move_queue add_moves2; // candidate ADD moves after second pass
+	move_queue drop_moves1; // candidate DROP moves after first pass
+	move_queue drop_moves2; // candidate DROP moves after second pass
+	move_queue swap_moves; // candidate SWAP moves
+
+	// Initialize candidate ADD/DROP line containers (integer line IDs meant for random sampling without repetition)
+	vector<int> add_candidates(sol_size); // initial set of candidate ADD lines
+	vector<int> drop_candidates(sol_size); // initial set of candidate DROP lines
+	for (int i = 0; i < sol_size; i++)
+	{
+		add_candidates[i] = i;
+		drop_candidates[i] = i;
+	}
+	random_shuffle(add_candidates.begin(), add_candidates.end());
+	random_shuffle(drop_candidates.begin(), drop_candidates.end());
+
+	// Initialize counters for the event log
+	int lookups = 0; // number of solutions successfully looked up from the solution log
+	int new_sols = 0; // number of new solution log entries
+
+	// ADD/DROP move selection loop
+
+	// Search until finding at least two feasible neighbors (in general we will find many more)
+	while (add_moves2.size() + drop_moves2.size() < 2)
+	{
+		// ADD move first pass
+
+		// Repeat until reaching our first-pass bound or running out of candidates
+		while ((add_moves1.size() < nbhd_add_lim1) && (add_candidates.size() > 0))
+		{
+			int choice = add_candidates.back(); // pick a random ADD candidate
+			add_candidates.pop_back(); // remove candidate
+
+
+			break;//////////////////////////////////////
+		}
+
+
+
+
+
+
+
+
+		/////////////////////////////////////////////////////////////////////////////////////
+		cout << "Artificially breaking candidate search for testing purposes." << endl;
+		break;
+	}
+
+	// Clear first-pass move queues
+	add_moves1 = move_queue();
+	drop_moves2 = move_queue();
+
 
 
 
 
 
 	/////////////////////////////////////////////////////////////////////////////////
+	cout << "Spent " << (1.0*clock() - nbhd_time) / CLOCKS_PER_SEC << " seconds on the neighborhood search." << endl << endl;
 	return make_pair(make_pair(make_pair(NO_ID, NO_ID), 0.0), make_pair(make_pair(NO_ID, NO_ID), 0.0));
 }
 

@@ -6,6 +6,7 @@ Called by the main() function after all subroutine objects have been initialized
 
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <csignal>
 #include <cstdlib>
@@ -29,6 +30,7 @@ Called by the main() function after all subroutine objects have been initialized
 using namespace std;
 
 typedef pair<pair<pair<int, int>, double>, pair<pair<int, int>, double>> neighbor_pair; // structure of neighborhood search output
+typedef priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<pair<double, pair<int, int>>>> move_queue; // min-priority queue for storing objective/move pairs in the neighborhood search
 
 // Global function prototypes
 pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
