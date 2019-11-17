@@ -156,13 +156,15 @@ Network::Network()
 			getline(stream, piece, '\t'); // Scaling
 			double day_fraction = stod(piece);
 			getline(stream, piece, '\t'); // LB
+			int lb = stoi(piece);
 			getline(stream, piece, '\t'); // UB
+			int ub = stoi(piece);
 			getline(stream, piece, '\t'); // Fare
 			getline(stream, piece, '\t'); // Frequency
 			getline(stream, piece, '\t'); // Capacity
 
 			// Create a line object and add it to the list
-			Line * new_line = new Line(vehicle_type, circuit_time, vehicles[vehicle_type]->capacity, day_fraction, horizon);
+			Line * new_line = new Line(vehicle_type, lb, ub, circuit_time, vehicles[vehicle_type]->capacity, day_fraction, horizon);
 			lines.push_back(new_line);
 		}
 
@@ -332,9 +334,11 @@ Arc::Arc(int id_in, Node * tail_in, Node * head_in, double cost_in, int line_in,
 }
 
 /// Line constructor specifies its vehicle type, circuit time, seating capacity, active fraction of day, and daily time horizon.
-Line::Line(int vehicle_in, double circuit_in, double seating_in, double fraction_in, double horizon_in)
+Line::Line(int vehicle_in, int lb_in, int ub_in, double circuit_in, double seating_in, double fraction_in, double horizon_in)
 {
 	vehicle_id = vehicle_in;
+	min_fleet = lb_in;
+	max_fleet = ub_in;
 	circuit = circuit_in;
 	seating = seating_in;
 	day_fraction = fraction_in;

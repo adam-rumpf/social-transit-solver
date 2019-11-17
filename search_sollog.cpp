@@ -120,6 +120,12 @@ void SolutionLog::create_row(const vector<int> &sol, int feas, const vector<doub
 	sol_log[vec2str(sol)] = make_tuple(feas, ucc, uc_time, obj, obj_time);
 }
 
+/// Creates a partial solution log entry for a given solution, objective value, and objective calculation time.
+void SolutionLog::create_partial_row(const vector<int> &sol, double obj, double obj_time)
+{
+	create_row(sol, FEAS_UNKNOWN, vector<double>(UC_COMPONENTS, FEAS_UNKNOWN), FEAS_UNKNOWN, obj, obj_time);
+}
+
 /// Returns a boolean indicating whether a given solution vector is present in the solution log.
 bool SolutionLog::solution_exists(const vector<int> &sol)
 {
@@ -136,6 +142,15 @@ tuple<int, vector<double>, double> SolutionLog::lookup_row(const vector<int> &so
 
 	// Output tuple of specified elements
 	return make_tuple(get<SOL_LOG_FEAS>(entry), get<SOL_LOG_UC>(entry), get<SOL_LOG_OBJ>(entry));
+}
+
+/// Returns a pair containing the feasibility status and objective value for a given solution vector.
+pair<int, double> SolutionLog::lookup_row_quick(const vector<int> &sol)
+{
+	tuple<int, vector<double>, double, double, double> entry = sol_log[vec2str(sol)]; // raw log entry
+
+	// Output tuple of specified elements
+	return make_pair(get<SOL_LOG_FEAS>(entry), get<SOL_LOG_OBJ>(entry));
 }
 
 /**

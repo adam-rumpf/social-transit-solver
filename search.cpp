@@ -133,12 +133,21 @@ void Search::solve()
 	double & nbhd_obj1 = nbhd_sol.first.second;
 	double & nbhd_obj2 = nbhd_sol.second.second;
 
-	// Determine vehicle bounds
+	// Determine total vehicle bounds
 	max_vehicles.resize(Net->vehicles.size());
 	for (int i = 0; i < Net->vehicles.size(); i++)
 		max_vehicles[i] = Net->vehicles[i]->max_fleet;
 
-	// Determine current vehicle usage and establish vehicle type vector
+	// Determine line fleet bounds
+	line_min.resize(sol_size);
+	line_max.resize(sol_size);
+	for (int i = 0; i < sol_size; i++)
+	{
+		line_min[i] = Net->lines[i]->min_fleet;
+		line_max[i] = Net->lines[i]->max_fleet;
+	}
+
+	// Determine current total vehicle usage and establish vehicle type vector
 	vehicle_type.resize(Net->lines.size());
 	for (int i = 0; i < Net->lines.size(); i++)
 		vehicle_type[i] = Net->lines[i]->vehicle_id;
@@ -362,8 +371,50 @@ neighbor_pair Search::neighborhood_search()
 		// Repeat until reaching our first-pass bound or running out of candidates
 		while ((add_moves1.size() < nbhd_add_lim1) && (add_candidates.size() > 0))
 		{
-			int choice = add_candidates.back(); // pick a random ADD candidate
-			add_candidates.pop_back(); // remove candidate
+			// Pop a random ADD move from the candidate list
+			int choice = add_candidates.back();
+			add_candidates.pop_back();
+			cout << "Considering move ADD " << choice << endl;
+
+			// Filter out moves that would violate constant fleet size bounds
+			if (sol_current[choice] + step > line_max[choice])
+			{
+				// Skip ADD moves that would exceed a line's vehicle bound
+				cout << "Skipping: That would add too many vehicles to line " << choice << endl;
+				continue;
+			}
+			/////////////////////////// REIMPLEMENT LATER (causing us to skip everything since initial solution begins at max fleet size)
+			/*if (current_vehicles[vehicle_type[choice]] + 1 > max_vehicles[vehicle_type[choice]])
+			{
+				// Skip ADD moves that would exceed a total vehicle bound
+				cout << "Skipping: We don't have enough of that vehicle type." << endl;
+				continue;
+			}*/
+
+			// Find objective and logged information for candidate solution
+			vector<int> candidate_sol = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
+			double candidate_obj; // objective of candidate solution
+			if (SolLog->solution_exists(candidate_sol) == true)
+			{
+				// If the solution is logged already, look up its feasibility status and objective
+				cout << "We've seen this!" << endl;
+				lookups++;
+				pair<int, double> info = SolLog->lookup_row_quick(candidate_sol);
+				if (info.first == FEAS_FALSE)
+					// Skip solutions known to be infeasible
+					continue;
+				candidate_obj = info.second;
+			}
+			else
+			{
+				// If the solution is new, calculate its objective and create a tentative log entry
+				cout << "This is new!" << endl;
+				new_sols++;
+				clock_t start = clock(); // objective calculation timer
+				candidate_obj = Obj->calculate(candidate_sol); // calculate objective value
+				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
+				SolLog->create_partial_row(candidate_sol, candidate_obj, candidate_time); // create an initial solution log entry for the candidate solution
+			}
 
 
 			break;//////////////////////////////////////

@@ -102,6 +102,8 @@ struct Line
 	//Public attributes
 	vector<Arc *> boarding; // pointers to associated boarding arcs
 	vector<Arc *> in_vehicle; // pointers to associated line arcs (in-vehicle travel)
+	int min_fleet; // minimum number of vehicles allowed
+	int max_fleet; // maximum number of vehicles allowed
 	double circuit; // time required for a vehicle to complete one circuit (minutes)
 	double seating; // seating capacity of each vehicle used by this line
 	double day_fraction; // fraction of day during which the line operates (1.0 indicates full day)
@@ -109,7 +111,7 @@ struct Line
 	int vehicle_id; // ID of vehicle type
 
 	// Public methods
-	Line(int, double, double, double, double); // constructor sets vehicle ID, circuit time, seating capacity, active fraction of day, and daily time horizon
+	Line(int, int, int, double, double, double, double); // constructor sets vehicle ID, lower vehicle bound, upper vehicle bound, circuit time, seating capacity, active fraction of day, and daily time horizon
 	double frequency(int); // returns frequency resulting from a given fleet size
 	double headway(int); // returns average headway resulting from a given fleet size
 	double capacity(int); // returns capacity resulting from a given fleet size

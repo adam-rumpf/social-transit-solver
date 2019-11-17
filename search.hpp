@@ -76,6 +76,8 @@ struct Search
 	int nonimp_in_max; // cutoff for inner nonimprovement counter
 	int nonimp_out_max; // cutoff for outer nonimprovement counter
 	int step; // step size for moves
+	vector<int> line_min; // lower vehicle bounds for all lines
+	vector<int> line_max; // upper vehicle bounds for all lines
 	vector<int> max_vehicles; // maximum number of each vehicle type
 	vector<int> vehicle_type; // vector of vehicle types for each line
 
@@ -190,7 +192,9 @@ struct SolutionLog
 	void load_solution(string); // reads a given solution log into the dictionary
 	void save_solution(); // writes the current solution log to the log file
 	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information
+	void create_partial_row(const vector<int> &, double, double); // creates a solution log entry for a given solution with only a known objective value and calculation time
 	bool solution_exists(const vector<int> &); // determines whether a given solution vector is present in the solution log
 	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
+	pair<int, double> lookup_row_quick(const vector<int> &); // retrieves feasibility status and objective value of a given solution
 	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
 };
