@@ -333,10 +333,12 @@ neighbor_pair Search::neighborhood_search()
 
 	In the first pass we generate candidate ADD and DROP moves that satisfy the constant vehicle bound constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also calculate the objective values of these candidates.
 
-	In the second pass we go through our candidates from the first pass in ascending order of objective value, evaluating the constraint function value for each and collecting the feasible results into a final candidate vector.
+	In the second pass we go through our candidates from the first pass in ascending order of objective value, evaluating the constraint function value for each and collecting the feasible results into a final candidate vector. If, at the end of the second pass, we have fewer than two feasible solutions, we throw away the tabu rules and start the search over again.
+
+	After obtaining enough ADD and DROP move candidates we assemble a list of SWAP move candidates. A SWAP move is made by combining an ADD candidate with a DROP candidate (provided that both candidates involve the same type of vehicle). Because of the potentially large number of possible combinations that could be made, we generate combinations by moving through the ADD and DROP candidate lists in ascending order of objective until obtaining enough feasible SWAP moves.
 	*/
 
-	cout << "Beginning neighborhood search." << endl << endl;
+	cout << "\n==================== Beginning neighborhood search. ====================" << endl << endl;
 	clock_t nbhd_time = clock(); // neighborhood search timer for event log
 
 	// Initialize candidate move containers (all min-priority queues of 3-tupes, respectivaly containing an objective value, ADD/DROP pair, and boolean flag to indicate new log entries)
@@ -357,12 +359,19 @@ neighbor_pair Search::neighborhood_search()
 	random_shuffle(add_candidates.begin(), add_candidates.end());
 	random_shuffle(drop_candidates.begin(), drop_candidates.end());
 
+	// Initialize candidate solution temporary containers
+	vector<int> sol_candidate(sol_size); // candidate solution vector
+	double obj_candidate; // candidate solution objective
+
 	// Initialize counters for the event log
-	int lookups = 0; // number of solutions successfully looked up from the solution log
-	int new_sols = 0; // number of new solution log entries
+	int obj_lookups = 0; // number of objectives successfully looked up from the solution log
+	int con_lookups = 0; // number of constraints successfully looked up from the solution log
+	int new_obj = 0; // number of new solution log objective entries
+	int new_con = 0; // number of new solution log constraint entries
 
 	// ADD/DROP move selection loop
 
+	cout << "\n-------------------- Generating ADD/DROP candidates. --------------------" << endl;
 	// Search until finding at least two feasible neighbors (in general we will find many more)
 	while (add_moves2.size() + drop_moves2.size() < 2)
 	{
@@ -391,41 +400,41 @@ neighbor_pair Search::neighborhood_search()
 			}
 
 			// Find objective and logged information for candidate solution
-			vector<int> candidate_sol = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
-			double candidate_obj; // objective of candidate solution
+			sol_candidate = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
 			bool new_candidate; // whether the candidate is new to the solution log
-			if (SolLog->solution_exists(candidate_sol) == true)
+			if (SolLog->solution_exists(sol_candidate) == true)
 			{
 				// If the solution is logged already, look up its feasibility status and objective
 				cout << "We've seen this!" << endl;
 				new_candidate = false;
-				lookups++;
-				pair<int, double> info = SolLog->lookup_row_quick(candidate_sol);
+				obj_lookups++;
+				pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
 				if (info.first == FEAS_FALSE)
 				{
 					// Skip solutions known to be infeasible
 					cout << "Skipping: We already know that this solution is infeasible." << endl;
+					con_lookups++;
 					continue;
 				}
-				candidate_obj = info.second;
+				obj_candidate = info.second;
 			}
 			else
 			{
 				// If the solution is new, calculate its objective and create a tentative log entry
 				cout << "This is new!" << endl;
 				new_candidate = true;
-				new_sols++;
+				new_obj++;
 				clock_t start = clock(); // objective calculation timer
-				candidate_obj = Obj->calculate(candidate_sol); // calculate objective value
+				obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
-				SolLog->create_partial_row(candidate_sol, candidate_obj, candidate_time); // create an initial solution log entry for the candidate solution
-				cout << "Logging new solution with objective " << candidate_obj << " calculated in " << candidate_time << " seconds." << endl;
+				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+				cout << "Logging new solution with objective " << obj_candidate << " calculated in " << candidate_time << " seconds." << endl;
 			}
 
 			// Skip a tabu move, unless it would improve our best known solution
 			if (add_tenure[choice] > 0)
 			{
-				if (candidate_obj >= obj_best)
+				if (obj_candidate >= obj_best)
 				{
 					cout << "Skipping tabu move." << endl;
 					continue;
@@ -436,24 +445,172 @@ neighbor_pair Search::neighborhood_search()
 
 			// Add candidate move to the first-pass queue
 			cout << "Adding move as a candidate." << endl;
-			add_moves1.push(make_tuple(candidate_obj, make_pair(choice, NO_ID), new_candidate));
+			add_moves1.push(make_tuple(obj_candidate, make_pair(choice, NO_ID), new_candidate));
 		}
 
+		// DROP move first pass
 
+		// Repeat until reaching our first-pass bound or running out of candidates
+		while ((drop_moves1.size() < nbhd_drop_lim1) && (drop_candidates.size() > 0))
+		{
+			// Pop a random DROP move from the candidate list
+			int choice = drop_candidates.back();
+			drop_candidates.pop_back();
+			cout << "\nConsidering move DROP " << choice << endl;
 
+			// Filter out moves that would violate a line fleet bound
+			if (sol_current[choice] - step < line_min[choice])
+			{
+				// Skip DROP moves that would fall below a line's vehicle bound
+				cout << "Skipping: That would give too few vehicles to line " << choice << endl;
+				continue;
+			}
+			if (current_vehicles[vehicle_type[choice]] - 1 < 0)
+			{
+				// Skip DROP moves that would result in negative vehicles
+				cout << "Skipping: We're out of that type of vehicle." << endl;
+				continue;
+			}
 
+			// Find objective and logged information for candidate solution
+			sol_candidate = make_move(NO_ID, choice); // solution vector resulting from chosen DROP
+			bool new_candidate; // whether the candidate is new to the solution log
+			if (SolLog->solution_exists(sol_candidate) == true)
+			{
+				// If the solution is logged already, look up its feasibility status and objective
+				cout << "We've seen this!" << endl;
+				new_candidate = false;
+				obj_lookups++;
+				pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
+				if (info.first == FEAS_FALSE)
+				{
+					// Skip solutions known to be infeasible
+					cout << "Skipping: We already know that this solution is infeasible." << endl;
+					con_lookups++;
+					continue;
+				}
+				obj_candidate = info.second;
+			}
+			else
+			{
+				// If the solution is new, calculate its objective and create a tentative log entry
+				cout << "This is new!" << endl;
+				new_candidate = true;
+				new_obj++;
+				clock_t start = clock(); // objective calculation timer
+				obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
+				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
+				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+				cout << "Logging new solution with objective " << obj_candidate << " calculated in " << candidate_time << " seconds." << endl;
+			}
 
+			// Skip a tabu move, unless it would improve our best known solution
+			if (drop_tenure[choice] > 0)
+			{
+				if (obj_candidate >= obj_best)
+				{
+					cout << "Skipping tabu move." << endl;
+					continue;
+				}
+				else
+					cout << "Keeping tabu move due to improved best aspiration!" << endl;
+			}
 
+			// Add candidate move to the first-pass queue
+			cout << "Adding move as a candidate." << endl;
+			drop_moves1.push(make_tuple(obj_candidate, make_pair(NO_ID, choice), new_candidate));
+		}
 
+		// ADD move second pass
 
-		/////////////////////////////////////////////////////////////////////////////////////
-		cout << "Artificially breaking candidate search for testing purposes." << endl;
-		break;
+		// Repeat until reaching our second-pass bound or running out of first-pass candidates
+		while ((add_moves1.size() > 0) && (add_moves2.size() < nbhd_add_lim2))
+		{
+			// Pop the best candidate out of the first-pass move list
+			tuple<double, pair<int, int>, bool> move_triple = add_moves1.top();
+			add_moves1.pop();
+			cout << "\nSecond pass for ADD " << get<1>(move_triple).first << endl;
+
+			// If the solution is new, calculate and log its constraint function values
+			if (get<2>(move_triple) == true)
+			{
+				cout << "Calculating constraints." << endl;
+				new_con++;
+				sol_candidate = make_move(get<1>(move_triple).first, NO_ID); // solution vector resulting from chosen ADD
+				clock_t start = clock(); // constraint calculation timer
+				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
+				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+				cout << "Updating constraints for solution with feasibility status " << con_candidate.first << " calculated in " << candidate_time << " seconds." << endl;
+				if (con_candidate.first == FEAS_FALSE)
+					// Skip candidate if we've discovered that it is infeasible
+					continue;
+			}
+
+			// Add the feasible candidate to the second-pass move queue
+			cout << "Adding move as a final candidate." << endl;
+			add_moves2.push(move_triple);
+		}
+
+		// DROP move second pass
+
+		// Repeat until reaching our second-pass bound or running out of first-pass candidates
+		while ((drop_moves1.size() > 0) && (drop_moves2.size() < nbhd_drop_lim2))
+		{
+			// Pop the best candidate out of the first-pass move list
+			tuple<double, pair<int, int>, bool> move_triple = drop_moves1.top();
+			drop_moves1.pop();
+			cout << "\nSecond pass for DROP " << get<1>(move_triple).second << endl;
+
+			// If the solution is new, calculate and log its constraint function values
+			if (get<2>(move_triple) == true)
+			{
+				cout << "Calculating constraints." << endl;
+				new_con++;
+				sol_candidate = make_move(NO_ID, get<1>(move_triple).second); // solution vector resulting from chosen DROP
+				clock_t start = clock(); // constraint calculation timer
+				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
+				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+				cout << "Updating constraints for solution with feasibility status " << con_candidate.first << " calculated in " << candidate_time << " seconds." << endl;
+				if (con_candidate.first == FEAS_FALSE)
+					// Skip candidate if we've discovered that it is infeasible
+					continue;
+			}
+
+			// Add the feasible candidate to the second-pass move queue
+			cout << "Adding move as a final candidate." << endl;
+			drop_moves2.push(move_triple);
+		}
+
+		// Unsuccessful search handling
+		if (add_moves2.size() + drop_moves2.size() + add_candidates.size() + drop_candidates.size() < 2)
+		{
+			// If there are no longer enough candidates to generate at least two moves, delete the tabu list
+			cout << "Out of options. Throwing away tabu set." << endl;
+			for (int i = 0; i < sol_size; i++)
+			{
+				add_tenure[i] = 0;
+				drop_tenure[i] = 0;
+			}
+		}
 	}
 
 	// Clear first-pass move queues
 	add_moves1 = move_queue();
-	drop_moves2 = move_queue();
+	drop_moves1 = move_queue();
+
+	cout << "\n-------------------- Generating SWAP candidates. --------------------" << endl;
+
+	// SWAP move selection
+
+	// Proceed only if we have at least one ADD and one DROP
+	if ((add_moves2.size() > 0) && (drop_moves2.size()))
+	{
+		cout << "Generating SWAPs from " << add_moves2.size() << " ADD moves and " << drop_moves2.size() << " DROP moves." << endl;
+	}
+
+	/////////////////////// We need to be able to iterate through the ADD and DROP 2nd-pass lists, so the 2nd-pass lists should not be priority queues but rather something like a list or a vector. We also don't need to include the "new" flag, so the second structure can be simpler. They will already be sorted so we can simply add them as they get popped off of the queue, but we should still use a priority queue for the SWAPs since they will not necessarily be generated in order.
 
 
 
@@ -461,7 +618,7 @@ neighbor_pair Search::neighborhood_search()
 
 
 	/////////////////////////////////////////////////////////////////////////////////
-	cout << "Spent " << (1.0*clock() - nbhd_time) / CLOCKS_PER_SEC << " seconds on the neighborhood search." << endl << endl;
+	cout << "\nSpent " << (1.0*clock() - nbhd_time) / CLOCKS_PER_SEC << " seconds on the neighborhood search." << endl << endl;
 	return make_pair(make_pair(make_pair(NO_ID, NO_ID), 0.0), make_pair(make_pair(NO_ID, NO_ID), 0.0));
 }
 
