@@ -9,6 +9,7 @@ Search::Search()
 	Obj = new Objective(Net); // objective function object
 	Con = new Constraint(Net); // constraint function object
 	sol_size = Net->lines.size(); // get solution vector size
+	srand(time(NULL)); // seed random number generator
 }
 
 /// Search constructor deletes Network, Objective, and Constraint objects created by the constructor.
@@ -180,22 +181,79 @@ void Search::solve()
 
 		if (nbhd_obj1 < obj_current)
 		{
-			// Improvement iteration
+			// Improvement iteration: make the move and make it tabu to undo it
+			cout << "Improvement iteration." << endl;
 
 			nonimp_out = 0; // reset outer nonimprovement counter
 			tenure = tenure_init; // reset tabu tenures
 			sol_current = move2sol(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
 			obj_current = nbhd_obj1; // update objective
 
-			// Update current vehicle usage depending on ADD or DROP moves
+			// ADD-related updates
 			if (nbhd_sol1.first != NO_ID)
-				current_vehicles[vehicle_type[nbhd_sol1.first]] += 1;
+			{
+				current_vehicles[vehicle_type[nbhd_sol1.first]]++; // increase vehicle usage
+				drop_tenure[nbhd_sol1.first] = tenure; // make it tabu to DROP from the new ADD line
+			}
+
+			// DROP-related updates
 			if (nbhd_sol1.second != NO_ID)
-				current_vehicles[vehicle_type[nbhd_sol1.second]] -= 1;
+			{
+				current_vehicles[vehicle_type[nbhd_sol1.second]]--; // decrease vehicle usage
+				add_tenure[nbhd_sol1.second] = tenure; // make it tabu to ADD to the new DROP line
+			}
+
+			// Update best known solution if needed
+			if (obj_current < obj_best)
+			{
+				cout << "New best solution found!" << endl;
+				sol_best = sol_current;
+				obj_best = obj_current;
+			}
 		}
 		else
 		{
 			// Nonimprovement iteration
+			cout << "Nonimprovement iteration." << endl;
+
+			// Increase nonimprovement counters
+			nonimp_in++;
+			nonimp_out++;
+
+			// Evaluate simulated annealing criterion
+			cout << "Probability of passing SA criterion: " << exp(-(nbhd_obj1 - obj_current) / temperature) << endl;
+			if (((1.0 * rand()) / RAND_MAX) < exp(-(nbhd_obj1 - obj_current) / temperature))
+			{
+				// If passed, make the move as in an improvement iteration but with increased tabus, then keep the second best solution as attractive
+				cout << "Passed SA criterion." << endl;
+
+				increase_tenure(); // increase tabu tenures
+				sol_current = move2sol(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
+				obj_current = nbhd_obj1; // update objective
+
+				// ADD-related updates
+				if (nbhd_sol1.first != NO_ID)
+				{
+					current_vehicles[vehicle_type[nbhd_sol1.first]]++; // increase vehicle usage
+					drop_tenure[nbhd_sol1.first] = tenure; // make it tabu to DROP from the new ADD line
+				}
+
+				// DROP-related updates
+				if (nbhd_sol1.second != NO_ID)
+				{
+					current_vehicles[vehicle_type[nbhd_sol1.second]]--; // decrease vehicle usage
+					add_tenure[nbhd_sol1.second] = tenure; // make it tabu to ADD to the new DROP line
+				}
+
+				// Add the second best solution as attractive
+				attractive_solutions.push_back(make_pair(move2sol(nbhd_sol2.first, nbhd_sol2.second), nbhd_obj2));
+			}
+			else
+			{
+				cout << "Failed SA criterion." << endl;
+				// If failed, make no moves but keep the best neighbor as attractive
+				attractive_solutions.push_back(make_pair(move2sol(nbhd_sol1.first, nbhd_sol1.second), nbhd_obj1));
+			}
 		}
 
 
@@ -221,6 +279,9 @@ void Search::solve()
 			exit(KEYBOARD_HALT);
 		}
 	}
+
+	//////////////////////////////
+	cout << "Attractive solution size: " << attractive_solutions.size() << endl;
 
 
 
@@ -270,6 +331,20 @@ vector<int> Search::move2sol(int add_id, int drop_id)
 		sol[drop_id] -= step;
 
 	return sol;
+}
+
+/// Increases tabu tenure.
+void Search::increase_tenure()
+{
+	// Here we simply apply a multiplicative factor, but randomized and iteration/counter-dependent alternatives exist.
+	tenure *= tenure_factor;
+}
+
+/// Decreases simulated annealing temperature.
+void Search::cool_temperature()
+{
+	// Here we simply apply a decay factor, but iteration-dependent alternatives exist.
+	temperature *= temp_factor;
 }
 
 /// Writes current memory structures to the output logs.
