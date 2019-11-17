@@ -87,9 +87,9 @@ EventLog::EventLog(bool pickup)
 Appends an iteration summary to the event log file.
 
 Requires the following arguments, respectively:
-current iteration number
-current objective value
-best objective value
+	current iteration number
+	current objective value
+	best objective value
 */
 void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 {
@@ -109,6 +109,7 @@ void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 	ofstream obj_file(OBJECTIVE_LOG_FILE, mode);
 	if (obj_file.is_open())
 	{
+		obj_file << fixed << setprecision(15);
 		obj_file << iteration << '\t' << obj_current << '\t' << obj_best << fixed << setprecision(15) << endl;
 		obj_file.close();
 	}

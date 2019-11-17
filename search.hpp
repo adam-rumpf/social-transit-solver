@@ -99,6 +99,7 @@ struct Search
 	neighbor_pair neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
 	vector<int> make_move(int, int); // returns the results of applying a move to the current solution
 	void pop_attractive(bool); // deletes a random attractive solution and optionally sets it as the current solution
+	void vehicle_totals(); // calculates total vehicles of each type in use
 	void increase_tenure(); // increase the tabu tenure value
 	void cool_temperature(); // apply a cooling schedule to the simulated annealing temperature
 	void save_data(); // writes all current progress to the log files

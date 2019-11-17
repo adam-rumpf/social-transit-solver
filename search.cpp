@@ -140,12 +140,9 @@ void Search::solve()
 
 	// Determine current vehicle usage and establish vehicle type vector
 	vehicle_type.resize(Net->lines.size());
-	current_vehicles = vector<int>(Net->vehicles.size(), 0);
 	for (int i = 0; i < Net->lines.size(); i++)
-	{
 		vehicle_type[i] = Net->lines[i]->vehicle_id;
-		current_vehicles[vehicle_type[i]] += sol_current[i];
-	}
+	vehicle_totals();
 
 	// Main search loop
 
@@ -273,20 +270,26 @@ void Search::solve()
 			// Move to a random attractive solution
 			pop_attractive(true); // replace mode resets current solution
 
-			//////////////
+			// Recalculate vehicle usage
+			vehicle_totals();
 		}
-	
 
+		// If outer nonimprovement counter is too high, take actions to intensivy
+		if (nonimp_out > nonimp_out_max)
+			tenure = tenure_init; // reset tabu tenures
 
+		// Allow tabu tenures to decay
+		for (int i = 0; i < sol_size; i++)
+		{
+			add_tenure[i] = max(add_tenure[i] - 1, 0.0);
+			drop_tenure[i] = max(drop_tenure[i] - 1, 0.0);
+		}
 
+		// Apply cooling schedule
+		cool_temperature();
 
-
-
-
-
-
-
-
+		// Log the results of the iteration
+		EveLog->log_iteration(iteration, obj_current, obj_best);
 
 		/////////////////////////////////////////////
 		cout << "Breaking search for testing purposes." << endl;
@@ -299,15 +302,6 @@ void Search::solve()
 			exit(KEYBOARD_HALT);
 		}
 	}
-
-	//////////////////////////////
-	cout << "Attractive solution size: " << attractive_solutions.size() << endl;
-
-
-
-
-
-	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT). Write a method to safely quit. Call it either after the while loop ends, or at the end of the while loop if we've decided to quit (and then exit).
 }
 
 /**
@@ -374,6 +368,14 @@ void Search::pop_attractive(bool replace)
 
 	// In either case, delete the chosen element
 	attractive_solutions.erase(it);
+}
+
+/// Calculates total number of each vehicle type in use for the current solution, and updates vehicle total variable.
+void Search::vehicle_totals()
+{
+	current_vehicles = vector<int>(Net->vehicles.size(), 0);
+	for (int i = 0; i < Net->lines.size(); i++)
+		current_vehicles[vehicle_type[i]] += sol_current[i];
 }
 
 /// Increases tabu tenure.
