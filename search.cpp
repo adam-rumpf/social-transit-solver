@@ -168,7 +168,7 @@ void Search::solve()
 			cout << sol_current[i] << '\t';
 		cout << endl;
 		cout << "Showing result of ADDing to 2 and DROPping from 3:" << endl;
-		sol_current = move2sol(2, 3);
+		sol_current = make_move(2, 3);
 		for (int i = 0; i < sol_current.size(); i++)
 			cout << sol_current[i] << '\t';
 		cout << endl;
@@ -186,7 +186,7 @@ void Search::solve()
 
 			nonimp_out = 0; // reset outer nonimprovement counter
 			tenure = tenure_init; // reset tabu tenures
-			sol_current = move2sol(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
+			sol_current = make_move(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
 			obj_current = nbhd_obj1; // update objective
 
 			// ADD-related updates
@@ -227,8 +227,9 @@ void Search::solve()
 				// If passed, make the move as in an improvement iteration but with increased tabus, then keep the second best solution as attractive
 				cout << "Passed SA criterion." << endl;
 
+				nonimp_in = 0; // reset inner nonimprovement counter
 				increase_tenure(); // increase tabu tenures
-				sol_current = move2sol(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
+				sol_current = make_move(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
 				obj_current = nbhd_obj1; // update objective
 
 				// ADD-related updates
@@ -246,16 +247,35 @@ void Search::solve()
 				}
 
 				// Add the second best solution as attractive
-				attractive_solutions.push_back(make_pair(move2sol(nbhd_sol2.first, nbhd_sol2.second), nbhd_obj2));
+				attractive_solutions.push_back(make_pair(make_move(nbhd_sol2.first, nbhd_sol2.second), nbhd_obj2));
 			}
 			else
 			{
 				cout << "Failed SA criterion." << endl;
 				// If failed, make no moves but keep the best neighbor as attractive
-				attractive_solutions.push_back(make_pair(move2sol(nbhd_sol1.first, nbhd_sol1.second), nbhd_obj1));
+				attractive_solutions.push_back(make_pair(make_move(nbhd_sol1.first, nbhd_sol1.second), nbhd_obj1));
 			}
 		}
 
+		// Iteration end updates
+
+		// Trim the attractive solution set if too long
+		if (attractive_solutions.size() > attractive_max)
+			pop_attractive(false); // in no-replace mode
+
+		// If inner nonimprovement counter is too high, take actions to diversify
+		if (nonimp_in > nonimp_in_max)
+		{
+			nonimp_in = 0; // reset inner counter
+			nonimp_out++; // increment outer counter
+			increase_tenure(); // increase tabu tenures
+
+			// Move to a random attractive solution
+			pop_attractive(true); // replace mode resets current solution
+
+			//////////////
+		}
+	
 
 
 
@@ -318,7 +338,7 @@ Requires an ADD line ID and a DROP line ID. Use an ID of "NO_ID" to ignore one o
 
 Returns a vector resulting from applying the specified move to the current solution.
 */
-vector<int> Search::move2sol(int add_id, int drop_id)
+vector<int> Search::make_move(int add_id, int drop_id)
 {
 	vector<int> sol = sol_current;
 
@@ -331,6 +351,29 @@ vector<int> Search::move2sol(int add_id, int drop_id)
 		sol[drop_id] -= step;
 
 	return sol;
+}
+
+/**
+Deletes a random solution from the attractive solution set, and optionally sets it as the current solution.
+
+Requires a boolean variable to set the mode. If true, then the chosen attractive solution replaces the current solution. If false, then the chosen attractive solution is simply deleted from the list and discarded.
+*/
+void Search::pop_attractive(bool replace)
+{
+	// Set an iterator to point to a random attractive solution
+	int r = rand() % attractive_solutions.size();
+	list<pair<vector<int>, double>>::iterator it = attractive_solutions.begin();
+	advance(it, r);
+
+	// If in replace mode, set the current solution to the chosen element
+	if (replace == true)
+	{
+		sol_current = it->first;
+		obj_current = it->second;
+	}
+
+	// In either case, delete the chosen element
+	attractive_solutions.erase(it);
 }
 
 /// Increases tabu tenure.
