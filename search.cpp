@@ -132,6 +132,20 @@ void Search::solve()
 	double & nbhd_obj1 = nbhd_sol.first.second;
 	double & nbhd_obj2 = nbhd_sol.second.second;
 
+	// Determine vehicle bounds
+	max_vehicles.resize(Net->vehicles.size());
+	for (int i = 0; i < Net->vehicles.size(); i++)
+		max_vehicles[i] = Net->vehicles[i]->max_fleet;
+
+	// Determine current vehicle usage and establish vehicle type vector
+	vehicle_type.resize(Net->lines.size());
+	current_vehicles = vector<int>(Net->vehicles.size(), 0);
+	for (int i = 0; i < Net->lines.size(); i++)
+	{
+		vehicle_type[i] = Net->lines[i]->vehicle_id;
+		current_vehicles[vehicle_type[i]] += sol_current[i];
+	}
+
 	// Main search loop
 
 	while (iteration < max_iterations)
@@ -157,6 +171,10 @@ void Search::solve()
 		for (int i = 0; i < sol_current.size(); i++)
 			cout << sol_current[i] << '\t';
 		cout << endl;
+		cout << "\n\nTesting vehicles." << endl;
+		for (int i = 0; i < Net->vehicles.size(); i++)
+			cout << "Type " << i << " (current, max, cap): " << current_vehicles[i] << ", " << Net->vehicles[i]->max_fleet << ", " << Net->vehicles[i]->capacity << endl;
+		cout << endl;
 
 		// TS/SA updates depending on search results
 
@@ -166,7 +184,14 @@ void Search::solve()
 
 			nonimp_out = 0; // reset outer nonimprovement counter
 			tenure = tenure_init; // reset tabu tenures
+			sol_current = move2sol(nbhd_sol1.first, nbhd_sol1.second); // move to best neighbor
+			obj_current = nbhd_obj1; // update objective
 
+			// Update current vehicle usage depending on ADD or DROP moves
+			if (nbhd_sol1.first != NO_ID)
+				current_vehicles[vehicle_type[nbhd_sol1.first]] += 1;
+			if (nbhd_sol1.second != NO_ID)
+				current_vehicles[vehicle_type[nbhd_sol1.second]] -= 1;
 		}
 		else
 		{

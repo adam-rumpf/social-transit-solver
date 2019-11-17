@@ -71,6 +71,8 @@ struct Search
 	int nonimp_in_max; // cutoff for inner nonimprovement counter
 	int nonimp_out_max; // cutoff for outer nonimprovement counter
 	int step; // step size for moves
+	vector<int> max_vehicles; // maximum number of each vehicle type
+	vector<int> vehicle_type; // vector of vehicle types for each line
 
 	// Public attributes (solution algorithm memory)
 	vector<double> add_tenure; // vector of tabu tenures for ADD moves to each solution vector element
@@ -85,6 +87,7 @@ struct Search
 	double tenure; // tabu tenure for newly-added tabu moves
 	double temperature; // simulated annealing temperature
 	vector<pair<vector<int>, double>> attractive_solutions; // vector of attractive solutions, stored as solution vector/objective value pairs
+	vector<int> current_vehicles; // number of each vehicle type currently in use
 
 	// Public methods
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
@@ -92,6 +95,7 @@ struct Search
 	void solve(); // main driver of the solution algorithm
 	neighbor_pair neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
 	vector<int> move2sol(int, int); // returns the results of applying a move to the current solution
+	void vehicle_totals(); // 
 	void save_data(); // writes all current progress to the log files
 };
 
