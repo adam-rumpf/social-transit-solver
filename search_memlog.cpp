@@ -169,7 +169,7 @@ void MemoryLog::load_memory()
 void MemoryLog::reset_memory()
 {
 	// Set fresh memory structure values
-	Solver->iteration = 1;
+	Solver->iteration = 0;
 	Solver->nonimp_in = 0;
 	Solver->nonimp_out = 0;
 	Solver->attractive_solutions.clear();

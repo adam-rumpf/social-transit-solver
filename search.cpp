@@ -8,6 +8,7 @@ Search::Search()
 	Net = new Network(); // network object
 	Obj = new Objective(Net); // objective function object
 	Con = new Constraint(Net); // constraint function object
+	sol_size = Net->lines.size(); // get solution vector size
 }
 
 /// Search constructor deletes Network, Objective, and Constraint objects created by the constructor.
@@ -124,11 +125,88 @@ void Search::solve()
 	MemLog = new MemoryLog(this, pickup);
 	SolLog = new SolutionLog(pickup);
 
-	/////////////////////////////////////////
+	// Initialize neighborhood search solution container and set references to its elements
+	pair<pair<vector<int>, double>, pair<vector<int>, double>> nbhd_sol;
+	vector<int> & nbhd_sol1 = nbhd_sol.first.first;
+	vector<int> & nbhd_sol2 = nbhd_sol.second.first;
+	double & nbhd_obj1 = nbhd_sol.first.second;
+	double & nbhd_obj2 = nbhd_sol.second.second;
+	nbhd_sol1.resize(sol_size);
+	nbhd_sol2.resize(sol_size);
+
+	// Main search loop
+
+	while (iteration < max_iterations)
+	{
+		iteration++;
+		cout << "Iteration " << iteration << " / " << max_iterations << endl;
+
+		// Perform neighborhood search
+		nbhd_sol = neighborhood_search();
+
+		//////////////////////////////////////////////////////// placeholder neighborhood search test
+		cout << "Neighborhood search results:" << endl;
+		cout << "1st best objective: " << nbhd_obj1 << endl;
+		cout << "1st best solution:" << endl;
+		for (int i = 0; i < nbhd_sol1.size(); i++)
+			cout << nbhd_sol1[i] << '\t';
+		cout << endl;
+		cout << "2nd best objective: " << nbhd_obj2 << endl;
+		cout << "2nd best solution:" << endl;
+		for (int i = 0; i < nbhd_sol2.size(); i++)
+			cout << nbhd_sol2[i] << '\t';
+		cout << endl;
 
 
 
 
 
-	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT).
+
+
+
+
+
+
+
+
+		/////////////////////////////////////////////
+		cout << "Breaking search for testing purposes." << endl;
+		break;
+
+		// Safely quit if a keyboard halt has been requested
+		if (keyboard_halt == true)
+		{
+			save_data();
+			exit(KEYBOARD_HALT);
+		}
+	}
+
+
+
+
+
+	/////// Note: If we end a loop due to stopping == true, we should safely quit with exit(KEYBOARD_HALT). Write a method to safely quit. Call it either after the while loop ends, or at the end of the while loop if we've decided to quit (and then exit).
+}
+
+/**
+Performs the neighborhood search of the tabu search/simulated annealing hybrid algorithm.
+
+Returns a pair of pairs, with each pair containing a solution vector and objective value for the best and second best solutions found.
+*/
+pair<pair<vector<int>, double>, pair<vector<int>, double>> Search::neighborhood_search()
+{
+
+
+
+
+
+	/////////////////////////////////////////////////////////////////////////////////
+	return make_pair(make_pair(vector<int>(Net->lines.size(), 0.0), 0.0), make_pair(vector<int>(Net->lines.size(), 0.0), 0.0));
+}
+
+/// Writes current memory structures to the output logs.
+void Search::save_data()
+{
+	//////////////////////////////////////
+	cout << "\n---------- SAVING DATA (PLACEHOLDER) ----------\n" << endl;
 }

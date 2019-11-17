@@ -55,6 +55,7 @@ struct Search
 	bool started = false; // whether or not the solve() method has been called
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
+	int sol_size; // size of solution vector
 	int max_iterations; // maximum number of search iterations
 	double temp_factor; // simulated annealing decay factor
 	int attractive_max; // number of attractive solutions to store for tabu search
@@ -87,6 +88,8 @@ struct Search
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
 	~Search(); // destructor deletes network, objective, and constraint objects
 	void solve(); // main driver of the solution algorithm
+	pair<pair<vector<int>, double>, pair<vector<int>, double>> neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
+	void save_data(); // writes all current progress to the log files
 };
 
 /**
