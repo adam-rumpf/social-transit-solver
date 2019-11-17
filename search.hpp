@@ -6,11 +6,14 @@ Called by the main() function after all subroutine objects have been initialized
 
 #pragma once
 
+#include <cmath>
 #include <csignal>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
+#include <list>
 #include <queue>
 #include <sstream>
 #include <string>
@@ -86,7 +89,7 @@ struct Search
 	int nonimp_out; // outer nonimprovement counter
 	double tenure; // tabu tenure for newly-added tabu moves
 	double temperature; // simulated annealing temperature
-	vector<pair<vector<int>, double>> attractive_solutions; // vector of attractive solutions, stored as solution vector/objective value pairs
+	list<pair<vector<int>, double>> attractive_solutions; // list of attractive solutions, stored as solution vector/objective value pairs
 	vector<int> current_vehicles; // number of each vehicle type currently in use
 
 	// Public methods
@@ -95,7 +98,8 @@ struct Search
 	void solve(); // main driver of the solution algorithm
 	neighbor_pair neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
 	vector<int> move2sol(int, int); // returns the results of applying a move to the current solution
-	void vehicle_totals(); // 
+	void increase_tenure(); // increase the tabu tenure value
+	void cool_temperature(); // apply a cooling schedule to the simulated annealing temperature
 	void save_data(); // writes all current progress to the log files
 };
 

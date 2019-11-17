@@ -55,104 +55,100 @@ void MemoryLog::load_memory()
 				// Break for blank line at file end
 				break;
 			stringstream stream(line);
-			stream.exceptions(ifstream::failbit);
+			stream.exceptions(ios_base::failbit);
 
 			// Expected data
-			try
+			switch (count)
 			{
-				switch (count)
+			case 1:
+				// ADD tenures
+				for (int i = 0; i < sol_size; i++)
 				{
-				case 1:
-					// ADD tenures
-					for (int i = 0; i < sol_size; i++)
-					{
-						getline(stream, piece, '\t');
-						Solver->add_tenure[i] = stod(piece);
-					}
-					break;
-				case 2:
-					// DROP tenures
-					for (int i = 0; i < sol_size; i++)
-					{
-						getline(stream, piece, '\t');
-						Solver->drop_tenure[i] = stod(piece);
-					}
-					break;
-				case 3:
-					// current solution
-					for (int i = 0; i < sol_size; i++)
-					{
-						getline(stream, piece, '\t');
-						Solver->sol_current[i] = stoi(piece);
-					}
-					break;
-				case 4:
-					// best solution
-					for (int i = 0; i < sol_size; i++)
-					{
-						getline(stream, piece, '\t');
-						Solver->sol_best[i] = stoi(piece);
-					}
-					break;
-				case 5:
-					// current objective
 					getline(stream, piece, '\t');
-					Solver->obj_current = stod(piece);
-					break;
-				case 6:
-					// best objective
+					Solver->add_tenure[i] = stod(piece);
+				}
+				break;
+			case 2:
+				// DROP tenures
+				for (int i = 0; i < sol_size; i++)
+				{
 					getline(stream, piece, '\t');
-					Solver->obj_best = stod(piece);
-					break;
-				case 7:
-					// iteration number
+					Solver->drop_tenure[i] = stod(piece);
+				}
+				break;
+			case 3:
+				// current solution
+				for (int i = 0; i < sol_size; i++)
+				{
 					getline(stream, piece, '\t');
-					Solver->iteration = stoi(piece);
-					break;
-				case 8:
-					// inner nonimprovement counter
+					Solver->sol_current[i] = stoi(piece);
+				}
+				break;
+			case 4:
+				// best solution
+				for (int i = 0; i < sol_size; i++)
+				{
 					getline(stream, piece, '\t');
-					Solver->nonimp_in = stoi(piece);
-					break;
-				case 9:
-					// outer nonimprovement counter
-					getline(stream, piece, '\t');
-					Solver->nonimp_out = stoi(piece);
-					break;
-				case 10:
-					// tabu tenure
-					getline(stream, piece, '\t');
-					Solver->tenure = stod(piece);
-					break;
-				case 11:
-					// simulated annealing temperature
-					getline(stream, piece, '\t');
-					Solver->temperature = stod(piece);
-					break;
-				case 12:
-					// attractive solution objectives
-					while (!stream.eof())
+					Solver->sol_best[i] = stoi(piece);
+				}
+				break;
+			case 5:
+				// current objective
+				getline(stream, piece, '\t');
+				Solver->obj_current = stod(piece);
+				break;
+			case 6:
+				// best objective
+				getline(stream, piece, '\t');
+				Solver->obj_best = stod(piece);
+				break;
+			case 7:
+				// iteration number
+				getline(stream, piece, '\t');
+				Solver->iteration = stoi(piece);
+				break;
+			case 8:
+				// inner nonimprovement counter
+				getline(stream, piece, '\t');
+				Solver->nonimp_in = stoi(piece);
+				break;
+			case 9:
+				// outer nonimprovement counter
+				getline(stream, piece, '\t');
+				Solver->nonimp_out = stoi(piece);
+				break;
+			case 10:
+				// tabu tenure
+				getline(stream, piece, '\t');
+				Solver->tenure = stod(piece);
+				break;
+			case 11:
+				// simulated annealing temperature
+				getline(stream, piece, '\t');
+				Solver->temperature = stod(piece);
+				break;
+			case 12:
+				// attractive solution objectives
+				while (!stream.eof())
+				{
+					try
 					{
 						getline(stream, piece, '\t');
 						attractive_objectives.push(stod(piece));
 					}
-					break;
-				default:
-					// attractive solution vectors
-					vector<int> asol(sol_size);
-					for (int i = 0; i < sol_size; i++)
-					{
-						getline(stream, piece, '\t');
-						asol[i] = stoi(piece);
-					}
-					Solver->attractive_solutions.push_back(make_pair(asol, attractive_objectives.front()));
-					attractive_objectives.pop();
+					catch (ios_base::failure &e) {} // catch end of file errors which can occur if the memory log has trailing whitespace
 				}
-			}
-			catch (ifstream::failure &e)
-			{
-				cout << "Mismatch between memory log row size and solution vector size." << endl;
-				exit(INCOMPATIBLE_DATA);
+				break;
+			default:
+				// attractive solution vectors
+				vector<int> asol(sol_size);
+				for (int i = 0; i < sol_size; i++)
+				{
+					getline(stream, piece, '\t');
+					asol[i] = stoi(piece);
+				}
+				Solver->attractive_solutions.push_back(make_pair(asol, attractive_objectives.front()));
+				attractive_objectives.pop();
 			}
 		}
 
@@ -263,17 +259,19 @@ void MemoryLog::save_memory()
 		log_file << Solver->temperature << endl;
 
 		// Write attractive solution objective vector
-		for (int i = 0; i < Solver->attractive_solutions.size(); i++)
-			log_file << Solver->attractive_solutions[i].second << '\t';
+		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(), [&](pair<vector<int>, double> sol)
+		{
+			log_file << sol.second << '\t';
+		});
 		log_file << endl;
 
 		// Write attractive solution vectors
-		for (int i = 0; i < Solver->attractive_solutions.size(); i++)
+		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(), [&](pair<vector<int>, double> sol)
 		{
-			for (int j = 0; j < sol_size; j++)
-				log_file << Solver->attractive_solutions[i].first[j] << '\t';
+			for (int i = 0; i < sol_size; i++)
+				log_file << sol.first[i] << '\t';
 			log_file << endl;
-		}
+		});
 
 		log_file.close();
 		cout << "Successfully recorded memory log." << endl;
