@@ -160,7 +160,6 @@ struct MemoryLog
 
 	// Public methods
 	MemoryLog(Search *, bool); // constructor initializes internal search parameters associated with memory file
-	~MemoryLog(); // destructor automatically calls the memory writing method
 	void load_memory(); // reads contents of memory log file into memory log object
 	void reset_memory(); // sets memory structures according to the initial values from the search parameter file and the initial solution log file
 	void save_memory(); // writes contents of memory log object to the memory log file
@@ -190,7 +189,6 @@ struct SolutionLog
 
 	// Public methods
 	SolutionLog(bool); // constructor reads the solution log file and initializes the solution memory structure
-	~SolutionLog(); // destructor automatically calls the log writing method
 	void load_solution(string); // reads a given solution log into the dictionary
 	void save_solution(); // writes the current solution log to the log file
 	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information

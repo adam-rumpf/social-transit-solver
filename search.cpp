@@ -12,7 +12,7 @@ Search::Search()
 	srand(time(NULL)); // seed random number generator
 }
 
-/// Search constructor deletes Network, Objective, and Constraint objects created by the constructor.
+/// Search destructor deletes Network, Objective, and Constraint objects created by the constructor.
 Search::~Search()
 {
 	delete Net;
@@ -642,6 +642,7 @@ neighbor_pair Search::neighborhood_search()
 					else if (info.first == FEAS_TRUE)
 					{
 						// Immediately add solutions known to be feasible
+						con_lookups++;
 						swaps++;
 						final_moves.push(make_pair(obj_candidate, make_pair(add_id, drop_id)));
 						continue;
@@ -777,6 +778,7 @@ void Search::cool_temperature()
 /// Writes current memory structures to the output logs.
 void Search::save_data()
 {
-	//////////////////////////////////////
-	cout << "\n---------- SAVING DATA (PLACEHOLDER) ----------\n" << endl;
+	cout << "\n---------- SAVING DATA ----------\n" << endl;
+	MemLog->save_memory();
+	SolLog->save_solution();
 }

@@ -101,6 +101,17 @@ void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 		event_file << "\n==================================================\nIteration " << iteration << " / " << max_iterations << "\n==================================================\n\n";
 
 		///////////////////////////////////////////////////////////////////
+		/*
+		Information that we want:
+		-search time
+		-number of obj/con lookups/creations
+		-number of ADD/DROP/SWAP candidates at each stage (out of the max allowed)
+		-basic case (improvement, nonimprovement with SA pass, nonimprovement with SA fail
+		-announcement when a counter maxes out and resets
+		-improved best
+
+		Remove most command line messages and leave only iteration number, possibly with a progress bar to show neighborhood search progress (optional, since that would really slow down the small network)
+		*/
 
 		event_file.close();
 	}
