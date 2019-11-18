@@ -170,7 +170,13 @@ void Search::solve()
 		if (nbhd_obj1 < obj_current)
 		{
 			// Improvement iteration: make the move and make it tabu to undo it
-			cout << "Improvement iteration." << endl;
+			EveLog->events.push("\nImprovement iteration (" + to_string(nbhd_obj1) + " < " + to_string(obj_best) + ").");
+			if (nbhd_sol1.second == NO_ID)
+				EveLog->events.push("Making move ADD(" + to_string(nbhd_sol1.first) + ").");
+			else if (nbhd_sol1.first == NO_ID)
+				EveLog->events.push("Making move DROP(" + to_string(nbhd_sol1.second) + ").");
+			else
+				EveLog->events.push("Making move SWAP(" + to_string(nbhd_sol1.first) + "<-" + to_string(nbhd_sol1.second) + ").");
 
 			nonimp_out = 0; // reset outer nonimprovement counter
 			tenure = tenure_init; // reset tabu tenures
@@ -194,7 +200,7 @@ void Search::solve()
 			// Update best known solution if needed
 			if (obj_current < obj_best)
 			{
-				cout << "New best solution found!" << endl;
+				EveLog->events.push("New best solution found!");
 				sol_best = sol_current;
 				obj_best = obj_current;
 			}
@@ -202,18 +208,24 @@ void Search::solve()
 		else
 		{
 			// Nonimprovement iteration
-			cout << "Nonimprovement iteration." << endl;
+			EveLog->events.push("\nNonimprovement iteration (" + to_string(nbhd_obj1) + " >= " + to_string(obj_best) + ").");
 
 			// Increase nonimprovement counters
 			nonimp_in++;
 			nonimp_out++;
 
 			// Evaluate simulated annealing criterion
-			cout << "Probability of passing SA criterion: " << exp(-(nbhd_obj1 - obj_current) / temperature) << endl;
-			if (((1.0 * rand()) / RAND_MAX) < exp(-(nbhd_obj1 - obj_current) / temperature))
+			double prob = exp(-(nbhd_obj1 - obj_current) / temperature);
+			if (((1.0 * rand()) / RAND_MAX) < prob)
 			{
 				// If passed, make the move as in an improvement iteration but with increased tabus, then keep the second best solution as attractive
-				cout << "Passed SA criterion." << endl;
+				EveLog->events.push("Passed SA criterion with pass probability: " + to_string(prob));
+				if (nbhd_sol1.second == NO_ID)
+					EveLog->events.push("Making move ADD(" + to_string(nbhd_sol1.first) + ").");
+				else if (nbhd_sol1.first == NO_ID)
+					EveLog->events.push("Making move DROP(" + to_string(nbhd_sol1.second) + ").");
+				else
+					EveLog->events.push("Making move SWAP(" + to_string(nbhd_sol1.first) + "<-" + to_string(nbhd_sol1.second) + ").");
 
 				nonimp_in = 0; // reset inner nonimprovement counter
 				increase_tenure(); // increase tabu tenures
@@ -239,8 +251,8 @@ void Search::solve()
 			}
 			else
 			{
-				cout << "Failed SA criterion." << endl;
 				// If failed, make no moves but keep the best neighbor as attractive
+				EveLog->events.push("No move. Failed SA criterion with pass probability: " + to_string(prob));
 				attractive_solutions.push_back(make_pair(make_move(nbhd_sol1.first, nbhd_sol1.second), nbhd_obj1));
 			}
 		}
@@ -249,7 +261,10 @@ void Search::solve()
 
 		// Trim the attractive solution set if too long
 		if (attractive_solutions.size() > attractive_max)
+		{
+			EveLog->events.push("\nCulling attractive solution set.");
 			pop_attractive(false); // in no-replace mode
+		}
 
 		// If inner nonimprovement counter is too high, take actions to diversify
 		if (nonimp_in > nonimp_in_max)
@@ -257,6 +272,8 @@ void Search::solve()
 			nonimp_in = 0; // reset inner counter
 			nonimp_out++; // increment outer counter
 			increase_tenure(); // increase tabu tenures
+
+			EveLog->events.push("\nInner nonimprovement counter maxed out. Taking diversification actions.\nIncreasing tenures to " + to_string(tenure) + ".\nMoving to a random attractive solution.");
 
 			// Move to a random attractive solution
 			pop_attractive(true); // replace mode resets current solution
@@ -267,7 +284,10 @@ void Search::solve()
 
 		// If outer nonimprovement counter is too high, take actions to intensify
 		if (nonimp_out > nonimp_out_max)
+		{
 			tenure = tenure_init; // reset tabu tenures
+			EveLog->events.push("\nOuter nonimprovement counter maxed out. Taking intensification actions. Resetting tenures.");
+		}
 
 		// Allow tabu tenures to decay
 		for (int i = 0; i < sol_size; i++)
@@ -285,6 +305,7 @@ void Search::solve()
 		// Safely quit if a keyboard halt has been requested
 		if (keyboard_halt == true)
 		{
+			EveLog->halt();
 			save_data();
 			exit(KEYBOARD_HALT);
 		}
@@ -318,7 +339,6 @@ neighbor_pair Search::neighborhood_search()
 	After obtaining enough ADD and DROP move candidates we assemble a list of SWAP move candidates. A SWAP move is made by combining an ADD candidate with a DROP candidate (provided that both candidates involve the same type of vehicle). Because of the potentially large number of possible combinations that could be made, we generate combinations by moving through the ADD and DROP candidate lists in ascending order of objective until obtaining enough feasible SWAP moves.
 	*/
 
-	cout << "\nBeginning neighborhood search." << endl;
 	clock_t nbhd_time = clock(); // neighborhood search timer for event log
 
 	/*
@@ -366,7 +386,6 @@ neighbor_pair Search::neighborhood_search()
 	{
 		// ADD move first pass
 
-		cout << "ADD first pass." << endl;
 		// Repeat until reaching our first-pass bound or running out of candidates
 		while ((add_moves1.size() < nbhd_add_lim1) && (add_candidates.size() > 0))
 		{
@@ -425,10 +444,11 @@ neighbor_pair Search::neighborhood_search()
 			add_moves1.push(make_tuple(obj_candidate, make_pair(choice, NO_ID), new_candidate));
 			add_chosen.insert(choice);
 		}
+		EveLog->events.push("ADD first pass includes " + to_string(add_moves1.size()) + " moves.");
+		cout << '.';
 
 		// DROP move first pass
 
-		cout << "DROP first pass." << endl;
 		// Repeat until reaching our first-pass bound or running out of candidates
 		while ((drop_moves1.size() < nbhd_drop_lim1) && (drop_candidates.size() > 0))
 		{
@@ -487,10 +507,11 @@ neighbor_pair Search::neighborhood_search()
 			drop_moves1.push(make_tuple(obj_candidate, make_pair(NO_ID, choice), new_candidate));
 			drop_chosen.insert(choice);
 		}
+		EveLog->events.push("DROP first pass includes " + to_string(drop_moves1.size()) + " moves.");
+		cout << '.';
 
 		// ADD move second pass
 
-		cout << "ADD second pass." << endl;
 		// Repeat until reaching our second-pass bound or running out of first-pass candidates
 		while ((add_moves1.size() > 0) && (add_moves2.size() < nbhd_add_lim2))
 		{
@@ -518,10 +539,11 @@ neighbor_pair Search::neighborhood_search()
 			add_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
 			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
+		EveLog->events.push("ADD second pass includes " + to_string(add_moves2.size()) + " moves.");
+		cout << '.';
 
 		// DROP move second pass
 
-		cout << "DROP second pass." << endl;
 		// Repeat until reaching our second-pass bound or running out of first-pass candidates
 		while ((drop_moves1.size() > 0) && (drop_moves2.size() < nbhd_drop_lim2))
 		{
@@ -549,6 +571,8 @@ neighbor_pair Search::neighborhood_search()
 			drop_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
 			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
+		EveLog->events.push("DROP second pass includes " + to_string(drop_moves2.size()) + " moves.");
+		cout << '.';
 
 		// Unsuccessful search handling
 		if (add_moves2.size() + drop_moves2.size() + add_candidates.size() + drop_candidates.size() < 2)
@@ -581,7 +605,8 @@ neighbor_pair Search::neighborhood_search()
 
 	// SWAP move selection
 
-	cout << "SWAP candidates." << endl;
+	int swaps = 0; // number of swap moves accepted
+
 	// Proceed only if we have at least one ADD and one DROP
 	if ((add_moves2.size() > 0) && (drop_moves2.size()))
 	{
@@ -591,7 +616,6 @@ neighbor_pair Search::neighborhood_search()
 		Specifically, we consider pairs of candidates in a triangular search pattern by iterating through the ADD list, and for each ADD move by iterating through all of the DROP moves located at or ahead of the corresponding ADD move in their own list. The search ends as soon as we find enough swap candidates, or we run out of pairs to search.
 		*/
 		int limit = min(add_moves2.size(), drop_moves2.size()); // smaller of the two candidate list sizes
-		int swaps = 0; // number of swap moves accepted
 		int add_loop = 0; // iteration of outer ADD list loop
 		int drop_loop; // iteration of inner DROP list loop
 
@@ -603,6 +627,7 @@ neighbor_pair Search::neighborhood_search()
 				break;
 
 			drop_loop = 0;
+			cout << '.';
 
 			// Iterate through the DROP list (breaks if we reach a stopping condition, or upon iterating to the same position as the current ADD iterator)
 			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin(); drop_it != drop_moves2.end(); drop_it++)
@@ -694,6 +719,7 @@ neighbor_pair Search::neighborhood_search()
 			add_loop++;
 		}
 	}
+	EveLog->events.push("SWAP includes " + to_string(swaps) + " moves.");
 
 	// Clear second-pass move lists
 	add_moves2.clear();
@@ -704,9 +730,11 @@ neighbor_pair Search::neighborhood_search()
 	final_moves.pop();
 	pair<pair<int, int>, double> neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
 
-	cout << "Spent " << (1.0*clock() - nbhd_time) / CLOCKS_PER_SEC << " seconds on the neighborhood search." << endl;
-	cout << "Looked up " << obj_lookups << " objectives and " << con_lookups << " constraints." << endl;
-	cout << "Generated " << new_obj << " objectives and " << new_con << " constraints." << endl << endl;
+	EveLog->events.push("\nSpent " + to_string((1.0*clock() - nbhd_time) / CLOCKS_PER_SEC) + " seconds on the neighborhood search.");
+	EveLog->events.push("Looked up " + to_string(obj_lookups) + " objectives and " + to_string(con_lookups) + " constraints.");
+	EveLog->events.push("Generated " + to_string(new_obj) + " objectives and " + to_string(new_con) + " constraints.");
+	cout << endl;
+
 	return make_pair(neighbor1, neighbor2);
 }
 

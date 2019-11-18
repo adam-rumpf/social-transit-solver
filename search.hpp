@@ -123,10 +123,12 @@ struct EventLog
 	// Public attributes
 	ios_base::openmode mode; // file open mode (append or truncate)
 	int max_iterations; // iteration number cutoff
+	queue<string> events; // queue of events to log for the current iteration
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
 	void log_iteration(int, double, double); // appends an iteration report to the event log file
+	void halt(); // prints a message to the event log that the session has been halted
 };
 
 /**
