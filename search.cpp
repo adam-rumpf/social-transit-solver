@@ -812,3 +812,161 @@ void Search::save_data()
 	MemLog->save_memory();
 	SolLog->save_solution();
 }
+
+/**
+Finds the absolute best neighbor of the current solution.
+
+Returns a move/objective value pair corresponding to the best neighbor. If no neighbor has an objective value strictly lower than the given solution (meaning that the given solution is locally optimal), the returned solution will consist of the NO_ID move pair and an infinite objective.
+
+This is for use in an exhaustive local search. Every possible ADD and DROP move from the given solution is considered (we do not consider SWAP moves since there are so many). Tabu rules are ignored but all other constraints are enforced.
+*/
+pair<pair<int, int>, double> Search::best_neighbor()
+{
+	// Current best known neighbor objective and move
+	pair<int, int> top_move = make_pair(NO_ID, NO_ID);
+	double top_objective = INFINITY;
+
+	// Consider every possible ADD move
+	for (int choice = 0; choice < sol_size; choice++)
+	{
+		// Filter out moves that would violate a line fleet bound
+		if (sol_current[choice] + step > line_max[choice])
+			// Skip ADD moves that would exceed a line's vehicle bound
+			continue;
+		if (current_vehicles[vehicle_type[choice]] + 1 > max_vehicles[vehicle_type[choice]])
+			// Skip ADD moves that would exceed a total vehicle bound
+			continue;
+
+		// Initialize candidate solution containers
+		vector<int> sol_candidate = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
+		double obj_candidate; // objective of candidate solution
+		int feas; // candidate solution feasibility status
+
+		// Look up logged information for candidate solution
+		if (SolLog->solution_exists(sol_candidate) == true)
+		{
+			// If the solution is logged already, look up its feasibility status and objective
+			pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
+			feas = info.first;
+			if (feas == FEAS_FALSE)
+				// Skip solutions known to be infeasible
+				continue;
+			obj_candidate = info.second;
+		}
+		else
+		{
+			// If the solution is new, calculate its objective and create a tentative log entry
+			feas = FEAS_UNKNOWN;
+			clock_t start = clock(); // objective calculation timer
+			obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
+			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
+			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+		}
+
+		// Filter out moves that do not improve on the current solution or best known neighbor
+		if ((obj_candidate >= obj_current) || (obj_candidate >= top_objective))
+			continue;
+
+		// Evaluate the feasibility of the candidate solution
+		if (feas == FEAS_UNKNOWN)
+		{
+			// If feasibility is unknown, calculate its constraints and create a full log entry
+			clock_t start = clock(); // constraint calculation timer
+			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
+			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+			if (con_candidate.first == FEAS_FALSE)
+				// Skip candidate if discovered to be infeasible
+				continue;
+		}
+
+		// If we've made it this far, the candidate should be kept
+		top_move = make_pair(choice, NO_ID);
+		top_objective = obj_candidate;
+	}
+
+	// Consider every possible DROP move
+	for (int choice = 0; choice < sol_size; choice++)
+	{
+		// Filter out moves that would violate a line fleet bound
+		if (sol_current[choice] - step < line_min[choice])
+			// Skip DROP moves that would fall below a line's vehicle bound
+			continue;
+		if (current_vehicles[vehicle_type[choice]] - 1 < 0)
+			// Skip DROP moves that would result in negative vehicles
+			continue;
+
+		// Initialize candidate solution containers
+		vector<int> sol_candidate = make_move(NO_ID, choice); // solution vector resulting from chosen DROP
+		double obj_candidate; // objective of candidate solution
+		int feas; // candidate solution feasibility status
+
+		// Look up logged information for candidate solution
+		if (SolLog->solution_exists(sol_candidate) == true)
+		{
+			// If the solution is logged already, look up its feasibility status and objective
+			pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
+			feas = info.first;
+			if (feas == FEAS_FALSE)
+				// Skip solutions known to be infeasible
+				continue;
+			obj_candidate = info.second;
+		}
+		else
+		{
+			// If the solution is new, calculate its objective and create a tentative log entry
+			feas = FEAS_UNKNOWN;
+			clock_t start = clock(); // objective calculation timer
+			obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
+			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
+			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+		}
+
+		// Filter out moves that do not improve on the current solution or best known neighbor
+		if ((obj_candidate >= obj_current) || (obj_candidate >= top_objective))
+			continue;
+
+		// Evaluate the feasibility of the candidate solution
+		if (feas == FEAS_UNKNOWN)
+		{
+			// If feasibility is unknown, calculate its constraints and create a full log entry
+			clock_t start = clock(); // constraint calculation timer
+			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
+			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+			if (con_candidate.first == FEAS_FALSE)
+				// Skip candidate if discovered to be infeasible
+				continue;
+		}
+
+		// If we've made it this far, the candidate should be kept
+		top_move = make_pair(NO_ID, choice);
+		top_objective = obj_candidate;
+	}
+
+	// Return the best solution vector
+	return make_pair(top_move, top_objective);
+}
+
+/**
+Conducts an exhaustive, greedy local search from the current solution.
+
+Each iteration of the search moves to the neighbor with the best objective value. The search ends when local optimality is achieved.
+*/
+void Search::exhaustive_search()
+{
+	// Find best neighbor
+	pair<pair<int, int>, double> move = best_neighbor();
+
+	// Continue main loop until reaching local optimality
+	while (move.second < INFINITY)
+	{
+		// Make local move and update objective and vehicle usage
+		sol_current = make_move(move.first.first, move.first.second);
+		obj_current = move.second;
+		vehicle_totals();
+
+		// Repeat neighborhood search
+		move = best_neighbor();
+	}
+}

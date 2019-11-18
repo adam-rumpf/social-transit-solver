@@ -109,6 +109,8 @@ struct Search
 	void increase_tenure(); // increase the tabu tenure value
 	void cool_temperature(); // apply a cooling schedule to the simulated annealing temperature
 	void save_data(); // writes all current progress to the log files
+	pair<pair<int, int>, double> best_neighbor(); // finds the best move from the current solution via exhaustive neighborhood search
+	void exhaustive_search(); // conducts an exhaustive local search from the current solution
 };
 
 /**
