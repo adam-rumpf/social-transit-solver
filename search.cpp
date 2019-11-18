@@ -331,7 +331,7 @@ neighbor_pair Search::neighborhood_search()
 	/*
 	The neighborhood search is conducted in two passes in order to minimize the number of constraint function evaluations, since evaluating the constraints is many orders of magnitude more expensive than evaluating the objective.
 
-	In the first pass we generate candidate ADD and DROP moves that satisfy the constant vehicle bound constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also calculate the objective values of these candidates.
+	In the first pass we generate non-tabu candidate ADD and DROP moves that satisfy the constant vehicle bound constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also calculate the objective values of these candidates.
 
 	In the second pass we go through our candidates from the first pass in ascending order of objective value, evaluating the constraint function value for each and collecting the feasible results into a final candidate vector. If, at the end of the second pass, we have fewer than two feasible solutions, we throw away the tabu rules and start the search over again.
 
@@ -341,12 +341,20 @@ neighbor_pair Search::neighborhood_search()
 	cout << "\n==================== Beginning neighborhood search. ====================" << endl << endl;
 	clock_t nbhd_time = clock(); // neighborhood search timer for event log
 
-	// Initialize candidate move containers (all min-priority queues of 3-tupes, respectivaly containing an objective value, ADD/DROP pair, and boolean flag to indicate new log entries)
-	move_queue add_moves1; // candidate ADD moves after first pass
-	move_queue add_moves2; // candidate ADD moves after second pass
-	move_queue drop_moves1; // candidate DROP moves after first pass
-	move_queue drop_moves2; // candidate DROP moves after second pass
-	move_queue swap_moves; // candidate SWAP moves
+	/*
+	Initialize candidate move containers.
+
+	During the first pass, ADD and DROP moves are stored in a min-priority queue of 3-tuples which contain the objective value, ADD/DROP line pair, and a boolean indicating whether the solution has been logged already. Non-tabu solutions which satisfy the vehicle bound constraints are pushed into the queue, and can later be processed in ascending order of objective.
+
+	During the second pass, ADD and DROP moves are stored in a list of pairs which contain the objective value and the ADD/DROP line pair. Because the second pass always considers solutions in ascending order of objective, the lists will automatically be sorted in ascending order of objective.
+
+	The final moves are stored in a min-priority queue of pairs which contain the objective value and ADD/DROP line pair. This includes (a second copy of) ADD/DROP moves chosen during the second pass and chosen SWAP moves. The first two elements of the queue can be popped to obtain the best and second best neighbors.
+	*/
+	candidate_queue add_moves1; // candidate ADD moves after first pass
+	candidate_queue drop_moves1; // candidate DROP moves after first pass
+	list<pair<double, pair<int, int>>> add_moves2; // candidate ADD moves after second pass
+	list<pair<double, pair<int, int>>> drop_moves2; // candidate DROP moves after second pass
+	neighbor_queue final_moves; // includes all ADD, DROP, and SWAP moves for final consideration
 
 	// Initialize candidate ADD/DROP line containers (integer line IDs meant for random sampling without repetition)
 	vector<int> add_candidates(sol_size); // initial set of candidate ADD lines
@@ -547,9 +555,10 @@ neighbor_pair Search::neighborhood_search()
 					continue;
 			}
 
-			// Add the feasible candidate to the second-pass move queue
+			// Add the feasible candidate to the second-pass move list and the final move queue
 			cout << "Adding move as a final candidate." << endl;
-			add_moves2.push(move_triple);
+			add_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
+			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
 
 		// DROP move second pass
@@ -578,9 +587,10 @@ neighbor_pair Search::neighborhood_search()
 					continue;
 			}
 
-			// Add the feasible candidate to the second-pass move queue
+			// Add the feasible candidate to the second-pass move list and the final move queue
 			cout << "Adding move as a final candidate." << endl;
-			drop_moves2.push(move_triple);
+			drop_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
+			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
 
 		// Unsuccessful search handling
@@ -597,8 +607,8 @@ neighbor_pair Search::neighborhood_search()
 	}
 
 	// Clear first-pass move queues
-	add_moves1 = move_queue();
-	drop_moves1 = move_queue();
+	add_moves1 = candidate_queue();
+	drop_moves1 = candidate_queue();
 
 	cout << "\n-------------------- Generating SWAP candidates. --------------------" << endl;
 
@@ -609,8 +619,6 @@ neighbor_pair Search::neighborhood_search()
 	{
 		cout << "Generating SWAPs from " << add_moves2.size() << " ADD moves and " << drop_moves2.size() << " DROP moves." << endl;
 	}
-
-	/////////////////////// We need to be able to iterate through the ADD and DROP 2nd-pass lists, so the 2nd-pass lists should not be priority queues but rather something like a list or a vector. We also don't need to include the "new" flag, so the second structure can be simpler. They will already be sorted so we can simply add them as they get popped off of the queue, but we should still use a priority queue for the SWAPs since they will not necessarily be generated in order.
 
 
 
