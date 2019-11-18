@@ -64,6 +64,7 @@ struct Search
 	bool started = false; // whether or not the solve() method has been called
 	bool keyboard_halt = false; // whether or not to stop due to a keyboard halt
 	bool pickup; // whether or not to continue a search from its saved data files (if false, log files are wiped clean)
+	bool exhaustive; // whether or not to end with an exhaustive search from the final solution
 	int sol_size; // size of solution vector
 	int max_iterations; // maximum number of search iterations
 	double temp_factor; // simulated annealing decay factor
@@ -97,6 +98,7 @@ struct Search
 	double temperature; // simulated annealing temperature
 	list<pair<vector<int>, double>> attractive_solutions; // list of attractive solutions, stored as solution vector/objective value pairs
 	vector<int> current_vehicles; // number of each vehicle type currently in use
+	int exhaustive_iteration; // iteration of exhaustive local search
 
 	// Public methods
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
@@ -126,11 +128,13 @@ struct EventLog
 	ios_base::openmode mode; // file open mode (append or truncate)
 	int max_iterations; // iteration number cutoff
 	queue<string> events; // queue of events to log for the current iteration
+	bool exhaustive = false; // whether the exhaustive search is underway
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
 	void log_iteration(int, double, double); // appends an iteration report to the event log file
 	void halt(); // prints a message to the event log that the session has been halted
+	void exhaustive_begin(); // prints a message to the event log that the exhaustive local search has begun
 };
 
 /**

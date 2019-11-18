@@ -110,6 +110,9 @@ void Search::solve()
 			case 15:
 				step = stoi(piece);
 				break;
+			case 16:
+				exhaustive = stoi(piece);
+				break;
 			}
 		}
 
@@ -309,6 +312,25 @@ void Search::solve()
 			save_data();
 			exit(KEYBOARD_HALT);
 		}
+	}
+
+	// Handle exhaustive search (if selected)
+	if (exhaustive == true)
+	{
+		exhaustive_iteration = 0;
+
+		cout << "\n============================================================" << endl;
+		cout << "Final exhaustive search" << endl;
+		cout << "============================================================" << endl << endl;
+		EveLog->exhaustive_begin();
+
+		// Set current solution to best
+		sol_current = sol_best;
+		obj_current = obj_best;
+		vehicle_totals();
+
+		// Initialize local search method
+		exhaustive_search();
 	}
 
 	// Perform final saves after search completes
@@ -884,6 +906,7 @@ pair<pair<int, int>, double> Search::best_neighbor()
 		top_move = make_pair(choice, NO_ID);
 		top_objective = obj_candidate;
 	}
+	cout << '.';
 
 	// Consider every possible DROP move
 	for (int choice = 0; choice < sol_size; choice++)
@@ -943,8 +966,10 @@ pair<pair<int, int>, double> Search::best_neighbor()
 		top_move = make_pair(NO_ID, choice);
 		top_objective = obj_candidate;
 	}
+	cout << '.';
 
 	// Return the best solution vector
+	cout << endl;
 	return make_pair(top_move, top_objective);
 }
 
@@ -961,10 +986,20 @@ void Search::exhaustive_search()
 	// Continue main loop until reaching local optimality
 	while (move.second < INFINITY)
 	{
+		exhaustive_iteration++;
+		cout << "\n---------- Exhaustive Search Iteration " << exhaustive_iteration << " ----------\n" << endl;
+
 		// Make local move and update objective and vehicle usage
+		EveLog->events.push("Improved objective (" + to_string(move.second) + " < " + to_string(obj_current) + ").");
 		sol_current = make_move(move.first.first, move.first.second);
 		obj_current = move.second;
 		vehicle_totals();
+
+		if (move.first.second == NO_ID)
+			EveLog->events.push("Making move ADD(" + to_string(move.first.first) + ").");
+		else if (move.first.first == NO_ID)
+			EveLog->events.push("Making move DROP(" + to_string(move.first.second) + ").");
+		EveLog->log_iteration(exhaustive_iteration, obj_current, obj_current);
 
 		// Repeat neighborhood search
 		move = best_neighbor();

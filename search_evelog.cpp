@@ -98,7 +98,10 @@ void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 	if (event_file.is_open())
 	{
 		// Write iteration header
-		event_file << "\n==================================================\nIteration " << iteration << " / " << max_iterations << "\n==================================================\n\n";
+		if (exhaustive == false)
+			event_file << "\n==================================================\nIteration " << iteration << " / " << max_iterations << "\n==================================================\n\n";
+		else
+			event_file << "\n==================================================\nExhaustive Iteration " << iteration << "\n==================================================\n\n";
 
 		// Write contents of event queue
 		while (events.size() > 0)
@@ -131,5 +134,27 @@ void EventLog::halt()
 	{
 		event_file << "\n############################################################\nSession Halted\n############################################################\n";
 		event_file.close();
+	}
+}
+
+/// Prints an exhaustive search message to the event and objective logs and sets the exhaustive search variable.
+void EventLog::exhaustive_begin()
+{
+	exhaustive = true;
+
+	// Write to event log file
+	ofstream event_file(EVENT_LOG_FILE, mode);
+	if (event_file.is_open())
+	{
+		event_file << "\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\nExhaustive Search Begun\n%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n";
+		event_file.close();
+	}
+
+	// Write to objective log file
+	ofstream obj_file(OBJECTIVE_LOG_FILE, mode);
+	if (obj_file.is_open())
+	{
+		obj_file << "-----\t-----\t-----" << endl;
+		obj_file.close();
 	}
 }
