@@ -220,4 +220,3 @@ A few errors can cause the program to terminate. The following codes may be retu
 * `1`: Intentional early termination from keyboard stop request (`[Ctrl]+[C]`).
 * `2`: Early termination due to a missing input file (see above for what is required).
 * `3`: Early termination due to errors within an input file (see above for required format).
-* `4`: Early termination due to incompatible elements within data files (for example, a mismatch between vector sizes or number of arguments).

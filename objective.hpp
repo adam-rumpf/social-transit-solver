@@ -16,6 +16,7 @@ The objective function is implemented as a class equipped with its own attribute
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include "DEFINITIONS.hpp"
 #include "network.hpp"
 
 using namespace std;

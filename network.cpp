@@ -88,8 +88,8 @@ Network::Network()
 		exit(FILE_NOT_FOUND);
 	}
 
-	// Read vehicle file and record the information required to define the lines
-	unordered_map<int, double> vehicle_seating; // maps vehicle type to seating capacity
+	// Read vehicle file and record the information required to define the vehicle types and lines
+	
 	ifstream vehicle_file;
 	vehicle_file.open(VEHICLE_FILE);
 	if (vehicle_file.is_open())
@@ -108,15 +108,16 @@ Network::Network()
 
 			// Go through each piece of the line
 			getline(stream, piece, '\t'); // Type
-			int vehicle_type = stoi(piece);
 			getline(stream, piece, '\t'); // Name
 			getline(stream, piece, '\t'); // UB
+			int vehicle_bound = stoi(piece);
 			getline(stream, piece, '\t'); // Seating
 			double vehicle_cap = stod(piece);
 			getline(stream, piece, '\t'); // Cost
 
-			// Record seating capacity into map
-			vehicle_seating[vehicle_type] = vehicle_cap;
+			// Create a new vehicle type
+			Vehicle * new_vehicle = new Vehicle(vehicle_bound, vehicle_cap);
+			vehicles.push_back(new_vehicle);
 		}
 
 		vehicle_file.close();
@@ -155,13 +156,15 @@ Network::Network()
 			getline(stream, piece, '\t'); // Scaling
 			double day_fraction = stod(piece);
 			getline(stream, piece, '\t'); // LB
+			int lb = stoi(piece);
 			getline(stream, piece, '\t'); // UB
+			int ub = stoi(piece);
 			getline(stream, piece, '\t'); // Fare
 			getline(stream, piece, '\t'); // Frequency
 			getline(stream, piece, '\t'); // Capacity
 
 			// Create a line object and add it to the list
-			Line * new_line = new Line(circuit_time, vehicle_seating[vehicle_type], day_fraction, horizon);
+			Line * new_line = new Line(vehicle_type, lb, ub, circuit_time, vehicles[vehicle_type]->capacity, day_fraction, horizon);
 			lines.push_back(new_line);
 		}
 
@@ -330,9 +333,12 @@ Arc::Arc(int id_in, Node * tail_in, Node * head_in, double cost_in, int line_in,
 		boarding = false;
 }
 
-/// Line constructor specifies its circuit time, seating capacity, active fraction of day, and daily time horizon.
-Line::Line(double circuit_in, double seating_in, double fraction_in, double horizon_in)
+/// Line constructor specifies its vehicle type, circuit time, seating capacity, active fraction of day, and daily time horizon.
+Line::Line(int vehicle_in, int lb_in, int ub_in, double circuit_in, double seating_in, double fraction_in, double horizon_in)
 {
+	vehicle_id = vehicle_in;
+	min_fleet = lb_in;
+	max_fleet = ub_in;
 	circuit = circuit_in;
 	seating = seating_in;
 	day_fraction = fraction_in;
@@ -358,4 +364,11 @@ double Line::headway(int fleet)
 double Line::capacity(int fleet)
 {
 	return frequency(fleet) * day_fraction * day_horizon * seating;
+}
+
+/// Vehicle constructor specifies its fleet size limit and capacity.
+Vehicle::Vehicle(int ub, double cap)
+{
+	max_fleet = ub;
+	capacity = cap;
 }

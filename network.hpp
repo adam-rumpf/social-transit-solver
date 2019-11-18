@@ -1,7 +1,7 @@
 /**
 A variety of structures for storing a network representation of the public transit system.
 
-Includes a Network, Arc, Node, and Line class. Objects from these classes are built from the input data, after which they are mostly treated as read-only for use in the objective and constraint calculation functions.
+Includes a Network, Arc, Node, Line, and Vehicle class. Objects from these classes are built from the input data, after which they are mostly treated as read-only for use in the objective and constraint calculation functions.
 */
 
 #pragma once
@@ -12,7 +12,7 @@ Includes a Network, Arc, Node, and Line class. Objects from these classes are bu
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "definitions.hpp"
+#include "DEFINITIONS.hpp"
 
 using namespace std;
 
@@ -21,11 +21,12 @@ struct Network;
 struct Node;
 struct Arc;
 struct Line;
+struct Vehicle;
 
 /**
 A class for the network representation of the public transit system.
 
-Its constructor reads the node and arc data files and uses them to define Node and Arc objects. Pointers to these objects are then stored in different lists, partitioned depending on their function, for use in the objective and constraint function calculations.
+Its constructor reads the node and arc data files and uses them to define Node and Arc objects. Pointers to these objects are then stored in different lists, partitioned depending on their function, for use in the objective and constraint function calculations. Line and Vehicle lists are similarly generated.
 
 Most of the network objects are partitioned into a "core" set which is used for all purposes (including stop/boarding nodes and line/boarding/alighting/walking arcs), and an "access" set which is only needed for the primary care access metrics (including population/facility nodes and their associated walking arcs). Only the core set needs to be considered for the constraint calculation, while the access sets must be added in for the objective.
 */
@@ -33,6 +34,7 @@ struct Network
 {
 	// Public attributes
 	vector<Line *> lines; // pointers to each line, arranged in the same order as the solution vector
+	vector<Vehicle *> vehicles; // pointers to each vehicle type
 	vector<Node *> nodes; // pointers to all nodes
 	vector<Node *> core_nodes; // pointers to all core nodes (stop and boarding)
 	vector<Node *> stop_nodes; // pointers to all stop nodes
@@ -100,14 +102,32 @@ struct Line
 	//Public attributes
 	vector<Arc *> boarding; // pointers to associated boarding arcs
 	vector<Arc *> in_vehicle; // pointers to associated line arcs (in-vehicle travel)
+	int min_fleet; // minimum number of vehicles allowed
+	int max_fleet; // maximum number of vehicles allowed
 	double circuit; // time required for a vehicle to complete one circuit (minutes)
 	double seating; // seating capacity of each vehicle used by this line
 	double day_fraction; // fraction of day during which the line operates (1.0 indicates full day)
 	double day_horizon; // daily time horizon (minutes)
+	int vehicle_id; // ID of vehicle type
 
 	// Public methods
-	Line(double, double, double, double); // constructor sets circuit time, seating capacity, active fraction of day, and daily time horizon
+	Line(int, int, int, double, double, double, double); // constructor sets vehicle ID, lower vehicle bound, upper vehicle bound, circuit time, seating capacity, active fraction of day, and daily time horizon
 	double frequency(int); // returns frequency resulting from a given fleet size
 	double headway(int); // returns average headway resulting from a given fleet size
 	double capacity(int); // returns capacity resulting from a given fleet size
+};
+
+/**
+A class for the public transit network's vehicle types.
+
+Stores various vehicle-related attributes.
+*/
+struct Vehicle
+{
+	// Public attributes
+	int max_fleet; // maximum number of vehicles available
+	double capacity; // vehicle capacity
+
+	// Public methods
+	Vehicle(int, double); // constructor sets max fleet and capacity values
 };

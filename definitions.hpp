@@ -1,6 +1,4 @@
-/**
-Global definitions used throughout various submodules.
-*/
+/// Global definitions used throughout various submodules.
 
 #pragma once
 
@@ -31,7 +29,6 @@ Global definitions used throughout various submodules.
 #define KEYBOARD_HALT 1
 #define FILE_NOT_FOUND 2
 #define INCORRECT_FILE 3
-#define INCOMPATIBLE_DATA 4
 
 // Node and arc type IDs
 #define STOP_NODE 0
@@ -43,6 +40,7 @@ Global definitions used throughout various submodules.
 #define ALIGHTING_ARC 2
 #define WALKING_ARC 3
 #define ACCESS_ARC 4
+#define NO_ID -1
 
 // Feasibility codes
 #define FEAS_TRUE 1

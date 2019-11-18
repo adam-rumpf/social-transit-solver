@@ -16,15 +16,17 @@ Solves the Spiess and Florian model to return the user flows based on a given so
 #include <utility>
 #include <unordered_set>
 #include <vector>
+#include "DEFINITIONS.hpp"
 #include "network.hpp"
-
-// Other technical definitions
-#define EPSILON 0.000001 // very small positive value
 
 using namespace std;
 using namespace concurrency;
 
 typedef pair<double, int> arc_cost_pair; // used to define a priority queue of combined cost/ID pairs sorted by the first element
+
+// Structure declarations
+struct ConstantAssignment;
+struct NonlinearAssignment;
 
 /**
 Constant-cost assignment model class.
