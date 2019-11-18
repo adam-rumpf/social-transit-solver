@@ -292,6 +292,8 @@ void Search::solve()
 
 	// Perform final saves after search completes
 	save_data();
+	cout << "Generating metrics for best known solution." << endl;
+	Obj->save_metrics(sol_best);
 }
 
 /**

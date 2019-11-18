@@ -232,3 +232,23 @@ double Objective::population_metric(int pop, vector<vector<double>> &distance, v
 
 	return multiplier * sum; // apply multiplication factor to result
 }
+
+/// Calculates the gravity metrics for all population centers for a given solution, and prints the result to an output file.
+void Objective::save_metrics(const vector<int> &fleet)
+{
+	vector<double> metrics = all_metrics(fleet); // calculate all metrics
+
+	ofstream out_file(METRIC_FILE);
+
+	if (out_file.is_open())
+	{
+		// Write comment line
+		out_file << "Community_Area_ID\tGravity_Metric" << fixed << setprecision(15) << endl;
+
+		// Write all metrics
+		for (int i = 0; i < metrics.size(); i++)
+			out_file << i + 1 << '\t' << metrics[i] << endl;
+
+		out_file.close();
+	}
+}

@@ -7,6 +7,7 @@ The objective function is implemented as a class equipped with its own attribute
 #pragma once
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <math.h>
 #include <ppl.h>
@@ -48,4 +49,5 @@ struct Objective
 	void population_to_all_facilities(int, const vector<double> &, vector<double> &); // calculates distance from a given source population center to all facilities and updates distance vector row
 	double facility_metric(int, vector<vector<double>> &); // calculates the gravity metric for a given facility and vector of distances to that facility
 	double population_metric(int, vector<vector<double>> &, vector<double> &); // calculates the gravity metric for a given population center, distance matrix, and facility metric vector
+	void save_metrics(const vector<int> &); // calculates gravity metrics for all population centers and prints to an output file
 };
