@@ -100,7 +100,12 @@ void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 		// Write iteration header
 		event_file << "\n==================================================\nIteration " << iteration << " / " << max_iterations << "\n==================================================\n\n";
 
-		///////////////////////////////////////////////////////////////////
+		// Write contents of event queue
+		while (events.size() > 0)
+		{
+			event_file << events.front() << endl;
+			events.pop();
+		}
 
 		event_file.close();
 	}
@@ -112,5 +117,19 @@ void EventLog::log_iteration(int iteration, double obj_current, double obj_best)
 		obj_file << fixed << setprecision(15);
 		obj_file << iteration << '\t' << obj_current << '\t' << obj_best << fixed << setprecision(15) << endl;
 		obj_file.close();
+	}
+
+	// Clear event queue
+	events = queue<string>();
+}
+
+/// Prints a keyboard halt message to the event log.
+void EventLog::halt()
+{
+	ofstream event_file(EVENT_LOG_FILE, mode);
+	if (event_file.is_open())
+	{
+		event_file << "\n############################################################\nSession Halted\n############################################################\n";
+		event_file.close();
 	}
 }

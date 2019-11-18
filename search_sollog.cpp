@@ -17,12 +17,6 @@ SolutionLog::SolutionLog(bool pickup)
 		load_solution(INPUT_SOLUTION_LOG_FILE);
 }
 
-/// Solution log destructor automatically calls the writing method to export the unordered map to a file.
-SolutionLog::~SolutionLog()
-{
-	save_solution();
-}
-
 /// Reads a given solution log file into the solution dictionary.
 void SolutionLog::load_solution(string in_file)
 {

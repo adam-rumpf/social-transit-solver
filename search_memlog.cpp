@@ -25,12 +25,6 @@ MemoryLog::MemoryLog(Search * search_in, bool pickup)
 		reset_memory();
 }
 
-/// Memory log destructor automatically calls the writing method to export the current memory structures to a file.
-MemoryLog::~MemoryLog()
-{
-	save_memory();
-}
-
 /// Reads the memory log file to set memory log attributes.
 void MemoryLog::load_memory()
 {

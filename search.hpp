@@ -123,10 +123,12 @@ struct EventLog
 	// Public attributes
 	ios_base::openmode mode; // file open mode (append or truncate)
 	int max_iterations; // iteration number cutoff
+	queue<string> events; // queue of events to log for the current iteration
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
 	void log_iteration(int, double, double); // appends an iteration report to the event log file
+	void halt(); // prints a message to the event log that the session has been halted
 };
 
 /**
@@ -160,7 +162,6 @@ struct MemoryLog
 
 	// Public methods
 	MemoryLog(Search *, bool); // constructor initializes internal search parameters associated with memory file
-	~MemoryLog(); // destructor automatically calls the memory writing method
 	void load_memory(); // reads contents of memory log file into memory log object
 	void reset_memory(); // sets memory structures according to the initial values from the search parameter file and the initial solution log file
 	void save_memory(); // writes contents of memory log object to the memory log file
@@ -190,7 +191,6 @@ struct SolutionLog
 
 	// Public methods
 	SolutionLog(bool); // constructor reads the solution log file and initializes the solution memory structure
-	~SolutionLog(); // destructor automatically calls the log writing method
 	void load_solution(string); // reads a given solution log into the dictionary
 	void save_solution(); // writes the current solution log to the log file
 	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information
