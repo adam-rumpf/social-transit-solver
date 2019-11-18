@@ -152,7 +152,7 @@ Parameters for the tabu search/simulated annealing hybrid algorithm.
 
 Contains the following rows:
 
-* `Elements`: Number of parameters listed on the following rows. Currently set to `15`.
+* `Elements`: Number of parameters listed on the following rows. Currently set to `16`.
 * `Continue`: Indicates whether to continue a previously-halted search using its printed log files. Set to `1` to continue the previous search or `0` to start a new search. Note that starting a new search wipes clean all of the files in the `log/` folder (except for the initial row of the solution log file, which is always required for initialization).
 * `Iterations`: Number of iterations to perform during the overall local search algorithm (can be safely terminated before this point by pressing `[Ctrl]+[C]`).
 * `Temp_Init`: Initial simulated annealing temperature.
@@ -168,6 +168,7 @@ Contains the following rows:
 * `Nonimp_In_Max`: Maximum value of inner nonimprovement counter (the inner counter roughly determines when the process should start trying to diversify).
 * `Nonimp_Out_Max`: Maximum value of outer nonimprovement counter (the outer counter roughly determines when the process should start trying to intensify).
 * `Step`: Increment of ADD/DROP moves.
+* `Exhaustive`: Indicates whether to conduct an exhaustive local search from the best known solution after the final iteration ends. Set to `1` to finish with an exhaustive search and `0` to skip it. Be aware that the exhaustive search may take a significant amount of time due to the large number of neighbors to evaluate.
 
 ### `transit_data.txt`
 
