@@ -8,6 +8,7 @@ Includes a signal handler to allow for keyboard halt via [Ctrl]+[C].
 The exit code should correspond to the circumstances of the exit.
 */
 
+#include <csignal>
 #include <iostream>
 #include "DEFINITIONS.hpp"
 #include "search.hpp"
@@ -18,7 +19,7 @@ using namespace std;
 Search * Solver;
 
 // Global keyboard stop signal handler
-void STOP_REQUEST(int signum);
+void STOP_REQUEST(int);
 
 /// Main driver.
 int main()
