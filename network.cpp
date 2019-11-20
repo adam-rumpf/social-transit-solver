@@ -146,22 +146,28 @@ Network::Network()
 			stringstream stream(line);
 
 			// Go through each piece of the line
-			getline(stream, piece, '\t'); // ID
-			getline(stream, piece, '\t'); // Name
-			getline(stream, piece, '\t'); // Type
-			int vehicle_type = stoi(piece);
-			getline(stream, piece, '\t'); // Fleet
-			getline(stream, piece, '\t'); // Circuit
-			double circuit_time = stod(piece);
-			getline(stream, piece, '\t'); // Scaling
-			double day_fraction = stod(piece);
-			getline(stream, piece, '\t'); // LB
-			int lb = stoi(piece);
-			getline(stream, piece, '\t'); // UB
-			int ub = stoi(piece);
-			getline(stream, piece, '\t'); // Fare
-			getline(stream, piece, '\t'); // Frequency
-			getline(stream, piece, '\t'); // Capacity
+			int vehicle_type;
+			double circuit_time;
+			double day_fraction;
+			int lb;
+			int ub;
+			try
+			{
+				getline(stream, piece, '\t'); // ID
+				getline(stream, piece, '\t'); // Name
+				getline(stream, piece, '\t'); // Type
+				vehicle_type = stoi(piece);
+				getline(stream, piece, '\t'); // Fleet
+				getline(stream, piece, '\t'); // Circuit
+				circuit_time = stod(piece);
+				getline(stream, piece, '\t'); // Scaling
+				day_fraction = stod(piece);
+				getline(stream, piece, '\t'); // LB
+				lb = stoi(piece);
+				getline(stream, piece, '\t'); // UB
+				ub = stoi(piece);
+			}
+			catch (out_of_range &e) {};
 
 			// Create a line object and add it to the list
 			Line * new_line = new Line(vehicle_type, lb, ub, circuit_time, vehicles[vehicle_type]->capacity, day_fraction, horizon);
