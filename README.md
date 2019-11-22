@@ -12,12 +12,68 @@ I would not expect this program to be of much use to anyone outside of our resea
 
 This program writes outputs to a local `log/` folder. The following files are produced:
 
-* `event.txt`: A log explaining what occurred during each iteration of the solution process, including the contents of the search neighborhood, the time spent searching, the selected move, the current objective value, and other events.
+* [`event.txt`](#eventtxt): A log giving a summary of the events during each iteration of the solution process. See below for details.
 * `final.txt`: Includes the best known solution vector along with its objective value.
-* `memory.txt`: The memory structures associated with the tabu search/simulated annealing hybrid search process. Used to continue a halted search process.
+* [`memory.txt`](#memorytxt): The memory structures associated with the tabu search/simulated annealing hybrid search process. Used to continue a halted search process. Not meant meant to be easily interpreted, but details are included below just in case.
 * `metrics.txt`: Accessibility metrics of each population center for the best known solution.
-* `objective.txt`: Log of the current and best objective values in each iteration of the search process.
-* `solution.txt`: Log of all previously-searched solutions along with their feasibility status, constraint function elements, objective values, and evaluation times. Used to maintain a solution dictionary in order to avoid having to process searched solutions a second time. Due to the unordered map used to store solutions internally during execution, the order of the rows is arbitrary and may change between executions.
+* `solution.txt`: Log of all previously-searched solutions along with their feasibility status, constraint function elements, objective values, and evaluation times. Used to maintain a solution dictionary in order to avoid having to process searched solutions a second time. Its format is the same as that of the input file [`initial_solution_log.txt`](#initial_solution_logtxt), but due to the unordered map used to store solutions internally during execution the order of the rows is arbitrary and may change between executions.
+
+The program also prints to the command line as it runs in order to report the main algorithm iteration number and other major events. During the neighborhood search, which is the most time-consuming part of the process, it prints a sequence of `*` and `.` characters as an indication that it is still working (specifically, it prints `*` whenever considering a new move during the first pass, and `.` for each iteration of Frank-Wolfe during constraint calculation).
+
+### `event.txt`
+
+The event log is formatted as a tab-separated table to facilitate automatic processing or insertion into a spreadsheet. Each row includes information about the results at the end of the current search iteration. The first row (iteration `0`) indicates the initial solution, for which most of the search result columns display a default value of `-1`.
+
+If the search is halted via keyboard stop request, a row consisting entirely of `-1` will be included to indicate the break.
+
+Includes the following columns:
+* `Iteration`: Iteration number.
+* `Obj_Current`: Current objective value.
+* `Obj_Best`: Best known objective value.
+* `New_Best`: Whether or not the best known objective was improved (`1` if true, `0` if false).
+* `Case`: Code indicating the case of the main search loop:
+  * `1`: Improvement over the previous solution was found.
+  * `2`: Nonimprovement but passed SA criterion.
+  * `3`: Nonimprovement but failed SA criterion.
+  * `4`: Final exhaustive search iteration.
+* `SA_Prob`: Probability of passing the SA criterion (if applicable, and `-1` otherwise).
+* `Jump`: Whether or not an attractive solution was jumped to as the result of the inner nonimprovement counter getting too high (`1` if true, `0` if false).
+* `Nonimp_In`: Value of inner nonimprovement counter.
+* `Nonimp_Out`: Value of outer nonimprovement counter.
+* `Tenure`: Current tabu tenures.
+* `Temperature`: Current simulated annealing temperature.
+* `ADD`: Line ID of any ADD moves made (`-1` if none).
+* `DROP`: Line ID of any DROP moves made (`-1` if none).
+* `Obj_Lookups`: Number of objective values successfully retrieved from the solution log.
+* `Con_Lookups`: Number of constraint values successfully retrieved from the solution log.
+* `Obj_Evals`: Number of objective values newly-evaluated for the solution log.
+* `Con_Evals`: Number of constraint values newly-evaluated for the solution log.
+* `ADD_First`: Number of ADD moves collected during the first pass.
+* `DROP_First`: Number of DROP moves collected during the first pass.
+* `ADD_Second`: Number of ADD moves collected during the second pass.
+* `DROP_Second`: Number of DROP moves collected during the second pass.
+* `SWAPs`: Number of SWAP moves collected.
+* `Total_Time`: Total time spent on entire iteration (in seconds).
+* `Solution`: Current solution vector, expressed as its string from the solution log.
+
+### `memory.txt`
+
+The memory log is meant for internal use by the search algorithm, but since it is formatted as a plain text file it can also be read for diagnostic purposes.
+
+After an initial comment line, it includes the following rows:
+* `add_tenure`: Tab-separated list of ADD tabu tenures for all solution vector elements.
+* `drop_tenure`: Tab-separated list of DROP tabu tenures for all solution vector elements.
+* `sol_current`: Tab-separated list representing current solution vector.
+* `sol_best`: Tab-separated list representing best known solution vector.
+* `obj_current`: Current objective value.
+* `obj_best`: Best known objective value.
+* `iteration`: Current iteration number.
+* `nonimp_in`: Inner nonimprovement counter.
+* `nonimp_out`: Outer nonimprovement counter.
+* `tenure`: Current tenure to assign to new tabu moves.
+* `temperature`: Current simulated annealing temperature.
+* `attractive_objectives`: Tab-separated list of attractive solution objectives.
+* `attractive_solutions`: All remaining rows consist of tab-separated lists defining the attractive solution vectors, in the same order as the objectives in the above row.
 
 ## Data Folder
 
