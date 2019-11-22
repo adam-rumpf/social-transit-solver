@@ -283,8 +283,8 @@ void Search::solve()
 		// Allow tabu tenures to decay
 		for (int i = 0; i < sol_size; i++)
 		{
-			add_tenure[i] = max(add_tenure[i] - 1, 0.0);
-			drop_tenure[i] = max(drop_tenure[i] - 1, 0.0);
+			add_tenure[i] = max(add_tenure[i] - 1.0, 0.0);
+			drop_tenure[i] = max(drop_tenure[i] - 1.0, 0.0);
 		}
 
 		// Apply cooling schedule
@@ -300,11 +300,13 @@ void Search::solve()
 		EveLog->total_time = (1.0*clock() - start) / CLOCKS_PER_SEC;
 		EveLog->log_iteration(sol_current);
 
+		// Save data
+		save_data();
+
 		// Safely quit if a keyboard halt has been requested
 		if (keyboard_halt == true)
 		{
 			EveLog->halt();
-			save_data();
 			exit(KEYBOARD_HALT);
 		}
 	}
@@ -398,6 +400,8 @@ neighbor_pair Search::neighborhood_search()
 	// Search until finding at least two feasible neighbors (in general we will find many more)
 	while (add_moves2.size() + drop_moves2.size() < 2)
 	{
+		cout << '|';
+
 		// ADD move first pass
 
 		// Repeat until reaching our first-pass bound or running out of candidates
@@ -420,7 +424,7 @@ neighbor_pair Search::neighborhood_search()
 				continue;
 
 			// Find objective and logged information for candidate solution
-			cout << '*';
+			cout << 'a';
 			sol_candidate = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
 			bool new_candidate; // whether the candidate is new to the solution log
 			if (SolLog->solution_exists(sol_candidate) == true)
@@ -483,7 +487,7 @@ neighbor_pair Search::neighborhood_search()
 				continue;
 
 			// Find objective and logged information for candidate solution
-			cout << '*';
+			cout << 'd';
 			sol_candidate = make_move(NO_ID, choice); // solution vector resulting from chosen DROP
 			bool new_candidate; // whether the candidate is new to the solution log
 			if (SolLog->solution_exists(sol_candidate) == true)
@@ -639,7 +643,7 @@ neighbor_pair Search::neighborhood_search()
 				break;
 
 			drop_loop = 0;
-			cout << '*';
+			cout << 's';
 
 			// Iterate through the DROP list (breaks if we reach a stopping condition, or upon iterating to the same position as the current ADD iterator)
 			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin(); drop_it != drop_moves2.end(); drop_it++)
@@ -822,7 +826,6 @@ void Search::cool_temperature()
 /// Writes current memory structures to the output logs.
 void Search::save_data()
 {
-	cout << "\n---------- SAVING DATA ----------\n" << endl;
 	MemLog->save_memory();
 	SolLog->save_solution();
 }

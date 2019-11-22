@@ -296,8 +296,8 @@ void MemoryLog::output_best()
 		log_file << Solver->obj_best << endl;
 
 		log_file.close();
-		cout << "Successfully recorded final solution." << endl;
+		cout << "Successfully recorded solution." << endl;
 	}
 	else
-		cout << "Failed to write final solution." << endl;
+		cout << "Failed to write solution." << endl;
 }
