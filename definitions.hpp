@@ -22,7 +22,6 @@
 #define EVENT_LOG_FILE "log/event.txt"
 #define MEMORY_LOG_FILE "log/memory.txt"
 #define FINAL_SOLUTION_FILE "log/final.txt"
-#define OBJECTIVE_LOG_FILE "log/objective.txt"
 
 // Exit codes
 #define SUCCESSFUL_EXIT 0
@@ -58,8 +57,15 @@
 #define SOL_LOG_OBJ 3
 #define SOL_LOG_OBJ_TIME 4
 
+// Event log codes
+#define EVENT_IMPROVEMENT 1
+#define EVENT_NONIMP_PASS 2
+#define EVENT_NONIMP_FAIL 3
+#define EVENT_EXHAUSTIVE 4
+
 // Fixed parameters
 #define UC_COMPONENTS 3 // number of components of the user cost vector
+#define EVENT_LOG_COLUMNS 24 // number of columns in the event log
 #define DELIMITER '_' // delimiter to use for defining solution log names
 
 // Other technical definitions

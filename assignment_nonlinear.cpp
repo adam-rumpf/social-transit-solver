@@ -108,6 +108,7 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 	{
 		// Loop continues until achieving sufficiently low error or reaching an iteration cutoff
 		iteration++;
+		cout << '.';
 
 		// Update all arc costs based on the current flow
 		for_each(Net->core_arcs.begin(), Net->core_arcs.end(), [&](Arc * a)

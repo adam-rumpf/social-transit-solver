@@ -118,7 +118,7 @@ struct Search
 /**
 Event logger.
 
-Reports the events that occur during each iteration of the search process and prints them to an output log for later review. Also outputs a log of the current and best objective values in each iteration.
+Reports the events that occur during each iteration of the search process and prints them to an output log for later review.
 
 In order to reduce the number of times we need to open the output file, the results of an iteration are only written at the end of an iteration. Until that point, internal attributes and search object attributes are used to store the events of the iteration.
 */
@@ -126,15 +126,35 @@ struct EventLog
 {
 	// Public attributes
 	ios_base::openmode mode; // file open mode (append or truncate)
-	int max_iterations; // iteration number cutoff
-	queue<string> events; // queue of events to log for the current iteration
-	bool exhaustive = false; // whether the exhaustive search is underway
+	int iteration; // current iteration
+	double tenure; // current tabu tenure
+	double temperature; // current simulated annealing temperature
+	double obj_current; // current objective value
+	double obj_best; // best known objective value
+	int new_best; // whether a new best solution has been found
+	int event_case; // code to describe case of main loop
+	double sa_prob; // simulated annealing pass probability
+	int jump; // whether we have jumped to an attractive solution
+	int nonimp_in; // inner nonimprovement counter
+	int nonimp_out; // outer nonimprovement counter
+	int add_id; // line ID of ADD move
+	int drop_id; // line ID of DROP move
+	int obj_lookups; // count of objectives looked up
+	int con_lookups; // count of constraints looked up
+	int obj_evals; // count of objectives calculated
+	int con_evals; // count of constraints calculated
+	int add_first; // size of first-pass ADD list
+	int drop_first; // size of first-pass DROP list
+	int add_second; // size of second-pass ADD list
+	int drop_second; // size of second-pass DROP list
+	int swaps; // size of SWAP list
+	double total_time; // time spent on iteration
 
 	// Public methods
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
-	void log_iteration(int, double, double); // appends an iteration report to the event log file
-	void halt(); // prints a message to the event log that the session has been halted
-	void exhaustive_begin(); // prints a message to the event log that the exhaustive local search has begun
+	void log_iteration(const vector<int> &); // writes a row for the current iteration to the event log file
+	void reset(); // sets event log attributes to their default values
+	void halt(); // writes a row to indicate that a halt has taken place
 };
 
 /**

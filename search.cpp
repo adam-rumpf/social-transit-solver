@@ -160,10 +160,13 @@ void Search::solve()
 
 	while (iteration < max_iterations)
 	{
+		clock_t start = clock(); // iteration timer
+
 		iteration++;
 		cout << "\n============================================================" << endl;
 		cout << "Iteration " << iteration << " / " << max_iterations << endl;
 		cout << "============================================================" << endl << endl;
+		EveLog->iteration = iteration;
 
 		// Perform neighborhood search
 		nbhd_sol = neighborhood_search();
@@ -173,13 +176,7 @@ void Search::solve()
 		if (nbhd_obj1 < obj_current)
 		{
 			// Improvement iteration: make the move and make it tabu to undo it
-			EveLog->events.push("\nImprovement iteration (" + to_string(nbhd_obj1) + " < " + to_string(obj_best) + ").");
-			if (nbhd_sol1.second == NO_ID)
-				EveLog->events.push("Making move ADD(" + to_string(nbhd_sol1.first) + ").");
-			else if (nbhd_sol1.first == NO_ID)
-				EveLog->events.push("Making move DROP(" + to_string(nbhd_sol1.second) + ").");
-			else
-				EveLog->events.push("Making move SWAP(" + to_string(nbhd_sol1.first) + "<-" + to_string(nbhd_sol1.second) + ").");
+			EveLog->event_case = EVENT_IMPROVEMENT;
 
 			nonimp_out = 0; // reset outer nonimprovement counter
 			tenure = tenure_init; // reset tabu tenures
@@ -191,6 +188,7 @@ void Search::solve()
 			{
 				current_vehicles[vehicle_type[nbhd_sol1.first]]++; // increase vehicle usage
 				drop_tenure[nbhd_sol1.first] = tenure; // make it tabu to DROP from the new ADD line
+				EveLog->add_id = nbhd_sol1.first;
 			}
 
 			// DROP-related updates
@@ -198,12 +196,13 @@ void Search::solve()
 			{
 				current_vehicles[vehicle_type[nbhd_sol1.second]]--; // decrease vehicle usage
 				add_tenure[nbhd_sol1.second] = tenure; // make it tabu to ADD to the new DROP line
+				EveLog->drop_id = nbhd_sol1.second;
 			}
 
 			// Update best known solution if needed
 			if (obj_current < obj_best)
 			{
-				EveLog->events.push("New best solution found!");
+				EveLog->new_best = 1;
 				sol_best = sol_current;
 				obj_best = obj_current;
 			}
@@ -211,7 +210,6 @@ void Search::solve()
 		else
 		{
 			// Nonimprovement iteration
-			EveLog->events.push("\nNonimprovement iteration (" + to_string(nbhd_obj1) + " >= " + to_string(obj_best) + ").");
 
 			// Increase nonimprovement counters
 			nonimp_in++;
@@ -219,16 +217,11 @@ void Search::solve()
 
 			// Evaluate simulated annealing criterion
 			double prob = exp(-(nbhd_obj1 - obj_current) / temperature);
+			EveLog->sa_prob = prob;
 			if (((1.0 * rand()) / RAND_MAX) < prob)
 			{
 				// If passed, make the move as in an improvement iteration but with increased tabus, then keep the second best solution as attractive
-				EveLog->events.push("Passed SA criterion with pass probability: " + to_string(prob));
-				if (nbhd_sol1.second == NO_ID)
-					EveLog->events.push("Making move ADD(" + to_string(nbhd_sol1.first) + ").");
-				else if (nbhd_sol1.first == NO_ID)
-					EveLog->events.push("Making move DROP(" + to_string(nbhd_sol1.second) + ").");
-				else
-					EveLog->events.push("Making move SWAP(" + to_string(nbhd_sol1.first) + "<-" + to_string(nbhd_sol1.second) + ").");
+				EveLog->event_case = EVENT_NONIMP_PASS;
 
 				nonimp_in = 0; // reset inner nonimprovement counter
 				increase_tenure(); // increase tabu tenures
@@ -240,6 +233,7 @@ void Search::solve()
 				{
 					current_vehicles[vehicle_type[nbhd_sol1.first]]++; // increase vehicle usage
 					drop_tenure[nbhd_sol1.first] = tenure; // make it tabu to DROP from the new ADD line
+					EveLog->add_id = nbhd_sol1.first;
 				}
 
 				// DROP-related updates
@@ -247,6 +241,7 @@ void Search::solve()
 				{
 					current_vehicles[vehicle_type[nbhd_sol1.second]]--; // decrease vehicle usage
 					add_tenure[nbhd_sol1.second] = tenure; // make it tabu to ADD to the new DROP line
+					EveLog->drop_id = nbhd_sol1.second;
 				}
 
 				// Add the second best solution as attractive
@@ -255,7 +250,7 @@ void Search::solve()
 			else
 			{
 				// If failed, make no moves but keep the best neighbor as attractive
-				EveLog->events.push("No move. Failed SA criterion with pass probability: " + to_string(prob));
+				EveLog->event_case = EVENT_NONIMP_FAIL;
 				attractive_solutions.push_back(make_pair(make_move(nbhd_sol1.first, nbhd_sol1.second), nbhd_obj1));
 			}
 		}
@@ -264,10 +259,7 @@ void Search::solve()
 
 		// Trim the attractive solution set if too long
 		if (attractive_solutions.size() > attractive_max)
-		{
-			EveLog->events.push("\nCulling attractive solution set.");
 			pop_attractive(false); // in no-replace mode
-		}
 
 		// If inner nonimprovement counter is too high, take actions to diversify
 		if (nonimp_in > nonimp_in_max)
@@ -276,10 +268,9 @@ void Search::solve()
 			nonimp_out++; // increment outer counter
 			increase_tenure(); // increase tabu tenures
 
-			EveLog->events.push("\nInner nonimprovement counter maxed out. Taking diversification actions.\nIncreasing tenures to " + to_string(tenure) + ".\nMoving to a random attractive solution.");
-
 			// Move to a random attractive solution
 			pop_attractive(true); // replace mode resets current solution
+			EveLog->jump = 1;
 
 			// Recalculate vehicle usage
 			vehicle_totals();
@@ -287,10 +278,7 @@ void Search::solve()
 
 		// If outer nonimprovement counter is too high, take actions to intensify
 		if (nonimp_out > nonimp_out_max)
-		{
 			tenure = tenure_init; // reset tabu tenures
-			EveLog->events.push("\nOuter nonimprovement counter maxed out. Taking intensification actions. Resetting tenures.");
-		}
 
 		// Allow tabu tenures to decay
 		for (int i = 0; i < sol_size; i++)
@@ -303,7 +291,14 @@ void Search::solve()
 		cool_temperature();
 
 		// Log the results of the iteration
-		EveLog->log_iteration(iteration, obj_current, obj_best);
+		EveLog->obj_current = obj_current;
+		EveLog->obj_best = obj_best;
+		EveLog->nonimp_in = nonimp_in;
+		EveLog->nonimp_out = nonimp_out;
+		EveLog->tenure = tenure;
+		EveLog->temperature = temperature;
+		EveLog->total_time = (1.0*clock() - start) / CLOCKS_PER_SEC;
+		EveLog->log_iteration(sol_current);
 
 		// Safely quit if a keyboard halt has been requested
 		if (keyboard_halt == true)
@@ -322,7 +317,6 @@ void Search::solve()
 		cout << "\n============================================================" << endl;
 		cout << "Final exhaustive search" << endl;
 		cout << "============================================================" << endl << endl;
-		EveLog->exhaustive_begin();
 
 		// Set current solution to best
 		sol_current = sol_best;
@@ -360,8 +354,6 @@ neighbor_pair Search::neighborhood_search()
 
 	After obtaining enough ADD and DROP move candidates we assemble a list of SWAP move candidates. A SWAP move is made by combining an ADD candidate with a DROP candidate (provided that both candidates involve the same type of vehicle). Because of the potentially large number of possible combinations that could be made, we generate combinations by moving through the ADD and DROP candidate lists in ascending order of objective until obtaining enough feasible SWAP moves.
 	*/
-
-	clock_t nbhd_time = clock(); // neighborhood search timer for event log
 
 	/*
 	Initialize candidate move containers.
@@ -428,6 +420,7 @@ neighbor_pair Search::neighborhood_search()
 				continue;
 
 			// Find objective and logged information for candidate solution
+			cout << '*';
 			sol_candidate = make_move(choice, NO_ID); // solution vector resulting from chosen ADD
 			bool new_candidate; // whether the candidate is new to the solution log
 			if (SolLog->solution_exists(sol_candidate) == true)
@@ -466,8 +459,7 @@ neighbor_pair Search::neighborhood_search()
 			add_moves1.push(make_tuple(obj_candidate, make_pair(choice, NO_ID), new_candidate));
 			add_chosen.insert(choice);
 		}
-		EveLog->events.push("ADD first pass includes " + to_string(add_moves1.size()) + " moves.");
-		cout << '.';
+		EveLog->add_first += add_moves1.size();
 
 		// DROP move first pass
 
@@ -491,6 +483,7 @@ neighbor_pair Search::neighborhood_search()
 				continue;
 
 			// Find objective and logged information for candidate solution
+			cout << '*';
 			sol_candidate = make_move(NO_ID, choice); // solution vector resulting from chosen DROP
 			bool new_candidate; // whether the candidate is new to the solution log
 			if (SolLog->solution_exists(sol_candidate) == true)
@@ -529,8 +522,7 @@ neighbor_pair Search::neighborhood_search()
 			drop_moves1.push(make_tuple(obj_candidate, make_pair(NO_ID, choice), new_candidate));
 			drop_chosen.insert(choice);
 		}
-		EveLog->events.push("DROP first pass includes " + to_string(drop_moves1.size()) + " moves.");
-		cout << '.';
+		EveLog->drop_first += drop_moves1.size();
 
 		// ADD move second pass
 
@@ -561,8 +553,7 @@ neighbor_pair Search::neighborhood_search()
 			add_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
 			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
-		EveLog->events.push("ADD second pass includes " + to_string(add_moves2.size()) + " moves.");
-		cout << '.';
+		EveLog->add_second += add_moves2.size();
 
 		// DROP move second pass
 
@@ -593,8 +584,7 @@ neighbor_pair Search::neighborhood_search()
 			drop_moves2.push_back(make_pair(get<0>(move_triple), get<1>(move_triple)));
 			final_moves.push(make_pair(get<0>(move_triple), get<1>(move_triple)));
 		}
-		EveLog->events.push("DROP second pass includes " + to_string(drop_moves2.size()) + " moves.");
-		cout << '.';
+		EveLog->drop_second += drop_moves2.size();
 
 		// Unsuccessful search handling
 		if (add_moves2.size() + drop_moves2.size() + add_candidates.size() + drop_candidates.size() < 2)
@@ -649,7 +639,7 @@ neighbor_pair Search::neighborhood_search()
 				break;
 
 			drop_loop = 0;
-			cout << '.';
+			cout << '*';
 
 			// Iterate through the DROP list (breaks if we reach a stopping condition, or upon iterating to the same position as the current ADD iterator)
 			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin(); drop_it != drop_moves2.end(); drop_it++)
@@ -741,7 +731,7 @@ neighbor_pair Search::neighborhood_search()
 			add_loop++;
 		}
 	}
-	EveLog->events.push("SWAP includes " + to_string(swaps) + " moves.");
+	EveLog->swaps = swaps;
 
 	// Clear second-pass move lists
 	add_moves2.clear();
@@ -752,9 +742,11 @@ neighbor_pair Search::neighborhood_search()
 	final_moves.pop();
 	pair<pair<int, int>, double> neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
 
-	EveLog->events.push("\nSpent " + to_string((1.0*clock() - nbhd_time) / CLOCKS_PER_SEC) + " seconds on the neighborhood search.");
-	EveLog->events.push("Looked up " + to_string(obj_lookups) + " objectives and " + to_string(con_lookups) + " constraints.");
-	EveLog->events.push("Generated " + to_string(new_obj) + " objectives and " + to_string(new_con) + " constraints.");
+	EveLog->obj_lookups = obj_lookups;
+	EveLog->con_lookups = con_lookups;
+	EveLog->obj_evals = new_obj;
+	EveLog->con_evals = new_con;
+
 	cout << endl;
 
 	return make_pair(neighbor1, neighbor2);
@@ -986,20 +978,27 @@ void Search::exhaustive_search()
 	// Continue main loop until reaching local optimality
 	while (move.second < INFINITY)
 	{
+		clock_t start = clock(); // iteration timer
+
 		exhaustive_iteration++;
 		cout << "\n---------- Exhaustive Search Iteration " << exhaustive_iteration << " ----------\n" << endl;
+		EveLog->iteration = exhaustive_iteration;
+		EveLog->event_case = EVENT_EXHAUSTIVE;
 
 		// Make local move and update objective and vehicle usage
-		EveLog->events.push("Improved objective (" + to_string(move.second) + " < " + to_string(obj_current) + ").");
 		sol_current = make_move(move.first.first, move.first.second);
 		obj_current = move.second;
 		vehicle_totals();
+		EveLog->obj_current = obj_current;
+		EveLog->obj_best = obj_current;
+		EveLog->new_best = 1;
 
 		if (move.first.second == NO_ID)
-			EveLog->events.push("Making move ADD(" + to_string(move.first.first) + ").");
+			EveLog->add_id = move.first.first;
 		else if (move.first.first == NO_ID)
-			EveLog->events.push("Making move DROP(" + to_string(move.first.second) + ").");
-		EveLog->log_iteration(exhaustive_iteration, obj_current, obj_current);
+			EveLog->drop_id = move.first.second;
+		EveLog->total_time = (1.0*clock() - start) / CLOCKS_PER_SEC;
+		EveLog->log_iteration(sol_current);
 
 		// Repeat neighborhood search
 		move = best_neighbor();
