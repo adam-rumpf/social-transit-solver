@@ -244,8 +244,9 @@ void Search::solve()
 					EveLog->drop_id = nbhd_sol1.second;
 				}
 
-				// Add the second best solution as attractive
-				attractive_solutions.push_back(make_pair(make_move(nbhd_sol2.first, nbhd_sol2.second), nbhd_obj2));
+				// Add the second best solution as attractive (unless there was only one feasible neigbhor)
+				if (nbhd_obj2 < INFINITY)
+					attractive_solutions.push_back(make_pair(make_move(nbhd_sol2.first, nbhd_sol2.second), nbhd_obj2));
 			}
 			else
 			{
@@ -597,14 +598,29 @@ neighbor_pair Search::neighborhood_search()
 			
 			// Reset tabu tenures
 			tenure = tenure_init;
+
+			// Test to see whether at least one move is still tabu
+			bool tabu_exists = false;
+			for (int i = 0; i < sol_size; i++)
+			{
+				if ((add_tenure[i] > 0) || (drop_tenure[i] > 0))
+				{
+					tabu_exists = true;
+					break;
+				}
+			}
+
+			// If no moves are tabu and we are still in the failure case, we can only have one feasible neighbor left and we end the ADD/DROP search
+			if (tabu_exists == false)
+				break;
 			
-			// Delete the tabu list and reset the candidate lists to prepare to go through this loop a second time
+			// Decrement the tabu list and reset the candidate lists to prepare to go through this loop a second time
 			add_candidates.resize(sol_size);
 			drop_candidates.resize(sol_size);
 			for (int i = 0; i < sol_size; i++)
 			{
-				add_tenure[i] = 0;
-				drop_tenure[i] = 0;
+				add_tenure[i] = max(add_tenure[i] - 1.0, 0.0);
+				drop_tenure[i] = max(drop_tenure[i] - 1.0, 0.0);
 				add_candidates[i] = i;
 				drop_candidates[i] = i;
 			}
@@ -741,10 +757,14 @@ neighbor_pair Search::neighborhood_search()
 	add_moves2.clear();
 	drop_moves2.clear();
 
-	// Return the two best solutions from the final move queue
+	// Return the two best solutions from the final move queue (or the single feasible solution plus a placeholder)
 	pair<pair<int, int>, double> neighbor1 = make_pair(final_moves.top().second, final_moves.top().first);
 	final_moves.pop();
-	pair<pair<int, int>, double> neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
+	pair<pair<int, int>, double> neighbor2;
+	if (final_moves.empty() == false)
+		neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
+	else
+		neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
 
 	EveLog->obj_lookups = obj_lookups;
 	EveLog->con_lookups = con_lookups;
