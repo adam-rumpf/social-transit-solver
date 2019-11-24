@@ -78,6 +78,8 @@ The overall process being used here is the Frank-Wolfe algorithm, which iterativ
 */
 pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &fleet, const pair<vector<double>, double> &initial_sol)
 {
+	cout << '*';
+
 	// Initialize variables
 	pair<vector<double>, double> sol_next; // flow/waiting pair calculated as the linearized submodel solution
 	pair<vector<double>, double> sol_previous; // flow/waiting pair for the previous solution
@@ -93,6 +95,7 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 	});
 
 	// Calculate arc costs based on initial flow
+	cout << '.';
 	vector<double> arc_costs(Net->core_arcs.size());
 	for_each(Net->core_arcs.begin(), Net->core_arcs.end(), [&](Arc * a)
 	{

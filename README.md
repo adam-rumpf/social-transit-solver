@@ -18,7 +18,7 @@ This program writes outputs to a local `log/` folder. The following files are pr
 * `metrics.txt`: Accessibility metrics of each population center for the best known solution.
 * `solution.txt`: Log of all previously-searched solutions along with their feasibility status, constraint function elements, objective values, and evaluation times. Used to maintain a solution dictionary in order to avoid having to process searched solutions a second time. Its format is the same as that of the input file [`initial_solution_log.txt`](#initial_solution_logtxt), but due to the unordered map used to store solutions internally during execution the order of the rows is arbitrary and may change between executions.
 
-The program also prints to the command line as it runs in order to report the main algorithm iteration number and other major events. During the neighborhood search, which is the most time-consuming part of the process, it prints a sequence of `*` and `.` characters as an indication that it is still working (specifically, it prints `*` whenever considering a new move during the first pass, and `.` for each iteration of Frank-Wolfe during constraint calculation).
+The program also prints to the command line as it runs in order to report the main algorithm iteration number and other major events. During the neighborhood search, which is the most time-consuming part of the process, it prints a sequence of characters as an indication that it is still working (specifically, it prints `|` when starting or restarting the first pass, `a` whenever considering a new ADD move during the first pass, `d` for a DROP move, `*` when beginning a constraint calculation, and `.` for each iteration of Frank-Wolfe during constraint calculation).
 
 ### `event.txt`
 

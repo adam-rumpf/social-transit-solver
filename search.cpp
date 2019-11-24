@@ -302,6 +302,7 @@ void Search::solve()
 		EveLog->log_iteration(sol_current);
 
 		// Save data
+		cout << "\n" << (1.0*clock() - start) / CLOCKS_PER_SEC << " seconds spent on iteration." << endl;
 		save_data();
 
 		// Safely quit if a keyboard halt has been requested
