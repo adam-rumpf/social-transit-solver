@@ -21,9 +21,19 @@ Search * Solver;
 // Global keyboard stop signal handler
 void STOP_REQUEST(int);
 
-/// Main driver.
-int main()
+/**
+Main driver.
+
+Accepts an optional command line argument to specify a base directory, which will be used to look for the data/ and log/ directories. If none is provided, the current directory will be used.
+*/
+int main(int argc, char *argv[])
 {
+	// Get base directory (if provided by command line arguments)
+	if (argc > 1)
+		FILE_BASE = argv[1];
+	else
+		FILE_BASE = "";
+
 	// Register signal handler for stop request
 	signal(SIGINT, STOP_REQUEST);
 
