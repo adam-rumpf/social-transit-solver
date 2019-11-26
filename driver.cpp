@@ -18,6 +18,9 @@ using namespace std;
 // Global search object pointer
 Search * Solver;
 
+// Global file base name
+string FILE_BASE;
+
 // Global keyboard stop signal handler
 void STOP_REQUEST(int);
 
@@ -45,8 +48,6 @@ int main(int argc, char *argv[])
 
 	// Delete solver to automate shutdown process
 	delete Solver;
-
-	cin.get();////////////////////////////////////// remove later
 
 	return SUCCESSFUL_EXIT;
 }

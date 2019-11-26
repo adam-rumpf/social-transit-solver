@@ -10,7 +10,7 @@ Network::Network()
 	// Read problem file to get time horizon
 	double horizon = 1440.0; // default to whole 24 hours
 	ifstream problem_file;
-	problem_file.open(PROBLEM_FILE);
+	problem_file.open(FILE_BASE + PROBLEM_FILE);
 	if (problem_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -33,7 +33,7 @@ Network::Network()
 
 	// Read node file and create node lists
 	ifstream node_file;
-	node_file.open(NODE_FILE);
+	node_file.open(FILE_BASE + NODE_FILE);
 	if (node_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -91,7 +91,7 @@ Network::Network()
 	// Read vehicle file and record the information required to define the vehicle types and lines
 	
 	ifstream vehicle_file;
-	vehicle_file.open(VEHICLE_FILE);
+	vehicle_file.open(FILE_BASE + VEHICLE_FILE);
 	if (vehicle_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -130,7 +130,7 @@ Network::Network()
 
 	// Read transit file and create line list
 	ifstream transit_file;
-	transit_file.open(TRANSIT_FILE);
+	transit_file.open(FILE_BASE + TRANSIT_FILE);
 	if (transit_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -184,7 +184,7 @@ Network::Network()
 
 	// Read arc file and create arc lists
 	ifstream arc_file;
-	arc_file.open(ARC_FILE);
+	arc_file.open(FILE_BASE + ARC_FILE);
 	if (arc_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -260,7 +260,7 @@ Network::Network()
 
 	// Read OD file and create travel demand lists for nodes
 	ifstream od_file;
-	od_file.open(OD_FILE);
+	od_file.open(FILE_BASE + OD_FILE);
 	if (od_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

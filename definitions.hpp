@@ -70,6 +70,3 @@
 
 // Other technical definitions
 #define EPSILON 0.00000001 // very small positive value
-
-// Global variables
-string FILE_BASE; // base directory of data/ and log/ directories

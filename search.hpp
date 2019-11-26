@@ -30,6 +30,8 @@ Called by the main() function after all subroutine objects have been initialized
 
 using namespace std;
 
+extern string FILE_BASE;
+
 typedef pair<pair<pair<int, int>, double>, pair<pair<int, int>, double>> neighbor_pair; // structure of neighborhood search output
 typedef priority_queue<tuple<double, pair<int, int>, bool>, vector<tuple<double, pair<int, int>, bool>>, greater<tuple<double, pair<int, int>, bool>>> candidate_queue; // min-priority queue for storing objective/move/new tuples in the neighborhood search
 typedef priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<pair<double, pair<int, int>>>> neighbor_queue; // min-priority queue for storing objective/move pairs at the end of the neighborhood search

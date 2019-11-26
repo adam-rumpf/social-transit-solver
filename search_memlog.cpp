@@ -30,7 +30,7 @@ void MemoryLog::load_memory()
 {
 	// Read memory log file
 	ifstream log_file;
-	log_file.open(MEMORY_LOG_FILE);
+	log_file.open(FILE_BASE + MEMORY_LOG_FILE);
 	if (log_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -171,7 +171,7 @@ void MemoryLog::reset_memory()
 
 	// Read search parameter file
 	ifstream param_file;
-	param_file.open(SEARCH_FILE);
+	param_file.open(FILE_BASE + SEARCH_FILE);
 	if (param_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -220,7 +220,7 @@ void MemoryLog::reset_memory()
 /// Writes memory log attributes to the memory log file. Also calls a method to output the best known solution as a separate file.
 void MemoryLog::save_memory()
 {
-	ofstream log_file(MEMORY_LOG_FILE);
+	ofstream log_file(FILE_BASE + MEMORY_LOG_FILE);
 
 	if (log_file.is_open())
 	{
@@ -280,7 +280,7 @@ void MemoryLog::save_memory()
 /// Writes an output file containing only the best solution and its objective value.
 void MemoryLog::output_best()
 {
-	ofstream log_file(FINAL_SOLUTION_FILE);
+	ofstream log_file(FILE_BASE + FINAL_SOLUTION_FILE);
 
 	if (log_file.is_open())
 	{

@@ -23,6 +23,8 @@ The objective function is implemented as a class equipped with its own attribute
 using namespace std;
 using namespace concurrency;
 
+extern string FILE_BASE;
+
 typedef pair<double, int> dist_pair; // used to define a min-priority queue of distance/ID pairs ordered by first element
 
 /**

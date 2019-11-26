@@ -13,6 +13,7 @@ Solves the Spiess and Florian model to return the user flows based on a given so
 #include <string>
 #include <ppl.h>
 #include <queue>
+#include <string>
 #include <utility>
 #include <unordered_set>
 #include <vector>
@@ -21,6 +22,8 @@ Solves the Spiess and Florian model to return the user flows based on a given so
 
 using namespace std;
 using namespace concurrency;
+
+extern string FILE_BASE;
 
 typedef pair<double, int> arc_cost_pair; // used to define a priority queue of combined cost/ID pairs sorted by the first element
 

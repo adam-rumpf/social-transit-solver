@@ -16,6 +16,8 @@ Includes a Network, Arc, Node, Line, and Vehicle class. Objects from these class
 
 using namespace std;
 
+extern string FILE_BASE;
+
 // Structure declarations
 struct Network;
 struct Node;

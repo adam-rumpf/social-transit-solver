@@ -2,7 +2,9 @@
 
 The main tabu search/simulated annealing hybrid solution algorithm for use in a research project of mine dealing with a public transit design model with social access objectives.
 
-This program shares a large amount of code with a [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single), including its objective function, constraint function, and assignment model. This program largely consists of a search process that uses these modules as subroutines.
+This program shares a large amount of code with a [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single), including its objective function, constraint function, and assignment model. It largely consists of a search process that uses these modules as subroutines.
+
+This program requires an input folder called `data/` and an output folder called `log/`, both of which will be explained below. By default the program will expect them in its local directory, but it can be passed a command line argument to specify a different base directory for where to find `data/` and `log/`.
 
 Note that this program may take an extremely long time to run for large problem instances. A search parameter file allows the user to specify the number of search iterations. The program can also be terminated early by pressing `[Ctrl]+[C]` during its execution, which causes the it to safely quit at the end of the current iteration (which may still take a fair amount of time).
 

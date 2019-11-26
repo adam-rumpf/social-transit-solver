@@ -17,7 +17,7 @@ pair<vector<int>, double> get_initial_solution()
 
 	// Read specified file
 	ifstream log_file;
-	log_file.open(INPUT_SOLUTION_LOG_FILE);
+	log_file.open(FILE_BASE + INPUT_SOLUTION_LOG_FILE);
 	if (log_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
