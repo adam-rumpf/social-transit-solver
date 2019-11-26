@@ -2,7 +2,7 @@
 
 #include "search.hpp"
 
-/// Search constructor initializes Network, Objective, and Constraint objects.
+/// Search constructor initializes Network, Objective, and Constraint objects and loads search parameters.
 Search::Search()
 {
 	Net = new Network(); // network object
@@ -10,32 +10,10 @@ Search::Search()
 	Con = new Constraint(Net); // constraint function object
 	sol_size = Net->lines.size(); // get solution vector size
 	srand(time(NULL)); // seed random number generator
-}
-
-/// Search destructor deletes Network, Objective, and Constraint objects created by the constructor.
-Search::~Search()
-{
-	delete Net;
-	delete Obj;
-	delete Con;
-
-	// Only delete logger objects if they have been instantiated
-	if (started == true)
-	{
-		delete EveLog;
-		delete MemLog;
-		delete SolLog;
-	}
-}
-
-/// Main driver of the solution algorithm. Loads parameter files, calls main search loop, and handles final output.
-void Search::solve()
-{
-	started = true;
 
 	// Load search parameters
 	ifstream parameter_file;
-	parameter_file.open(SEARCH_FILE);
+	parameter_file.open(FILE_BASE + SEARCH_FILE);
 	if (parameter_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -57,7 +35,7 @@ void Search::solve()
 			getline(stream, piece, '\t'); // Label
 			getline(stream, piece, '\t'); // Value
 
-			// Expected data
+										  // Expected data
 			switch (count)
 			{
 			case 1:
@@ -123,6 +101,28 @@ void Search::solve()
 		cout << "Search parameter file failed to open." << endl;
 		exit(FILE_NOT_FOUND);
 	}
+}
+
+/// Search destructor deletes Network, Objective, and Constraint objects created by the constructor.
+Search::~Search()
+{
+	delete Net;
+	delete Obj;
+	delete Con;
+
+	// Only delete logger objects if they have been instantiated
+	if (started == true)
+	{
+		delete EveLog;
+		delete MemLog;
+		delete SolLog;
+	}
+}
+
+/// Main driver of the solution algorithm. Calls main search loop and handles final output.
+void Search::solve()
+{
+	started = true;
 
 	// Initialize logger objects
 	EveLog = new EventLog(pickup);

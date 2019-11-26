@@ -12,7 +12,7 @@ NonlinearAssignment::NonlinearAssignment(Network * net_in)
 
 	// Read assignment model data
 	ifstream a_file;
-	a_file.open(ASSIGNMENT_FILE);
+	a_file.open(FILE_BASE + ASSIGNMENT_FILE);
 	if (a_file.is_open())
 	{
 		string line, piece; // whole line and line element being read

@@ -18,6 +18,8 @@ Includes a variety of functions for calculating the constraint function values f
 
 using namespace std;
 
+extern string FILE_BASE;
+
 /**
 Constraint function class.
 

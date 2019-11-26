@@ -11,10 +11,10 @@ SolutionLog::SolutionLog(bool pickup)
 {
 	if (pickup == true)
 		// If continuing from a previous run, read in the existing log
-		load_solution(OUTPUT_SOLUTION_LOG_FILE);
+		load_solution(FILE_BASE + OUTPUT_SOLUTION_LOG_FILE);
 	else
 		// If starting a new run, read in only the initial solution log
-		load_solution(INPUT_SOLUTION_LOG_FILE);
+		load_solution(FILE_BASE + INPUT_SOLUTION_LOG_FILE);
 }
 
 /// Reads a given solution log file into the solution dictionary.
@@ -79,7 +79,7 @@ void SolutionLog::load_solution(string in_file)
 /// Writes the current contents of the solution log to the solution log output file.
 void SolutionLog::save_solution()
 {
-	ofstream log_file(OUTPUT_SOLUTION_LOG_FILE);
+	ofstream log_file(FILE_BASE + OUTPUT_SOLUTION_LOG_FILE);
 
 	if (log_file.is_open())
 	{

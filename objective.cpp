@@ -13,7 +13,7 @@ Objective::Objective(Network * net_in)
 
 	// Read objective data
 	ifstream obj_file;
-	obj_file.open(OBJECTIVE_FILE);
+	obj_file.open(FILE_BASE + OBJECTIVE_FILE);
 	if (obj_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -238,7 +238,7 @@ void Objective::save_metrics(const vector<int> &fleet)
 {
 	vector<double> metrics = all_metrics(fleet); // calculate all metrics
 
-	ofstream out_file(METRIC_FILE);
+	ofstream out_file(FILE_BASE + METRIC_FILE);
 
 	if (out_file.is_open())
 	{

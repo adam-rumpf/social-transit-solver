@@ -24,7 +24,7 @@ EventLog::EventLog(bool pickup)
 
 		// Load search parameters
 		ifstream parameter_file;
-		parameter_file.open(SEARCH_FILE);
+		parameter_file.open(FILE_BASE + SEARCH_FILE);
 		if (parameter_file.is_open())
 		{
 			string line, piece; // whole line and line element being read
@@ -57,7 +57,7 @@ EventLog::EventLog(bool pickup)
 		}
 
 		// Write to event log file
-		ofstream event_file(EVENT_LOG_FILE, mode);
+		ofstream event_file(FILE_BASE + EVENT_LOG_FILE, mode);
 		if (event_file.is_open())
 		{
 			// Comment line and formatting
@@ -105,7 +105,7 @@ EventLog::EventLog(bool pickup)
 void EventLog::log_iteration(const vector<int> &sol)
 {
 	// Write to event log file
-	ofstream event_file(EVENT_LOG_FILE, mode);
+	ofstream event_file(FILE_BASE + EVENT_LOG_FILE, mode);
 	if (event_file.is_open())
 	{
 		// Write event log parameters
@@ -171,7 +171,7 @@ void EventLog::reset()
 void EventLog::halt()
 {
 	// Write to event log file
-	ofstream event_file(EVENT_LOG_FILE, mode);
+	ofstream event_file(FILE_BASE + EVENT_LOG_FILE, mode);
 	if (event_file.is_open())
 	{
 		for (int i = 0; i < EVENT_LOG_COLUMNS - 1; i++)

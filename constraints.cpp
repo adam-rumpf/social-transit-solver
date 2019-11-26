@@ -9,7 +9,7 @@ Constraint::Constraint(Network * net_in)
 
 	// Attempt to read initial flow file (if file is not present, it will simply remain initialized as the zero vector)
 	ifstream fl_file;
-	fl_file.open(FLOW_FILE);
+	fl_file.open(FILE_BASE + FLOW_FILE);
 	if (fl_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
@@ -42,7 +42,7 @@ Constraint::Constraint(Network * net_in)
 
 	// Read constraint data
 	ifstream us_file;
-	us_file.open(USER_COST_FILE);
+	us_file.open(FILE_BASE + USER_COST_FILE);
 	if (us_file.is_open())
 	{
 		string line, piece; // whole line and line element being read
