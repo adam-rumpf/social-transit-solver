@@ -70,3 +70,4 @@
 
 // Other technical definitions
 #define EPSILON 0.00000001 // very small positive value
+#define LARGE 10e20 // very large positive value

@@ -143,7 +143,7 @@ double NonlinearAssignment::arc_cost(int id, double flow, double capacity)
 {
 	// Return infinite cost for zero-capacity arcs
 	if (capacity == 0)
-		return INFINITY;
+		return LARGE;
 
 	// Return only the arc's base cost for infinite-capacity or zero-flow arcs
 	if ((capacity >= INFINITY) || (flow == 0))
