@@ -104,7 +104,7 @@ Unless otherwise specified, the following units are used:
 
 ### `arc_data.txt`
 
-Information related to all arcs.
+Information related to all arcs. Due to the internal network object storage the accessibility walking arcs (type `4`) must be listed in a contiguous block at the end of the arc list.
 
 Contains the following columns:
 
@@ -159,7 +159,7 @@ Contains the following columns:
 
 ### `node_data.txt`
 
-Information related to all nodes.
+Information related to all nodes. Due to the internal network storage all population center and primary care facility nodes (types `2` and `3`) must be listed in a contiguous block at the end of the node list.
 
 Contains the following columns:
 
