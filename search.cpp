@@ -435,9 +435,9 @@ neighbor_pair Search::neighborhood_search()
 				new_candidate = false;
 				obj_lookups++;
 				pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
-				if (info.first == FEAS_FALSE)
+				if ((info.first == FEAS_FALSE) || (info.first == FEAS_BAN))
 				{
-					// Skip solutions known to be infeasible
+					// Skip solutions known to be infeasible and banned solutions
 					con_lookups++;
 					continue;
 				}
@@ -498,9 +498,9 @@ neighbor_pair Search::neighborhood_search()
 				new_candidate = false;
 				obj_lookups++;
 				pair<int, double> info = SolLog->lookup_row_quick(sol_candidate);
-				if (info.first == FEAS_FALSE)
+				if ((info.first == FEAS_FALSE) || (info.first == FEAS_BAN))
 				{
-					// Skip solutions known to be infeasible
+					// Skip solutions known to be infeasible and banned solutions
 					con_lookups++;
 					continue;
 				}
@@ -611,7 +611,7 @@ neighbor_pair Search::neighborhood_search()
 				}
 			}
 
-			// If no moves are tabu and we are still in the failure case, we can only have one feasible neighbor left and we end the ADD/DROP search
+			// If no moves are tabu and we are still in the failure case, we can only have one feasible neighbor left and we end the ADD/DROP search and ban the solution
 			if (tabu_exists == false)
 				break;
 			
@@ -765,7 +765,10 @@ neighbor_pair Search::neighborhood_search()
 	if (final_moves.empty() == false)
 		neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
 	else
+	{
 		neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
+		SolLog->ban_solution(make_move(neighbor1.first.first, neighbor1.first.second));
+	}
 
 	EveLog->obj_lookups = obj_lookups;
 	EveLog->con_lookups = con_lookups;

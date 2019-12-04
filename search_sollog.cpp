@@ -163,3 +163,15 @@ void SolutionLog::update_row(const vector<int> &sol, int feas, const vector<doub
 	get<SOL_LOG_UC>(sol_log[key]) = ucc;
 	get<SOL_LOG_CON_TIME>(sol_log[key]) = uc_time;
 }
+
+/**
+Bans a given solution.
+
+Requires a solution vector reference.
+
+The feasibility status of the given solution log entry will be set to 2, meaning that it will be skipped in every future neighborhood search. This is applied to solutions with only one feasible neigbhor to prevent cycling.
+*/
+void SolutionLog::ban_solution(const vector<int> &sol)
+{
+	get<SOL_LOG_FEAS>(sol_log[vec2str(sol)]) = FEAS_BAN;
+}

@@ -227,4 +227,5 @@ struct SolutionLog
 	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
 	pair<int, double> lookup_row_quick(const vector<int> &); // retrieves feasibility status and objective value of a given solution
 	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
+	void ban_solution(const vector<int> &); // bans a solution so that it will never be searched again
 };

@@ -45,6 +45,7 @@
 #define FEAS_TRUE 1
 #define FEAS_FALSE 0
 #define FEAS_UNKNOWN -1
+#define FEAS_BAN 2
 
 // Pickup codes
 #define CONTINUE_SEARCH 1
