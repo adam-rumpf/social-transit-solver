@@ -171,6 +171,14 @@ void Search::solve()
 		// Perform neighborhood search
 		nbhd_sol = neighborhood_search();
 
+		// Break if no moves are available
+		if (nbhd_obj1 == INFINITY)
+		{
+			EveLog->halt(FAILURE_HALT_SYMBOL);
+			save_data();
+			exit(FAILURE_HALT);
+		}
+
 		// TS/SA updates depending on search results
 
 		if (nbhd_obj1 < obj_current)
@@ -660,7 +668,6 @@ neighbor_pair Search::neighborhood_search()
 				break;
 
 			drop_loop = 0;
-			cout << 's';
 
 			// Iterate through the DROP list (breaks if we reach a stopping condition, or upon iterating to the same position as the current ADD iterator)
 			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin(); drop_it != drop_moves2.end(); drop_it++)
@@ -670,6 +677,7 @@ neighbor_pair Search::neighborhood_search()
 					break;
 
 				drop_loop++;
+				cout << 's';
 
 				// Get ADD and DROP line IDs
 				int add_id = add_it->second.first;
@@ -758,16 +766,35 @@ neighbor_pair Search::neighborhood_search()
 	add_moves2.clear();
 	drop_moves2.clear();
 
-	// Return the two best solutions from the final move queue (or the single feasible solution plus a placeholder)
-	pair<pair<int, int>, double> neighbor1 = make_pair(final_moves.top().second, final_moves.top().first);
-	final_moves.pop();
+	// Return the two best solutions from the final move queue (filling missing solutions with placeholders)
+	pair<pair<int, int>, double> neighbor1;
 	pair<pair<int, int>, double> neighbor2;
+
 	if (final_moves.empty() == false)
-		neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
+	{
+		// If there is a best neighbor, record it
+		neighbor1 = make_pair(final_moves.top().second, final_moves.top().first);
+		final_moves.pop();
+
+		if (final_moves.empty() == false)
+			// If there is a second best neighbor, record it
+			neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
+		else
+		{
+			// If there was only one feasible neighbor, output a null second solution ban the current solution so that we never return to it
+			neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
+			SolLog->ban_solution(sol_current); // ban current solution
+			cout << "\n\nPERMABAN!\n\n";//////////////////////////////////////////////////////////////////////////////////////////////////////////
+			cin.get();
+		}
+	}
 	else
 	{
+		// If no neighbors were feasible, return null moves
+		neighbor1 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
 		neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
-		SolLog->ban_solution(make_move(neighbor1.first.first, neighbor1.first.second));
+		cout << "\n\nOUT OF OPTIONS!\n\n";///////////////////////////////////////////////////////////////////////////////////////////////////
+		cin.get();
 	}
 
 	EveLog->obj_lookups = obj_lookups;

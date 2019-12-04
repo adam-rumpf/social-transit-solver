@@ -28,6 +28,7 @@
 #define KEYBOARD_HALT 1
 #define FILE_NOT_FOUND 2
 #define INCORRECT_FILE 3
+#define FAILURE_HALT 4
 
 // Node and arc type IDs
 #define STOP_NODE 0
@@ -63,6 +64,8 @@
 #define EVENT_NONIMP_PASS 2
 #define EVENT_NONIMP_FAIL 3
 #define EVENT_EXHAUSTIVE 4
+#define KEYBOARD_HALT_SYMBOL -1
+#define FAILURE_HALT_SYMBOL -2
 
 // Fixed parameters
 #define UC_COMPONENTS 3 // number of components of the user cost vector

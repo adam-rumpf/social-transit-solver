@@ -156,7 +156,7 @@ struct EventLog
 	EventLog(bool); // constructor initializes event and objective log files and sets file open mode
 	void log_iteration(const vector<int> &); // writes a row for the current iteration to the event log file
 	void reset(); // sets event log attributes to their default values
-	void halt(); // writes a row to indicate that a halt has taken place
+	void halt(int = KEYBOARD_HALT_SYMBOL); // writes a row to indicate that a halt has taken place
 };
 
 /**

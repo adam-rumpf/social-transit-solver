@@ -63,6 +63,10 @@ void SolutionLog::load_solution(string in_file)
 			getline(stream, piece, '\t'); // Objective time
 			row_obj_time = stod(piece);
 
+			// Set banned solutions back to feasible
+			if (row_feas == FEAS_BAN)
+				row_feas = FEAS_TRUE;
+
 			// Create dictionary entry
 			sol_log[row_sol] = make_tuple(row_feas, row_uc, row_con_time, row_obj, row_obj_time);
 		}

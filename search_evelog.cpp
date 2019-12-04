@@ -167,16 +167,20 @@ void EventLog::reset()
 	swaps = 0;
 }
 
-/// Writes a row of -1 to the solution log in order to indicate a keyboard halt.
-void EventLog::halt()
+/**
+Writes a constant row to the solution log in order to indicate a keyboard halt.
+
+Accepts an integer to use as the placeholder value for all column entries (default -1).
+*/
+void EventLog::halt(int n)
 {
 	// Write to event log file
 	ofstream event_file(FILE_BASE + EVENT_LOG_FILE, mode);
 	if (event_file.is_open())
 	{
 		for (int i = 0; i < EVENT_LOG_COLUMNS - 1; i++)
-			event_file << "-1\t";
-		event_file << "-1" << endl;
+			event_file << n << '\t';
+		event_file << n << endl;
 
 		event_file.close();
 	}
