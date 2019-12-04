@@ -322,7 +322,7 @@ void Search::solve()
 	}
 
 	// Handle exhaustive search (if selected)
-	if (exhaustive == true)
+	if (exhaustive == 1)
 	{
 		exhaustive_iteration = 0;
 
@@ -784,8 +784,6 @@ neighbor_pair Search::neighborhood_search()
 			// If there was only one feasible neighbor, output a null second solution ban the current solution so that we never return to it
 			neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
 			SolLog->ban_solution(sol_current); // ban current solution
-			cout << "\n\nPERMABAN!\n\n";//////////////////////////////////////////////////////////////////////////////////////////////////////////
-			cin.get();
 		}
 	}
 	else
@@ -793,8 +791,6 @@ neighbor_pair Search::neighborhood_search()
 		// If no neighbors were feasible, return null moves
 		neighbor1 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
 		neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
-		cout << "\n\nOUT OF OPTIONS!\n\n";///////////////////////////////////////////////////////////////////////////////////////////////////
-		cin.get();
 	}
 
 	EveLog->obj_lookups = obj_lookups;
@@ -1046,7 +1042,7 @@ void Search::exhaustive_search()
 		obj_best = obj_current;
 		vehicle_totals();
 		EveLog->obj_current = obj_current;
-		EveLog->obj_best = obj_current;
+		EveLog->obj_best = obj_best;
 		EveLog->new_best = 1;
 
 		if (move.first.second == NO_ID)
