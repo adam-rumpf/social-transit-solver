@@ -1011,7 +1011,9 @@ void Search::exhaustive_search()
 
 		// Make local move and update objective and vehicle usage
 		sol_current = make_move(move.first.first, move.first.second);
+		sol_best = sol_current;
 		obj_current = move.second;
+		obj_best = obj_current;
 		vehicle_totals();
 		EveLog->obj_current = obj_current;
 		EveLog->obj_best = obj_current;
