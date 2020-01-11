@@ -1,6 +1,6 @@
 # social-transit-solver
 
-The main tabu search/simulated annealing hybrid solution algorithm for use in a research project of mine dealing with a public transit design model with social access objectives.
+The main tabu search/simulated annealing hybrid solution algorithm for use in a research project of mine dealing with a public transit design model with social access objectives (see project home page [here](https://github.com/adam-rumpf/social-transit)).
 
 This program shares a large amount of code with a [social-transit-solver-single](https://github.com/adam-rumpf/social-transit-solver-single), including its objective function, constraint function, and assignment model. It largely consists of a search process that uses these modules as subroutines.
 
