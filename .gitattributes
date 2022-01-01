@@ -1,2 +1,4 @@
-# MSBuild files
+# VS files
+*.json linguist-vendored
+*.sln linguist-vendored
 *.vcxproj linguist-vendored

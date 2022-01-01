@@ -7,8 +7,6 @@ log/
 *.TMP
 *.filters
 *.user
-*.vcxproj
-*.json
 
 # Data files
 data/
