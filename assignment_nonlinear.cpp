@@ -68,15 +68,20 @@ NonlinearAssignment::~NonlinearAssignment()
 /**
 Nonlinear cost assignment model evaluation for a given solution.
 
-Requires a fleet size vector and an initial solution, which takes the form of a pair made up of a flow vector and a waiting time scalar.
+Requires a fleet size vector and an initial solution, which takes the form of a pair made up of a flow vector and a
+waiting time scalar.
 
 Returns a pair containing a vector of flow values and a waiting time scalar.
 
-The solution vector is used to determine the frequency and capacity of each line. Frequencies contribute to boarding arc costs for the common lines problem, while capacities contribute to an overcrowding penalty to model congestion.
+The solution vector is used to determine the frequency and capacity of each line. Frequencies contribute to boarding arc
+costs for the common lines problem, while capacities contribute to an overcrowding penalty to model congestion.
 
-The overall process being used here is the Frank-Wolfe algorithm, which iteratively solves the linear approximation of the nonlinear cost quadratic program. That linear approximation happens to be an instance of the constant-cost LP whose costs are based on the current solution.
+The overall process being used here is the Frank-Wolfe algorithm, which iteratively solves the linear approximation of
+the nonlinear cost quadratic program. That linear approximation happens to be an instance of the constant-cost LP whose
+costs are based on the current solution.
 */
-pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &fleet, const pair<vector<double>, double> &initial_sol)
+pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &fleet, const pair<vector<double>,
+	double> &initial_sol)
 {
 	cout << '*';
 
@@ -85,7 +90,7 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 	pair<vector<double>, double> sol_previous; // flow/waiting pair for the previous solution
 	int iteration = 0; // current iteration number
 	double error = INFINITY; // current solution error bound
-	pair<double, double> change = make_pair(INFINITY, INFINITY); // flow/waiting time differences between consecutive solutions
+	pair<double, double> change = make_pair(INFINITY, INFINITY); // flow/waiting time differences betw consecutive sols
 
 	// Calculate line arc capacities
 	vector<double> capacities(Net->core_arcs.size(), INFINITY);
@@ -107,7 +112,8 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 
 	// Main Frank-Wolfe loop
 
-	while ((iteration < max_iterations) && (error > error_tol) && ((change.first > flow_tol) || (change.second > waiting_tol)))
+	while ((iteration < max_iterations) && (error > error_tol) &&
+		((change.first > flow_tol) || (change.second > waiting_tol)))
 	{
 		// Loop continues until achieving sufficiently low error or reaching an iteration cutoff
 		iteration++;
@@ -126,7 +132,8 @@ pair<vector<double>, double> NonlinearAssignment::calculate(const vector<int> &f
 		error = obj_error(capacities, sol_previous.first, sol_previous.second, sol_next.first, sol_next.second);
 
 		// Update solution as successive average of consecutive solutions and get maximum elementwise difference
-		change = solution_update(1 - (1.0 / iteration), sol_previous.first, sol_previous.second, sol_next.first, sol_next.second);
+		change = solution_update(1 - (1.0 / iteration), sol_previous.first, sol_previous.second, sol_next.first,
+			sol_next.second);
 	}
 
 	return sol_previous;
@@ -152,22 +159,29 @@ double NonlinearAssignment::arc_cost(int id, double flow, double capacity)
 	/*
 	Otherwise, evaluate the conical congestion function, which is defined as:
 		c(x) = c * (2 + sqrt((alpha * (1 - x/u))^2 + beta^2) - alpha * (1 - x/u) - beta)
-	where c(x) is the nonlinear cost, x is the arc's flow, c is the arc's base cost, u is the arc's capacity, and alpha and beta are parameters.
+	where c(x) is the nonlinear cost, x is the arc's flow, c is the arc's base cost, u is the arc's capacity, and alpha
+	and beta are parameters.
 	*/
 	double ratio = 1 - (flow / capacity);
-	return Net->core_arcs[id]->cost * (2 + sqrt(pow(conical_alpha*ratio, 2) + pow(conical_beta, 2)) - (conical_alpha * ratio) - conical_beta);
+	return Net->core_arcs[id]->cost * (2 + sqrt(pow(conical_alpha*ratio, 2) + pow(conical_beta, 2)) -
+		(conical_alpha * ratio) - conical_beta);
 }
 
 /**
 Calculates an error bound for the current objective value based on the difference between consecutive solutions.
 
-Requires references to the capacity vector, the current flow vector, the current waiting time, the next flow vector, and the next waiting time, respectively.
+Requires references to the capacity vector, the current flow vector, the current waiting time, the next flow vector, and
+the next waiting time, respectively.
 
 Returns an upper bound for the absolute error in the current solution.
 
-The Frank-Wolfe algorithm includes a means for bounding the absolute error of the current solution based on the objective values of the previous solutions. Since our algorithm never explicitly evaluates the objective value (only values of the linearized objective), we instead use a looser but more easily calculated bound that involves the difference between consecutive linearized objective values.
+The Frank-Wolfe algorithm includes a means for bounding the absolute error of the current solution based on the
+objective values of the previous solutions. Since our algorithm never explicitly evaluates the objective value (only
+values of the linearized objective), we instead use a looser but more easily calculated bound that involves the
+difference between consecutive linearized objective values.
 */
-double NonlinearAssignment::obj_error(const vector<double> &capacities, const vector<double> &flows_old, double waiting_old, const vector<double> &flows_new, double waiting_new)
+double NonlinearAssignment::obj_error(const vector<double> &capacities, const vector<double> &flows_old,
+	double waiting_old, const vector<double> &flows_new, double waiting_new)
 {
 	// Calculate error term-by-term
 	double total = waiting_old - waiting_new;
@@ -180,13 +194,15 @@ double NonlinearAssignment::obj_error(const vector<double> &capacities, const ve
 /**
 Updates the solution according to the convex combination found from the line search.
 
-Requires a value for the convex parameter, followed by references to the current flow vector, the current waiting time, the next flow vector, and the next waiting time, respectively.
+Requires a value for the convex parameter, followed by references to the current flow vector, the current waiting time,
+the next flow vector, and the next waiting time, respectively.
 
 Updates the current solution in place as a convex combination of the two vectors.
 
 Also returns a pair containing the maximum elementwise flow vector change and the waiting time change, respectively.
 */
-pair<double, double> NonlinearAssignment::solution_update(double lambda, vector<double> &flows_current, double &waiting_current, const vector<double> &flows_next, double waiting_next)
+pair<double, double> NonlinearAssignment::solution_update(double lambda, vector<double> &flows_current,
+	double &waiting_current, const vector<double> &flows_next, double waiting_next)
 {
 	double max_flow_diff = 0.0; // maximum elementwise flow difference
 	double waiting_diff; // waiting time difference

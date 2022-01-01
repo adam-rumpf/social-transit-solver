@@ -1,7 +1,8 @@
 /**
 A variety of structures for storing a network representation of the public transit system.
 
-Includes a Network, Arc, Node, Line, and Vehicle class. Objects from these classes are built from the input data, after which they are mostly treated as read-only for use in the objective and constraint calculation functions.
+Includes a Network, Arc, Node, Line, and Vehicle class. Objects from these classes are built from the input data, after
+which they are mostly treated as read-only for use in the objective and constraint calculation functions.
 */
 
 #pragma once
@@ -12,7 +13,7 @@ Includes a Network, Arc, Node, Line, and Vehicle class. Objects from these class
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "DEFINITIONS.hpp"
+#include "definitions.hpp"
 
 using namespace std;
 
@@ -28,9 +29,14 @@ struct Vehicle;
 /**
 A class for the network representation of the public transit system.
 
-Its constructor reads the node and arc data files and uses them to define Node and Arc objects. Pointers to these objects are then stored in different lists, partitioned depending on their function, for use in the objective and constraint function calculations. Line and Vehicle lists are similarly generated.
+Its constructor reads the node and arc data files and uses them to define Node and Arc objects. Pointers to these
+objects are then stored in different lists, partitioned depending on their function, for use in the objective and
+constraint function calculations. Line and Vehicle lists are similarly generated.
 
-Most of the network objects are partitioned into a "core" set which is used for all purposes (including stop/boarding nodes and line/boarding/alighting/walking arcs), and an "access" set which is only needed for the primary care access metrics (including population/facility nodes and their associated walking arcs). Only the core set needs to be considered for the constraint calculation, while the access sets must be added in for the objective.
+Most of the network objects are partitioned into a "core" set which is used for all purposes (including stop/boarding
+nodes and line/boarding/alighting/walking arcs), and an "access" set which is only needed for the primary care access
+metrics (including population/facility nodes and their associated walking arcs). Only the core set needs to be
+considered for the constraint calculation, while the access sets must be added in for the objective.
 */
 struct Network
 {
@@ -56,7 +62,8 @@ struct Network
 /**
 A class for the public transit network's nodes.
 
-Stores various node-level attributes, including some sets partitioned into use for the core network and the access network.
+Stores various node-level attributes, including some sets partitioned into use for the core network and the access
+network.
 */
 struct Node
 {
@@ -64,7 +71,7 @@ struct Node
 	vector<Arc *> core_out; // pointers to outgoing arcs that belong to the core network
 	vector<Arc *> core_in; // pointers to incoming arcs that belong to the core network
 	vector<Arc *> access_out; // pointers to outgoing arcs that belong to the access network
-	vector<double> incoming_demand; // (stop nodes only) travel demands from every other stop node, in same order as network's core node list
+	vector<double> incoming_demand; // (stop nodes only) travel demands from every other stop node, in core node order
 	int id; // ID number (should match position in node list)
 	double value; // value relevant to node type (population of a population center, weight of a facility)
 
@@ -97,7 +104,8 @@ A class for the public transit network's lines.
 
 Stores various line-level attributes.
 
-Also includes methods for calculating the frequency and capacity for a given fleet size. This is to avoid having to store fleet sizes internally, since we will be considering many different fleet sizes during the neighborhood searches.
+Also includes methods for calculating the frequency and capacity for a given fleet size. This is to avoid having to
+store fleet sizes internally, since we will be considering many different fleet sizes during the neighborhood searches.
 */
 struct Line
 {
@@ -113,7 +121,7 @@ struct Line
 	int vehicle_id; // ID of vehicle type
 
 	// Public methods
-	Line(int, int, int, double, double, double, double); // constructor sets vehicle ID, lower vehicle bound, upper vehicle bound, circuit time, seating capacity, active fraction of day, and daily time horizon
+	Line(int, int, int, double, double, double, double); // constructor sets vehicle attributes
 	double frequency(int); // returns frequency resulting from a given fleet size
 	double headway(int); // returns average headway resulting from a given fleet size
 	double capacity(int); // returns capacity resulting from a given fleet size

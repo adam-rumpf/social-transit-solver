@@ -1,7 +1,8 @@
 /**
 Main driver class of the TS/SA solution algorithm along with various logger classes.
 
-Called by the main() function after all subroutine objects have been initialized, and uses them to conduct the search process.
+Called by the main() function after all subroutine objects have been initialized, and uses them to conduct the search
+process.
 */
 
 #pragma once
@@ -23,7 +24,7 @@ Called by the main() function after all subroutine objects have been initialized
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include "DEFINITIONS.hpp"
+#include "definitions.hpp"
 #include "constraints.hpp"
 #include "network.hpp"
 #include "objective.hpp"
@@ -32,9 +33,11 @@ using namespace std;
 
 extern string FILE_BASE;
 
-typedef pair<pair<pair<int, int>, double>, pair<pair<int, int>, double>> neighbor_pair; // structure of neighborhood search output
-typedef priority_queue<tuple<double, pair<int, int>, bool>, vector<tuple<double, pair<int, int>, bool>>, greater<tuple<double, pair<int, int>, bool>>> candidate_queue; // min-priority queue for storing objective/move/new tuples in the neighborhood search
-typedef priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<pair<double, pair<int, int>>>> neighbor_queue; // min-priority queue for storing objective/move pairs at the end of the neighborhood search
+typedef pair<pair<pair<int, int>, double>, pair<pair<int, int>, double>> neighbor_pair; // nbhd search output
+typedef priority_queue<tuple<double, pair<int, int>, bool>, vector<tuple<double, pair<int, int>, bool>>,
+	greater<tuple<double, pair<int, int>, bool>>> candidate_queue; // min-priority queue for obj/move/new tuples
+typedef priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<pair<double,
+	pair<int, int>>>> neighbor_queue; // min-priority queue for obj/move pairs at the end of neighborhood search
 
 // Global function prototypes
 pair<vector<int>, double> get_initial_solution(); // returns the initial solution vector and objective value
@@ -50,7 +53,8 @@ struct SolutionLog;
 /**
 Search object.
 
-Contains search-related attributes and pointers to the main subroutine objects, and carries out the main solution algorithm.
+Contains search-related attributes and pointers to the main subroutine objects, and carries out the main solution
+algorithm.
 */
 struct Search
 {
@@ -98,7 +102,7 @@ struct Search
 	int nonimp_out; // outer nonimprovement counter
 	double tenure; // tabu tenure for newly-added tabu moves
 	double temperature; // simulated annealing temperature
-	list<pair<vector<int>, double>> attractive_solutions; // list of attractive solutions, stored as solution vector/objective value pairs
+	list<pair<vector<int>, double>> attractive_solutions; // list of attractive sols, as solution vector/obj value pairs
 	vector<int> current_vehicles; // number of each vehicle type currently in use
 	int exhaustive_iteration; // iteration of exhaustive local search
 
@@ -106,23 +110,26 @@ struct Search
 	Search(); // constructor initializes network, objective, constraint, and various logger objects
 	~Search(); // destructor deletes network, objective, and constraint objects
 	void solve(); // main driver of the solution algorithm
-	neighbor_pair neighborhood_search(); // performs a neighborhood search to find the best and second best neighboring moves
+	neighbor_pair neighborhood_search(); // performs nbhd search to find the best and second best neighboring moves
 	vector<int> make_move(int, int); // returns the results of applying a move to the current solution
 	void pop_attractive(bool); // deletes a random attractive solution and optionally sets it as the current solution
 	void vehicle_totals(); // calculates total vehicles of each type in use
 	void increase_tenure(); // increase the tabu tenure value
 	void cool_temperature(); // apply a cooling schedule to the simulated annealing temperature
 	void save_data(); // writes all current progress to the log files
-	pair<pair<int, int>, double> best_neighbor(); // finds the best move from the current solution via exhaustive neighborhood search
+	pair<pair<int, int>, double> best_neighbor(); // finds best move from current solution via exhaustive nbhd search
 	void exhaustive_search(); // conducts an exhaustive local search from the current solution
 };
 
 /**
 Event logger.
 
-Reports the events that occur during each iteration of the search process and prints them to an output log for later review.
+Reports the events that occur during each iteration of the search process and prints them to an output log for later
+review.
 
-In order to reduce the number of times we need to open the output file, the results of an iteration are only written at the end of an iteration. Until that point, internal attributes and search object attributes are used to store the events of the iteration.
+In order to reduce the number of times we need to open the output file, the results of an iteration are only written at
+the end of an iteration. Until that point, internal attributes and search object attributes are used to store the events
+of the iteration.
 */
 struct EventLog
 {
@@ -162,11 +169,14 @@ struct EventLog
 /**
 Memory logger.
 
-Reads and writes the TS/SA algorithm's memory structures from and to an output file. This allows the search process to be halted and resumed later.
+Reads and writes the TS/SA algorithm's memory structures from and to an output file. This allows the search process to
+be halted and resumed later.
 
-Most of the memory structures associated with the search process are stored as public attributes of the main search's memory log object. The memory logger accesses these values via a pointer to the main search object.
+Most of the memory structures associated with the search process are stored as public attributes of the main search's
+memory log object. The memory logger accesses these values via a pointer to the main search object.
 
-The log file should always be automatically generated by this program and should never need to be viewed or edited by the user, but for reference its rows are arranged as follows:
+The log file should always be automatically generated by this program and should never need to be viewed or edited by
+the user, but for reference its rows are arranged as follows:
 	comment line to explain row structure
 	tab-separated list of ADD tabu tenures for all solution vector elements
 	tab-separated list of DROP tabu tenures for all solution vector elements
@@ -180,7 +190,8 @@ The log file should always be automatically generated by this program and should
 	current tenure for new tabu moves
 	current simulated annealing temperature
 	tab-separated list of attractive solution objectives
-	all remaining rows consist of tab-separated lists defining the attractive solution vectors, in the same order as the objectives in the above row
+	all remaining rows consist of tab-separated lists defining the attractive solution vectors, in the same order as the
+		objectives in the above row
 */
 struct MemoryLog
 {
@@ -191,7 +202,7 @@ struct MemoryLog
 	// Public methods
 	MemoryLog(Search *, bool); // constructor initializes internal search parameters associated with memory file
 	void load_memory(); // reads contents of memory log file into memory log object
-	void reset_memory(); // sets memory structures according to the initial values from the search parameter file and the initial solution log file
+	void reset_memory(); // sets memory structures according to initial vals from search param file and init sol log
 	void save_memory(); // writes contents of memory log object to the memory log file
 	void output_best(); // writes an output file containing just the best known solution and its objective value
 };
@@ -199,13 +210,19 @@ struct MemoryLog
 /**
 Solution logger.
 
-Records information about every solution encountered during the search process. This allows us to simply look up previously-generated solutions instead of having to reevaluate the objective and constraint functions.
+Records information about every solution encountered during the search process. This allows us to simply look up
+previously-generated solutions instead of having to reevaluate the objective and constraint functions.
 
 Includes methods for reading from and writing to the solution log input and output files.
 
-Due to the structure of the main solver's neighborhood search, we may occasionally generate the objective function value but not the constraint function value for a logged solution. For this reason, some rows in the solution log may be incomplete, but may be filled in later if the constraint function value is needed. Several of the methods of this class revolve around looking up or filling in pieces of information about solutions.
+Due to the structure of the main solver's neighborhood search, we may occasionally generate the objective function value
+but not the constraint function value for a logged solution. For this reason, some rows in the solution log may be
+incomplete, but may be filled in later if the constraint function value is needed. Several of the methods of this class
+revolve around looking up or filling in pieces of information about solutions.
 
-The most important attribute of this class is the solution log, which is an unordered map of solutions. The log is indexed by the string version of the corresponding solution vector. The entry in the log is a 5-part tuple consisting of the following:
+The most important attribute of this class is the solution log, which is an unordered map of solutions. The log is
+indexed by the string version of the corresponding solution vector. The entry in the log is a 5-part tuple consisting of
+the following:
 	<0> the feasibility result
 	<1> a vector of constraint function elements
 	<2> the constraint evaluation time
@@ -215,17 +232,17 @@ The most important attribute of this class is the solution log, which is an unor
 struct SolutionLog
 {
 	// Public attributes
-	unordered_map<string, tuple<int, vector<double>, double, double, double>> sol_log; // dictionary of solutions, indexed by the string version of the solution vector
+	unordered_map<string, tuple<int, vector<double>, double, double, double>> sol_log; // dict of sols, by sol vec str
 
 	// Public methods
 	SolutionLog(bool); // constructor reads the solution log file and initializes the solution memory structure
 	void load_solution(string); // reads a given solution log into the dictionary
 	void save_solution(); // writes the current solution log to the log file
-	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // creates or updates a solution log entry for a given solution vector with given information
-	void create_partial_row(const vector<int> &, double, double); // creates a solution log entry for a given solution with only a known objective value and calculation time
-	bool solution_exists(const vector<int> &); // determines whether a given solution vector is present in the solution log
-	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // retrieves feasibility status, constraint function elements, and objective value of a given solution
-	pair<int, double> lookup_row_quick(const vector<int> &); // retrieves feasibility status and objective value of a given solution
-	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies the feasibility status, constraints, and constraint time for a logged solution
+	void create_row(const vector<int> &, int, const vector<double> &, double, double, double); // updates sol log entry
+	void create_partial_row(const vector<int> &, double, double); // creates sol log entry for sol given obj and time
+	bool solution_exists(const vector<int> &); // determines whether a given sol vector is present in the solution log
+	tuple<int, vector<double>, double> lookup_row(const vector<int> &); // returns feas, constraint elements, and obj
+	pair<int, double> lookup_row_quick(const vector<int> &); // returns feas and objof a given solution
+	void update_row(const vector<int> &, int, const vector<double> &, double); // modifies feas, cons, and time
 	void ban_solution(const vector<int> &); // bans a solution so that it will never be searched again
 };

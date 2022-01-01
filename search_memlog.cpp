@@ -5,7 +5,9 @@
 /**
 Memory log constructor either reads the memory log file into the object's local attributes or sets initial values.
 
-Requires the size of the solution vector and a boolean argument to specify whether to begin by loading the existing memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory log file is ignored and the attributes are instead set according to the search parameter file.
+Requires the size of the solution vector and a boolean argument to specify whether to begin by loading the existing
+memory log. If true, the object's attributes are initialized by reading the memory log file. If false, then the memory
+log file is ignored and the attributes are instead set according to the search parameter file.
 */
 MemoryLog::MemoryLog(Search * search_in, bool pickup)
 {
@@ -37,7 +39,7 @@ void MemoryLog::load_memory()
 		getline(log_file, line); // skip comment line
 
 		int count = 0;
-		queue<double> attractive_objectives; // queue of attractive objectives to associate with attractive solution vectors as they are read
+		queue<double> attractive_objectives; // queue of att objs to associate with att sol vectors as they are read
 
 		while (log_file.eof() == false)
 		{
@@ -130,7 +132,7 @@ void MemoryLog::load_memory()
 						getline(stream, piece, '\t');
 						attractive_objectives.push(stod(piece));
 					}
-					catch (ios_base::failure &e) {} // catch end of file errors which can occur if the memory log has trailing whitespace
+					catch (ios_base::failure &e) {} // catch eof errors due to trailing whitespace
 				}
 				break;
 			default:
@@ -217,7 +219,10 @@ void MemoryLog::reset_memory()
 	Solver->obj_best = initial_sol.second;
 }
 
-/// Writes memory log attributes to the memory log file. Also calls a method to output the best known solution as a separate file.
+/**
+Writes memory log attributes to the memory log file. Also calls a method to output the best known solution as a separate
+file.
+*/
 void MemoryLog::save_memory()
 {
 	ofstream log_file(FILE_BASE + MEMORY_LOG_FILE);
@@ -225,7 +230,9 @@ void MemoryLog::save_memory()
 	if (log_file.is_open())
 	{
 		// Write comment line
-		log_file << "[add_tenure], [drop_tenure], [sol_current], [sol_best], obj_current, obj_best, iteration, nonimp_in, nonimp_out, tenure, temperature, [attractive_objectives], [[attractive_solutions]]" << fixed << setprecision(15) << endl;
+		log_file << "[add_tenure], [drop_tenure], [sol_current], [sol_best], obj_current, obj_best, iteration, " <<
+			"nonimp_in, nonimp_out, tenure, temperature, [attractive_objectives], [[attractive_solutions]]" << fixed <<
+			setprecision(15) << endl;
 
 		// Write tabu tenure vectors
 		for (int i = 0; i < sol_size; i++)
@@ -253,14 +260,16 @@ void MemoryLog::save_memory()
 		log_file << Solver->temperature << endl;
 
 		// Write attractive solution objective vector
-		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(), [&](pair<vector<int>, double> sol)
+		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(),
+			[&](pair<vector<int>, double> sol)
 		{
 			log_file << sol.second << '\t';
 		});
 		log_file << endl;
 
 		// Write attractive solution vectors
-		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(), [&](pair<vector<int>, double> sol)
+		for_each(Solver->attractive_solutions.begin(), Solver->attractive_solutions.end(),
+			[&](pair<vector<int>, double> sol)
 		{
 			for (int i = 0; i < sol_size; i++)
 				log_file << sol.first[i] << '\t';

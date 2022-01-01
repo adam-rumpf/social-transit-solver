@@ -105,11 +105,14 @@ Evaluates the constraint functions for a given solution.
 
 Requires a solution vector.
 
-Returns a pair whose first element is the feasibility result (1 for feasible, 0 for infeasible) and whose second element is a vector of constraint function elements, ordered in the same way as the solution log file.
+Returns a pair whose first element is the feasibility result (1 for feasible, 0 for infeasible) and whose second element
+is a vector of constraint function elements, ordered in the same way as the solution log file.
 
-All of the constraint functions are evaluated using either the solution vector directly, or using the flow vector produced by the assignment model.
+All of the constraint functions are evaluated using either the solution vector directly, or using the flow vector
+produced by the assignment model.
 
-Note that this entire process is skipped if the user cost percentage increase parameter is negative, which is how the user can specify in the input files to ignore the user cost constraints.
+Note that this entire process is skipped if the user cost percentage increase parameter is negative, which is how the
+user can specify in the input files to ignore the user cost constraints.
 */
 pair<int, vector<double>> Constraint::calculate(const vector<int> &sol)
 {

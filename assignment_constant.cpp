@@ -16,7 +16,9 @@ Requires a fleet size vector and nonlinear cost vector.
 
 Returns a pair containing a vector of flow values and a waiting time scalar.
 
-This model comes from the linear program formulation of the common line problem, which can be solved using a Dijkstra-like label setting algorithm. This must be done separately for every sink node, but each of these problems is independent and may be parallelized. The final result is the sum of these individual results.
+This model comes from the linear program formulation of the common line problem, which can be solved using a
+Dijkstra-like label setting algorithm. This must be done separately for every sink node, but each of these problems is
+independent and may be parallelized. The final result is the sum of these individual results.
 */
 pair<vector<double>, double> ConstantAssignment::calculate(const vector<int> &fleet, const vector<double> &arc_costs)
 {
@@ -49,18 +51,31 @@ pair<vector<double>, double> ConstantAssignment::calculate(const vector<int> &fl
 /**
 Calculates the flow vector to a given sink.
 
-Requires the sink index (as a position in the stop node list), flow vector, waiting time scalar, line frequency vector, arc cost vector, and pointers to the arc flow reader/writer lock and waiting time reader/writer lock, respectively.
+Requires the sink index (as a position in the stop node list), flow vector, waiting time scalar, line frequency vector,
+arc cost vector, and pointers to the arc flow reader/writer lock and waiting time reader/writer lock, respectively.
 
-The flow vector and waiting time are passed by reference and automatically incremented according to the results of this function.
+The flow vector and waiting time are passed by reference and automatically incremented according to the results of this
+function.
 
-The algorithm here solves the constant-cost, single-destination version of the common lines problem, which is a LP similar to min-cost flow and is solvable with a Dijkstra-like label setting algorithm. This process can be parallelized over all destinations, and so should rely only on local variables.
+The algorithm here solves the constant-cost, single-destination version of the common lines problem, which is a LP
+similar to min-cost flow and is solvable with a Dijkstra-like label setting algorithm. This process can be parallelized
+over all destinations, and so should rely only on local variables.
 */
-void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, double &waiting, const vector<double> &freq, const vector<double> &arc_costs, reader_writer_lock *flow_lock, reader_writer_lock *wait_lock)
+void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, double &waiting,
+	const vector<double> &freq, const vector<double> &arc_costs, reader_writer_lock *flow_lock,
+	reader_writer_lock *wait_lock)
 {
 	/*
-	To explain a few technical details, the label setting algorithm involves updating a distance label for each node. In each iteration, we choose the unprocessed arc with the minimum value of its own cost plus its head's label. In order to speed up that search, we store all of those values in a min-priority queue. As with Dijkstra's algorithm, to get around the inability to update priorities, we just add extra copies to the queue whenever they are updated. We also store a master list of those values, which should always decrease as the algorithm moves forward, as a comparison every time we pop something out of the queue to ensure that we have the latest version.
+	To explain a few technical details, the label setting algorithm involves updating a distance label for each node. In
+	each iteration, we choose the unprocessed arc with the minimum value of its own cost plus its head's label. In order
+	to speed up that search, we store all of those values in a min-priority queue. As with Dijkstra's algorithm, to get
+	around the inability to update priorities, we just add extra copies to the queue whenever they are updated. We also
+	store a master list of those values, which should always decrease as the algorithm moves forward, as a comparison
+	every time we pop something out of the queue to ensure that we have the latest version.
 
-	The arc loading algorithm involves processing all of the selected attractive arcs in descending order of their cost-plus-head-label from the label setting algorithm. This is accomplished in a similar way, with a copy of the cost-plus-head-label being added to a max-priority queue each time the tail label is updated.
+	The arc loading algorithm involves processing all of the selected attractive arcs in descending order of their
+	cost-plus-head-label from the label setting algorithm. This is accomplished in a similar way, with a copy of the
+	cost-plus-head-label being added to a max-priority queue each time the tail label is updated.
 	*/
 
 	// Initialize variables
@@ -73,7 +88,7 @@ void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, d
 	double added_flow; // chosen arc's added flow volume
 
 	// Initialize containers
-	vector<double> node_label(Net->core_nodes.size(), INFINITY); // tentative distances from every node to the destination
+	vector<double> node_label(Net->core_nodes.size(), INFINITY); // tentative distances from every node to destination
 	node_label[Net->stop_nodes[dest]->id] = 0.0; // distance from destination to self is 0
 	vector<double> node_freq(Net->core_nodes.size(), 0.0); // total frequency of all attractive arcs leaving a node
 	vector<double> node_vol(Net->core_nodes.size(), 0.0); // total flow leaving a node
@@ -81,17 +96,18 @@ void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, d
 		// Initialize travel volumes for stop nodes based on demand for destination
 		node_vol[Net->stop_nodes[i]->id] = Net->stop_nodes[dest]->incoming_demand[i];
 	vector<double> node_wait(Net->core_nodes.size(), 0.0); // expected waiting time at each node
-	unordered_set<int> unprocessed_arcs; // arcs not yet chosen in the main label setting loop, in order to ensure that each arc is processed only once
+	unordered_set<int> unprocessed_arcs; // arcs not yet chosen in main label setting loop
 	for (int i = 0; i < Net->core_arcs.size(); i++)
 		// All arcs are initially unprocessed
 		unprocessed_arcs.insert(Net->core_arcs[i]->id);
-	priority_queue<arc_cost_pair, vector<arc_cost_pair>, greater<arc_cost_pair>> arc_queue; // min-priority queue to quickly access the unprocessed arc with the minimum cost-plus-head-distance value
+	priority_queue<arc_cost_pair, vector<arc_cost_pair>, greater<arc_cost_pair>> arc_queue;
 	for (int i = 0; i < Net->stop_nodes[dest]->core_in.size(); i++)
 		// Set all non-infinite arc labels (which will include only the sink node's incoming arcs)
-		arc_queue.push(make_pair(arc_costs[Net->stop_nodes[dest]->core_in[i]->id], Net->stop_nodes[dest]->core_in[i]->id));
+		arc_queue.push(make_pair(arc_costs[Net->stop_nodes[dest]->core_in[i]->id],
+			Net->stop_nodes[dest]->core_in[i]->id));
 	unordered_set<int> attractive_arcs; // set of attractive arcs
-	priority_queue<arc_cost_pair, vector<arc_cost_pair>, less<arc_cost_pair>> load_queue; // max-priority queue to process attractive arcs in reverse order
-	stack<arc_cost_pair> nonzero_flows; // stack of flow increase/arc ID pairs for quickly processing only the nonzero updates
+	priority_queue<arc_cost_pair, vector<arc_cost_pair>, less<arc_cost_pair>> load_queue; // att arcs in reverse order
+	stack<arc_cost_pair> nonzero_flows; // flow increase/arc ID pairs for quickly processing only the nonzero updates
 
 	// Main label setting loop
 
@@ -125,7 +141,8 @@ void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, d
 				// Update tail label
 				if (node_label[chosen_tail] < INFINITY)
 					// Standard update
-					node_label[chosen_tail] = (node_freq[chosen_tail] * node_label[chosen_tail] + freq[chosen_arc] * chosen_label) / (node_freq[chosen_tail] + freq[chosen_arc]);
+					node_label[chosen_tail] = (node_freq[chosen_tail] * node_label[chosen_tail] +
+						freq[chosen_arc] * chosen_label) / (node_freq[chosen_tail] + freq[chosen_arc]);
 				else
 					// First-time update (from initially-infinite label)
 					node_label[chosen_tail] = (1 / freq[chosen_arc]) + chosen_label;
@@ -186,8 +203,8 @@ void ConstantAssignment::flows_to_destination(int dest, vector<double> &flows, d
 		if (freq[chosen_arc] < INFINITY)
 		{
 			// Finite-frequency arc
-			added_flow = (freq[chosen_arc] / node_freq[chosen_tail]) * node_vol[chosen_tail]; // distribute flow proportionally according to frequency
-			node_wait[chosen_tail] = max(node_wait[chosen_tail], added_flow / freq[chosen_arc]); // update waiting time to be bounded below by all outgoing flow:frequency ratios
+			added_flow = (freq[chosen_arc] / node_freq[chosen_tail]) * node_vol[chosen_tail]; // distribute flow
+			node_wait[chosen_tail] = max(node_wait[chosen_tail], added_flow / freq[chosen_arc]); // update waiting time
 		}
 		else
 			// Infinite-frequency arc

@@ -5,7 +5,8 @@
 /**
 Solution log constructor reads the solution log file into the solution log unordered map.
 
-Requires a boolean argument to specify whether to begin by loading the existing log files. If true, the existing solution log is loaded. If false, the existing log file is overwritten.
+Requires a boolean argument to specify whether to begin by loading the existing log files. If true, the existing
+solution log is loaded. If false, the existing log file is overwritten.
 */
 SolutionLog::SolutionLog(bool pickup)
 {
@@ -88,7 +89,8 @@ void SolutionLog::save_solution()
 	if (log_file.is_open())
 	{
 		// Write comment line
-		log_file << "Solution\tFeasible\tUC_Riding\tUC_Walking\tUC_Waiting\tCon_Time\tObjective\tObj_Time" << fixed << setprecision(15) << endl;
+		log_file << "Solution\tFeasible\tUC_Riding\tUC_Walking\tUC_Waiting\tCon_Time\tObjective\tObj_Time" << fixed <<
+			setprecision(15) << endl;
 
 		// Write rows by iterating through dictionary (order is arbitrary)
 		for (auto it = sol_log.begin(); it != sol_log.end(); it++)
@@ -96,7 +98,8 @@ void SolutionLog::save_solution()
 			log_file << it->first << '\t' << get<SOL_LOG_FEAS>(it->second) << '\t';
 			for (int i = 0; i < UC_COMPONENTS; i++)
 				log_file << get<SOL_LOG_UC>(it->second)[i] << '\t';
-			log_file << get<SOL_LOG_CON_TIME>(it->second) << '\t' << get<SOL_LOG_OBJ>(it->second) << '\t' << get<SOL_LOG_OBJ_TIME>(it->second) << endl;
+			log_file << get<SOL_LOG_CON_TIME>(it->second) << '\t' << get<SOL_LOG_OBJ>(it->second) << '\t' <<
+				get<SOL_LOG_OBJ_TIME>(it->second) << endl;
 		}
 
 		log_file.close();
@@ -109,11 +112,14 @@ void SolutionLog::save_solution()
 /**
 Creates or updates a solution log entry for a given solution.
 
-Requires a solution vector reference, feasibility status, constraint function vector reference, constraint calculation time, objective value, and objective calculation time, respectively.
+Requires a solution vector reference, feasibility status, constraint function vector reference, constraint calculation
+time, objective value, and objective calculation time, respectively.
 
-If the solution vector was not already present in the log, this will add a new row. If it was already present, this will overwrite its previous information.
+If the solution vector was not already present in the log, this will add a new row. If it was already present, this will
+overwrite its previous information.
 */
-void SolutionLog::create_row(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time, double obj, double obj_time)
+void SolutionLog::create_row(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time,
+	double obj, double obj_time)
 {
 	sol_log[vec2str(sol)] = make_tuple(feas, ucc, uc_time, obj, obj_time);
 }
@@ -133,7 +139,10 @@ bool SolutionLog::solution_exists(const vector<int> &sol)
 		return false;
 }
 
-/// Returns a tuple containing the feasibility status, vector of constraint function elements, and objective value for a given solution vector.
+/**
+Returns a tuple containing the feasibility status, vector of constraint function elements, and objective value for a
+given solution vector.
+*/
 tuple<int, vector<double>, double> SolutionLog::lookup_row(const vector<int> &sol)
 {
 	tuple<int, vector<double>, double, double, double> entry = sol_log[vec2str(sol)]; // raw log entry
@@ -152,11 +161,14 @@ pair<int, double> SolutionLog::lookup_row_quick(const vector<int> &sol)
 }
 
 /**
-Modifies the feasibility status, constraint function vector, and constraint evaluation time for a previously-logged solution.
+Modifies the feasibility status, constraint function vector, and constraint evaluation time for a previously-logged
+solution.
 
-Requires a solution vector reference, feasibility status, constraint vector reference, and constraint time, respectively.
+Requires a solution vector reference, feasibility status, constraint vector reference, and constraint time,
+respectively.
 
-This method is used to fill in constraint evaluation information for solutions whose constraint evaluation had previously been skipped during a neighborhood search.
+This method is used to fill in constraint evaluation information for solutions whose constraint evaluation had
+previously been skipped during a neighborhood search.
 */
 void SolutionLog::update_row(const vector<int> &sol, int feas, const vector<double> &ucc, double uc_time)
 {
@@ -173,7 +185,8 @@ Bans a given solution.
 
 Requires a solution vector reference.
 
-The feasibility status of the given solution log entry will be set to 2, meaning that it will be skipped in every future neighborhood search. This is applied to solutions with only one feasible neigbhor to prevent cycling.
+The feasibility status of the given solution log entry will be set to 2, meaning that it will be skipped in every future
+neighborhood search. This is applied to solutions with only one feasible neigbhor to prevent cycling.
 */
 void SolutionLog::ban_solution(const vector<int> &sol)
 {

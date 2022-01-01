@@ -45,7 +45,8 @@ Search::Search()
 					pickup = true;
 				else
 				{
-					cout << "Unrecognized search continuation specification. Use '" << NEW_SEARCH << "' for a new search or '" << CONTINUE_SEARCH << "' to continue a previous search." << endl;
+					cout << "Unrecognized search continuation specification. Use '" << NEW_SEARCH <<
+						"' for a new search or '" << CONTINUE_SEARCH << "' to continue a previous search." << endl;
 					exit(INCORRECT_FILE);
 				}
 				break;
@@ -228,7 +229,7 @@ void Search::solve()
 			EveLog->sa_prob = prob;
 			if (((1.0 * rand()) / RAND_MAX) < prob)
 			{
-				// If passed, make the move as in an improvement iteration but with increased tabus, then keep the second best solution as attractive
+				// If passed, make move as in improvement with increased tabus, and keep second best sol as attractive
 				EveLog->event_case = EVENT_NONIMP_PASS;
 
 				nonimp_in = 0; // reset inner nonimprovement counter
@@ -348,33 +349,54 @@ void Search::solve()
 /**
 Performs the neighborhood search of the tabu search/simulated annealing hybrid algorithm.
 
-Returns a structure of nested pairs to represent the best and second best solutions found. The structure is arranged as follows:
+Returns a structure of nested pairs to represent the best and second best solutions found. The structure is:
 	The overall pair's elements <pair, pair> correspond to the best and second best solutions, respectively.
 		For each solution we have a pair <pair, double> to represent the move and the objective value, respectively.
 			For each move we have a pair <int, int> containing the line IDs of the ADD and DROP lines, respectively.
 
-A move is represented as a pair of integers containing the line IDs of the lines being ADDed to or DROPped from, respectively. If the move does not involve an ADD or a DROP, then one of these elements will be set to "NO_ID" to indicate no change. SWAP moves should always include two legitimate line IDs.
+A move is represented as a pair of integers containing the line IDs of the lines being ADDed to or DROPped from,
+respectively. If the move does not involve an ADD or a DROP, then one of these elements will be set to "NO_ID" to
+indicate no change. SWAP moves should always include two legitimate line IDs.
 */
 neighbor_pair Search::neighborhood_search()
 {
 	/*
-	The neighborhood search is conducted in two passes in order to minimize the number of constraint function evaluations, since evaluating the constraints is many orders of magnitude more expensive than evaluating the objective.
+	The neighborhood search is conducted in two passes in order to minimize the number of constraint function
+	evaluations, since evaluating the constraints is many orders of magnitude more expensive than evaluating the
+	objective.
 
-	In the first pass we generate non-tabu candidate ADD and DROP moves that satisfy the constant vehicle bound constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also calculate the objective values of these candidates.
+	In the first pass we generate non-tabu candidate ADD and DROP moves that satisfy the constant vehicle bound
+	constraints. We do so by randomly selecting lines to ADD to or DROP from, checking whether this would satisfy the
+	vehicle bound constraints, and then collecting the feasible candidates into vectors of candidate moves. We also
+	calculate the objective values of these candidates.
 
-	In the second pass we go through our candidates from the first pass in ascending order of objective value, evaluating the constraint function value for each and collecting the feasible results into a final candidate vector. If, at the end of the second pass, we have fewer than two feasible solutions, we throw away the tabu rules and start the search over again.
+	In the second pass we go through our candidates from the first pass in ascending order of objective value,
+	evaluating the constraint function value for each and collecting the feasible results into a final candidate vector.
+	If, at the end of the second pass, we have fewer than two feasible solutions, we throw away the tabu rules and start
+	the search over again.
 
-	After obtaining enough ADD and DROP move candidates we assemble a list of SWAP move candidates. A SWAP move is made by combining an ADD candidate with a DROP candidate (provided that both candidates involve the same type of vehicle). Because of the potentially large number of possible combinations that could be made, we generate combinations by moving through the ADD and DROP candidate lists in ascending order of objective until obtaining enough feasible SWAP moves.
+	After obtaining enough ADD and DROP move candidates we assemble a list of SWAP move candidates. A SWAP move is made
+	by combining an ADD candidate with a DROP candidate (provided that both candidates involve the same type of
+	vehicle). Because of the potentially large number of possible combinations that could be made, we generate
+	combinations by moving through the ADD and DROP candidate lists in ascending order of objective until obtaining
+	enough feasible SWAP moves.
 	*/
 
 	/*
 	Initialize candidate move containers.
 
-	During the first pass, ADD and DROP moves are stored in a min-priority queue of 3-tuples which contain the objective value, ADD/DROP line pair, and a boolean indicating whether the solution has been logged already. Non-tabu solutions which satisfy the vehicle bound constraints are pushed into the queue, and can later be processed in ascending order of objective.
+	During the first pass, ADD and DROP moves are stored in a min-priority queue of 3-tuples which contain the objective
+	value, ADD/DROP line pair, and a boolean indicating whether the solution has been logged already. Non-tabu solutions
+	which satisfy the vehicle bound constraints are pushed into the queue, and can later be processed in ascending order
+	of objective.
 
-	During the second pass, ADD and DROP moves are stored in a list of pairs which contain the objective value and the ADD/DROP line pair. Because the second pass always considers solutions in ascending order of objective, the lists will automatically be sorted in ascending order of objective.
+	During the second pass, ADD and DROP moves are stored in a list of pairs which contain the objective value and the
+	ADD/DROP line pair. Because the second pass always considers solutions in ascending order of objective, the lists
+	will automatically be sorted in ascending order of objective.
 
-	The final moves are stored in a min-priority queue of pairs which contain the objective value and ADD/DROP line pair. This includes (a second copy of) ADD/DROP moves chosen during the second pass and chosen SWAP moves. The first two elements of the queue can be popped to obtain the best and second best neighbors.
+	The final moves are stored in a min-priority queue of pairs which contain the objective value and ADD/DROP line
+	pair. This includes (a second copy of) ADD/DROP moves chosen during the second pass and chosen SWAP moves. The first
+	two elements of the queue can be popped to obtain the best and second best neighbors.
 	*/
 	candidate_queue add_moves1; // candidate ADD moves after first pass
 	candidate_queue drop_moves1; // candidate DROP moves after first pass
@@ -459,7 +481,7 @@ neighbor_pair Search::neighborhood_search()
 				clock_t start = clock(); // objective calculation timer
 				obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
-				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // initial sol log entry
 			}
 
 			// Skip a tabu move, unless it would improve our best known solution
@@ -522,7 +544,7 @@ neighbor_pair Search::neighborhood_search()
 				clock_t start = clock(); // objective calculation timer
 				obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
-				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+				SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create init sol log entry
 			}
 
 			// Skip a tabu move, unless it would improve our best known solution
@@ -551,11 +573,11 @@ neighbor_pair Search::neighborhood_search()
 			if (get<2>(move_triple) == true)
 			{
 				new_con++;
-				sol_candidate = make_move(get<1>(move_triple).first, NO_ID); // solution vector resulting from chosen ADD
+				sol_candidate = make_move(get<1>(move_triple).first, NO_ID); // sol vector resulting from chosen ADD
 				clock_t start = clock(); // constraint calculation timer
-				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // feas status and con vector
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
-				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // log
 				if (con_candidate.first == FEAS_FALSE)
 					// Skip candidate if we've discovered that it is infeasible
 					continue;
@@ -582,11 +604,11 @@ neighbor_pair Search::neighborhood_search()
 			if (get<2>(move_triple) == true)
 			{
 				new_con++;
-				sol_candidate = make_move(NO_ID, get<1>(move_triple).second); // solution vector resulting from chosen DROP
+				sol_candidate = make_move(NO_ID, get<1>(move_triple).second); // sol vector resulting from chosen DROP
 				clock_t start = clock(); // constraint calculation timer
-				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+				pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feas and cons
 				double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
-				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+				SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // log
 				if (con_candidate.first == FEAS_FALSE)
 					// Skip candidate if we've discovered that it is infeasible
 					continue;
@@ -619,7 +641,10 @@ neighbor_pair Search::neighborhood_search()
 				}
 			}
 
-			// If no moves are tabu and we are still in the failure case, we can only have one feasible neighbor left and we end the ADD/DROP search and ban the solution
+			/**
+			If no moves are tabuand we are still in the failure case, we can only have one feasible neighbor leftand we
+			end the ADD / DROP search and ban the solution
+			*/
 			if (tabu_exists == false)
 				break;
 			
@@ -652,16 +677,23 @@ neighbor_pair Search::neighborhood_search()
 	if ((add_moves2.size() > 0) && (drop_moves2.size()))
 	{
 		/*
-		SWAP moves are generated by combining pairs of ADD and DROP moves from the candidate lists. Under the assumption that the best ADD and DROP moves will combine to give the best SWAP moves, we consider ADD and DROP moves in ascending order of objective value. Due to the order in which the lists were constructed, they are already both sorted by objective.
+		SWAP moves are generated by combining pairs of ADD and DROP moves from the candidate lists. Under the assumption
+		that the best ADD and DROP moves will combine to give the best SWAP moves, we consider ADD and DROP moves in
+		ascending order of objective value. Due to the order in which the lists were constructed, they are already both
+		sorted by objective.
 
-		Specifically, we consider pairs of candidates in a triangular search pattern by iterating through the ADD list, and for each ADD move by iterating through all of the DROP moves located at or ahead of the corresponding ADD move in their own list. The search ends as soon as we find enough swap candidates, or we run out of pairs to search.
+		Specifically, we consider pairs of candidates in a triangular search pattern by iterating through the ADD list,
+		and for each ADD move by iterating through all of the DROP moves located at or ahead of the corresponding ADD
+		move in their own list. The search ends as soon as we find enough swap candidates, or we run out of pairs to
+		search.
 		*/
 		int limit = min(add_moves2.size(), drop_moves2.size()); // smaller of the two candidate list sizes
 		int add_loop = 0; // iteration of outer ADD list loop
 		int drop_loop; // iteration of inner DROP list loop
 
 		// Iterate through the ADD list (breaks if we reach a stopping condition)
-		for (list<pair<double, pair<int, int>>>::iterator add_it = add_moves2.begin(); add_it != add_moves2.end(); add_it++)
+		for (list<pair<double, pair<int, int>>>::iterator add_it = add_moves2.begin(); add_it != add_moves2.end();
+			add_it++)
 		{
 			// Break if we have enough candidate SWAPs, or if the outer loop iteration counter reaches its limit
 			if ((swaps >= nbhd_swap_lim) || (add_loop > limit))
@@ -669,8 +701,12 @@ neighbor_pair Search::neighborhood_search()
 
 			drop_loop = 0;
 
-			// Iterate through the DROP list (breaks if we reach a stopping condition, or upon iterating to the same position as the current ADD iterator)
-			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin(); drop_it != drop_moves2.end(); drop_it++)
+			/*
+			Iterate through the DROP list(breaks if we reach a stopping condition, or upon iterating to the same
+			position as the current ADD iterator)
+			*/
+			for (list<pair<double, pair<int, int>>>::iterator drop_it = drop_moves2.begin();
+				drop_it != drop_moves2.end(); drop_it++)
 			{
 				// Break if inner loop's iteration number exceeds the outer loop's iteration number
 				if (drop_loop > add_loop)
@@ -720,9 +756,9 @@ neighbor_pair Search::neighborhood_search()
 						// Calculate constraints for solutions of unknown feasibility
 						new_con++;
 						clock_t start = clock(); // constraint calculation timer
-						pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+						pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // feas and cons
 						double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
-						SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+						SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time);
 					}
 				}
 				else
@@ -738,11 +774,12 @@ neighbor_pair Search::neighborhood_search()
 					// Calculate constraints
 					new_con++;
 					start = clock(); // constraint calculation timer
-					pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+					pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feas and cons
 					double con_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
 
 					// Create new solution log entry
-					SolLog->create_row(sol_candidate, con_candidate.first, con_candidate.second, con_time, obj_candidate, obj_time);
+					SolLog->create_row(sol_candidate, con_candidate.first, con_candidate.second, con_time,
+						obj_candidate, obj_time);
 
 					// If the solution is feasible, add it to the candidate list
 					if (con_candidate.first == FEAS_TRUE)
@@ -781,7 +818,7 @@ neighbor_pair Search::neighborhood_search()
 			neighbor2 = make_pair(final_moves.top().second, final_moves.top().first);
 		else
 		{
-			// If there was only one feasible neighbor, output a null second solution ban the current solution so that we never return to it
+			// If there was only one feasible neighbor, output null second solution and ban the current solution
 			neighbor2 = make_pair(make_pair(NO_ID, NO_ID), INFINITY);
 			SolLog->ban_solution(sol_current); // ban current solution
 		}
@@ -828,7 +865,8 @@ vector<int> Search::make_move(int add_id, int drop_id)
 /**
 Deletes a random solution from the attractive solution set, and optionally sets it as the current solution.
 
-Requires a boolean variable to set the mode. If true, then the chosen attractive solution replaces the current solution. If false, then the chosen attractive solution is simply deleted from the list and discarded.
+Requires a boolean variable to set the mode. If true, then the chosen attractive solution replaces the current solution.
+If false, then the chosen attractive solution is simply deleted from the list and discarded.
 */
 void Search::pop_attractive(bool replace)
 {
@@ -880,9 +918,12 @@ void Search::save_data()
 /**
 Finds the absolute best neighbor of the current solution.
 
-Returns a move/objective value pair corresponding to the best neighbor. If no neighbor has an objective value strictly lower than the given solution (meaning that the given solution is locally optimal), the returned solution will consist of the NO_ID move pair and an infinite objective.
+Returns a move/objective value pair corresponding to the best neighbor. If no neighbor has an objective value strictly
+lower than the given solution (meaning that the given solution is locally optimal), the returned solution will consist
+of the NO_ID move pair and an infinite objective.
 
-This is for use in an exhaustive local search. Every possible ADD and DROP move from the given solution is considered (we do not consider SWAP moves since there are so many). Tabu rules are ignored but all other constraints are enforced.
+This is for use in an exhaustive local search. Every possible ADD and DROP move from the given solution is considered
+(we do not consider SWAP moves since there are so many). Tabu rules are ignored but all other constraints are enforced.
 */
 pair<pair<int, int>, double> Search::best_neighbor()
 {
@@ -924,7 +965,7 @@ pair<pair<int, int>, double> Search::best_neighbor()
 			clock_t start = clock(); // objective calculation timer
 			obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
 			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
-			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create initial sol log entry
 		}
 
 		// Filter out moves that do not improve on the current solution or best known neighbor
@@ -936,9 +977,9 @@ pair<pair<int, int>, double> Search::best_neighbor()
 		{
 			// If feasibility is unknown, calculate its constraints and create a full log entry
 			clock_t start = clock(); // constraint calculation timer
-			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feas status and cons
 			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
-			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // log
 			if (con_candidate.first == FEAS_FALSE)
 				// Skip candidate if discovered to be infeasible
 				continue;
@@ -984,7 +1025,7 @@ pair<pair<int, int>, double> Search::best_neighbor()
 			clock_t start = clock(); // objective calculation timer
 			obj_candidate = Obj->calculate(sol_candidate); // calculate objective value
 			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // objective calculation time
-			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create an initial solution log entry for the candidate solution
+			SolLog->create_partial_row(sol_candidate, obj_candidate, candidate_time); // create initial sol log entry
 		}
 
 		// Filter out moves that do not improve on the current solution or best known neighbor
@@ -996,9 +1037,9 @@ pair<pair<int, int>, double> Search::best_neighbor()
 		{
 			// If feasibility is unknown, calculate its constraints and create a full log entry
 			clock_t start = clock(); // constraint calculation timer
-			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feasibility status and constraint vector
+			pair<int, vector<double>> con_candidate = Con->calculate(sol_candidate); // calculate feas and cons
 			double candidate_time = (1.0*clock() - start) / CLOCKS_PER_SEC; // constraint calculation time
-			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // fill in solution log with missing constraint information
+			SolLog->update_row(sol_candidate, con_candidate.first, con_candidate.second, candidate_time); // log
 			if (con_candidate.first == FEAS_FALSE)
 				// Skip candidate if discovered to be infeasible
 				continue;
@@ -1018,7 +1059,8 @@ pair<pair<int, int>, double> Search::best_neighbor()
 /**
 Conducts an exhaustive, greedy local search from the current solution.
 
-Each iteration of the search moves to the neighbor with the best objective value. The search ends when local optimality is achieved.
+Each iteration of the search moves to the neighbor with the best objective value. The search ends when local optimality
+is achieved.
 */
 void Search::exhaustive_search()
 {

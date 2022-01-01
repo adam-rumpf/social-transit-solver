@@ -1,0 +1,16 @@
+# Visual Studio files
+.vs/
+Debug/
+Release/
+log/
+*.editorconfig
+*.TMP
+*.filters
+*.user
+*.vcxproj
+*.json
+
+# Data files
+data/
+log/
+*.txt

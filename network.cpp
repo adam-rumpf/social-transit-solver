@@ -3,7 +3,8 @@
 /**
 Network constructor to automatically build network from data files.
 
-Reads the contents of these files and uses them to fill its own line, node, and arc lists, while also initializing those objects.
+Reads the contents of these files and uses them to fill its own line, node, and arc lists, while also initializing those
+objects.
 */
 Network::Network()
 {
@@ -170,7 +171,8 @@ Network::Network()
 			catch (out_of_range &e) {};
 
 			// Create a line object and add it to the list
-			Line * new_line = new Line(vehicle_type, lb, ub, circuit_time, vehicles[vehicle_type]->capacity, day_fraction, horizon);
+			Line * new_line = new Line(vehicle_type, lb, ub, circuit_time, vehicles[vehicle_type]->capacity,
+				day_fraction, horizon);
 			lines.push_back(new_line);
 		}
 
@@ -217,13 +219,13 @@ Network::Network()
 			Arc * new_arc = new Arc(arc_id, nodes[arc_tail], nodes[arc_head], arc_time, arc_line, arc_type);
 			if (arc_type == ACCESS_ARC)
 			{
-				// An access arc goes into the main access arc list, its tail's outgoing access arc set, and its head's incoming access arc set
+				// Access arc goes into main access arc list, tail's out access arc set, and head's in access arc set
 				access_arcs.push_back(new_arc);
 				nodes[arc_tail]->access_out.push_back(new_arc);
 			}
 			else
 			{
-				// A non-access arc goes into the main core arc list, its tail's outgoing/incoming core arc sets, and its head's incoming core arc set
+				// Non-access arc goes into main core arc list, tail's out/in core arc sets, and head's in core arc set
 				core_arcs.push_back(new_arc);
 				nodes[arc_tail]->core_out.push_back(new_arc);
 				nodes[arc_head]->core_in.push_back(new_arc);
@@ -339,8 +341,9 @@ Arc::Arc(int id_in, Node * tail_in, Node * head_in, double cost_in, int line_in,
 		boarding = false;
 }
 
-/// Line constructor specifies its vehicle type, circuit time, seating capacity, active fraction of day, and daily time horizon.
-Line::Line(int vehicle_in, int lb_in, int ub_in, double circuit_in, double seating_in, double fraction_in, double horizon_in)
+/// Line constructor specifies vehicle type, circuit time, seating capacity, active fraction, and daily time horizon.
+Line::Line(int vehicle_in, int lb_in, int ub_in, double circuit_in, double seating_in, double fraction_in,
+	double horizon_in)
 {
 	vehicle_id = vehicle_in;
 	min_fleet = lb_in;

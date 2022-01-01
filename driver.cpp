@@ -1,7 +1,8 @@
 /**
 The main function for the TS/SA hybrid search algorithm.
 
-Responsible for reading input data, initializing objects, and finally calling the search function, which is where most of the algorithm is actually conducted.
+Responsible for reading input data, initializing objects, and finally calling the search function, which is where most
+of the algorithm is actually conducted.
 
 Includes a signal handler to allow for keyboard halt via [Ctrl]+[C].
 
@@ -27,7 +28,8 @@ void STOP_REQUEST(int);
 /**
 Main driver.
 
-Accepts an optional command line argument to specify a base directory, which will be used to look for the data/ and log/ directories. If none is provided, the current directory will be used.
+Accepts an optional command line argument to specify a base directory, which will be used to look for the data/ and log/
+directories. If none is provided, the current directory will be used.
 */
 int main(int argc, char *argv[])
 {
@@ -57,7 +59,8 @@ Signal handler for safe stop request.
 
 Executes whenever the user presses [Ctrl]+[C] on the keyboard (or with the "raise(SIGINT)" command).
 
-Sets the global solver's stop request variable to true, which causes the main search loop to end after it completes its current iteration.
+Sets the global solver's stop request variable to true, which causes the main search loop to end after it completes its
+current iteration.
 */
 void STOP_REQUEST(int signum)
 {

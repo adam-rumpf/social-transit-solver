@@ -1,7 +1,8 @@
 /**
 Constraint function calculation.
 
-Includes a variety of functions for calculating the constraint function values for a given solution. This requires calling the assignment model.
+Includes a variety of functions for calculating the constraint function values for a given solution. This requires
+calling the assignment model.
 */
 
 #pragma once
@@ -12,7 +13,7 @@ Includes a variety of functions for calculating the constraint function values f
 #include <string>
 #include <utility>
 #include <vector>
-#include "DEFINITIONS.hpp"
+#include "definitions.hpp"
 #include "network.hpp"
 #include "assignment.hpp"
 
@@ -25,7 +26,8 @@ Constraint function class.
 
 A variety of local attributes are used to store information required for calculating the constraint functions
 
-Methods are used to execute different steps of the constraint function calculation process, which in turn requires the use of the assignment model.
+Methods are used to execute different steps of the constraint function calculation process, which in turn requires the
+use of the assignment model.
 
 NOTE: Currently leaving out the operator cost function, since it is irrelevant to our model.
 */
@@ -43,7 +45,7 @@ struct Constraint
 	int stop_size; // number of stop nodes (also number of O/D nodes)
 
 	// Public methods
-	Constraint(Network *); // constructor that reads the operator cost, user cost, initial flow, and assignment model data and sets the network object pointer
+	Constraint(Network *); // constructor reads op cost, user cost, init flow, assignment data, sets net obj pointer
 	~Constraint(); // destructor deletes the assignment model object
 	pair<int, vector<double>> calculate(const vector<int> &); // evaluates constraint functions for a given solution
 	vector<double> user_cost_components(); // uses flow vector and waiting time scalar to calculate user cost components

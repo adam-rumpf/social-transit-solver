@@ -5,7 +5,8 @@
 /**
 Event log constructor writes headers of event log files and clears if necessary.
 
-Requires a boolean argument to specify whether to continue or restart the log files. If true, the existing files are appended to. If false, the existing files are overwritten.
+Requires a boolean argument to specify whether to continue or restart the log files. If true, the existing files are
+appended to. If false, the existing files are overwritten.
 
 Also sets parameters to default values.
 */
@@ -61,7 +62,9 @@ EventLog::EventLog(bool pickup)
 		if (event_file.is_open())
 		{
 			// Comment line and formatting
-			event_file << "Iteration\tObj_Current\tObj_Best\tNew_Best\tCase\tSA_Prob\tJump\tNonimp_In\tNonimp_Out\tTenure\tTemperature\tADD\tDROP\tObj_Lookups\tCon_Lookups\tObj_Evals\tCon_Evals\tADD_First\tDROP_First\tADD_Second\tDROP_Second\tSWAPs\tTotal_Time\tSolution" << fixed << setprecision(15) << endl;
+			event_file << "Iteration\tObj_Current\tObj_Best\tNew_Best\tCase\tSA_Prob\tJump\tNonimp_In\tNonimp_Out\t" <<
+				"Tenure\tTemperature\tADD\tDROP\tObj_Lookups\tCon_Lookups\tObj_Evals\tCon_Evals\tADD_First\t" <<
+				"DROP_First\tADD_Second\tDROP_Second\tSWAPs\tTotal_Time\tSolution" << fixed << setprecision(15) << endl;
 
 			// Initial solution row
 			event_file << 0 << '\t'; // Iteration

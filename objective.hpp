@@ -17,7 +17,7 @@ The objective function is implemented as a class equipped with its own attribute
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include "DEFINITIONS.hpp"
+#include "definitions.hpp"
 #include "network.hpp"
 
 using namespace std;
@@ -25,14 +25,15 @@ using namespace concurrency;
 
 extern string FILE_BASE;
 
-typedef pair<double, int> dist_pair; // used to define a min-priority queue of distance/ID pairs ordered by first element
+typedef pair<double, int> dist_pair; // min-priority queue of distance/ID pairs ordered by first element
 
 /**
 Objective function class.
 
 A variety of local attributes are used to store information required for calculating the objective function.
 
-Methods are used to execute different steps of the objective function calculation process, much of which is related to distance calculation, and much of which is done in parallel.
+Methods are used to execute different steps of the objective function calculation process, much of which is related to
+distance calculation, and much of which is done in parallel.
 */
 struct Objective
 {
@@ -48,8 +49,8 @@ struct Objective
 	Objective(Network *); // constructor that reads objective function data and sets network object pointer
 	double calculate(const vector<int> &); // calculates objective value
 	vector<double> all_metrics(const vector<int> &); // calculates gravity metrics for all population centers
-	void population_to_all_facilities(int, const vector<double> &, vector<double> &); // calculates distance from a given source population center to all facilities and updates distance vector row
-	double facility_metric(int, vector<vector<double>> &); // calculates the gravity metric for a given facility and vector of distances to that facility
-	double population_metric(int, vector<vector<double>> &, vector<double> &); // calculates the gravity metric for a given population center, distance matrix, and facility metric vector
-	void save_metrics(const vector<int> &); // calculates gravity metrics for all population centers and prints to an output file
+	void population_to_all_facilities(int, const vector<double> &, vector<double> &); // distance from given source pop
+	double facility_metric(int, vector<vector<double>> &); // calculates gravity metric for a given facility
+	double population_metric(int, vector<vector<double>> &, vector<double> &); // gravity metric, distance mat, fac met
+	void save_metrics(const vector<int> &); // calculates gravity metrics for population centers and prints to output
 };

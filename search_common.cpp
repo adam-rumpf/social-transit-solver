@@ -7,7 +7,9 @@ Reads the initial solution vector and objective value from the initial solution 
 
 Returns a pair consisting of the initial fleet size vector along with its objective value, respectively.
 
-Normally the current and best solutions along with their objective values are stored in the memory log file, and can be passed to the search object in order to continue a search. If we are starting with a new search, however, the initial solution information must be (re-)acquired from the initial solution log file.
+Normally the current and best solutions along with their objective values are stored in the memory log file, and can be
+passed to the search object in order to continue a search. If we are starting with a new search, however, the initial
+solution information must be (re-)acquired from the initial solution log file.
 */
 pair<vector<int>, double> get_initial_solution()
 {
